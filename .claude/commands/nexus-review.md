@@ -76,16 +76,28 @@ Check every file for:
 ### MEMORY SAFETY: PASS/FAIL
 ```
 
-## Fix Policy
+## Fix Policy — Engineering Manager Gate
 
-**Fix bugs immediately — don't just report them.**
+**All fixes require Engineering Manager approval before applying.**
 
-- CRITICAL issues: Fix using the Edit tool right now. Don't ask.
-- HIGH issues: Fix if the change is contained to ≤3 files. Don't ask.
-- MEDIUM issues: Fix if trivial (rename, add guard, swap API). Otherwise report.
-- CRITICAL never waits for confirmation. The whole point of an engineering agent is to ship fixes.
+1. **Find the issue** → document file:line, severity, proposed fix
+2. **Request approval** → present to `/nexus-eng-manager` in this format:
+   ```
+   ENG-MANAGER REQUEST from /nexus-review
+   Issue: [file:line — description]
+   Severity: CRITICAL / HIGH / MEDIUM
+   Proposed fix: [specific code change]
+   Files affected: N
+   ```
+3. **Await decision**:
+   - APPROVED → apply fix with Edit tool immediately
+   - ESCALATED TO CTO → wait for CTO ruling, then Eng Manager approval
+   - REJECTED → implement the alternative the Eng Manager specified
 
-After fixing, re-read the changed file to verify the fix is correct, then commit with a clear message citing the bug found by `/nexus-review`.
+4. After applying an approved fix: re-read the changed file to verify, then note it in the session log.
+
+**Eng Manager approves without CTO**: bug fixes ≤3 files, no architecture change
+**Eng Manager escalates to CTO**: new services, audio render thread changes, >5 files, security changes
 
 ## Principles
 
