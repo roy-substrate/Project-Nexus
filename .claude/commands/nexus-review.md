@@ -76,9 +76,20 @@ Check every file for:
 ### MEMORY SAFETY: PASS/FAIL
 ```
 
+## Fix Policy
+
+**Fix bugs immediately — don't just report them.**
+
+- CRITICAL issues: Fix using the Edit tool right now. Don't ask.
+- HIGH issues: Fix if the change is contained to ≤3 files. Don't ask.
+- MEDIUM issues: Fix if trivial (rename, add guard, swap API). Otherwise report.
+- CRITICAL never waits for confirmation. The whole point of an engineering agent is to ship fixes.
+
+After fixing, re-read the changed file to verify the fix is correct, then commit with a clear message citing the bug found by `/nexus-review`.
+
 ## Principles
 
 - Be specific — every issue must have a file and line reference
-- Be constructive — every issue must have a suggested fix
+- Fix immediately — reporting without fixing is half the job
 - Don't nitpick style — focus on correctness, safety, and performance
 - If something is genuinely excellent, say so clearly

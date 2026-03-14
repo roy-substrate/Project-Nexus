@@ -91,7 +91,8 @@ HANDOFF evidence: Counts of each issue, specific file:line for all critical find
 - Read all audio engine files
 - Check Swift 6 concurrency (@MainActor, Sendable)
 - Check DSP correctness (vDSP usage, buffer safety)
-- List CRITICAL / HIGH / MEDIUM issues
+- **FIX all CRITICAL and HIGH issues immediately using Edit tool — do not just list them**
+- List MEDIUM issues for human review
 
 **Track 3B — Performance**:
 - Check for naive DSP loops vs. Accelerate/vDSP

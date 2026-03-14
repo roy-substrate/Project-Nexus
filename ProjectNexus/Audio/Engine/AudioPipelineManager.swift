@@ -25,6 +25,9 @@ final class AudioPipelineManager {
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
     var onSpectrumUpdate: (([Float]) -> Void)?
+    /// Set this to forward mic buffers into ASREffectivenessService.appendBuffer(_:)
+    /// — avoids a second AVAudioEngine competing over AVAudioSession.
+    var onMicBuffer: ((AVAudioPCMBuffer) -> Void)?
 
     init() throws {
         guard let fmt = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
@@ -153,6 +156,12 @@ final class AudioPipelineManager {
                 generator.updateMaskingThreshold(spectrum)
             }
         }
+
+        // Forward raw PCM buffers to any ASR measurement consumer.
+        // Eliminates the need for ASREffectivenessService to create its own AVAudioEngine.
+        micCapture.onRawBuffer = { [weak self] buffer in
+            self?.onMicBuffer?(buffer)
+        }
     }
 
     private func setupNotifications() {
@@ -169,7 +178,14 @@ final class AudioPipelineManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            try? self?.start()
+            guard let self else { return }
+            do {
+                try self.start()
+            } catch {
+                self.logger.error("Pipeline failed to restart after session resume: \(error.localizedDescription)")
+                // Post notification so callers (e.g. PerturbationService / UI) can react
+                NotificationCenter.default.post(name: .audioPipelineRestartFailed, object: error)
+            }
         }
     }
 }

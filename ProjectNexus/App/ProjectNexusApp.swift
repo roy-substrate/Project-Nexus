@@ -52,6 +52,10 @@ struct ProjectNexusApp: App {
         do {
             let service = try PerturbationService()
             metricsService.startMonitoring(perturbationService: service)
+            // Route mic buffers → ASR service (eliminates second AVAudioEngine)
+            service.onMicBuffer = { [weak asrService = asrService] buffer in
+                asrService?.appendBuffer(buffer)
+            }
             perturbationService = service
         } catch {
             appState.errorMessage = error.localizedDescription

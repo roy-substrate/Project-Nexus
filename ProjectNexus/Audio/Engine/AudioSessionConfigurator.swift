@@ -142,4 +142,5 @@ extension Notification.Name {
     static let audioSessionInterrupted = Notification.Name("audioSessionInterrupted")
     static let audioSessionResumed = Notification.Name("audioSessionResumed")
     static let audioRouteChanged = Notification.Name("audioRouteChanged")
+    static let audioPipelineRestartFailed = Notification.Name("audioPipelineRestartFailed")
 }

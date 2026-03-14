@@ -56,7 +56,9 @@ final class ASREffectivenessService: NSObject {
     private let logger = Logger(subsystem: "com.nexus.asr", category: "Effectiveness")
     private let recognizer: SFSpeechRecognizer?
     private var recognitionTask: SFSpeechRecognitionTask?
-    private var audioEngine: AVAudioEngine?
+    // No separate AVAudioEngine — buffers are delivered via appendBuffer()
+    // from the existing MicCaptureNode tap in AudioPipelineManager.
+    // This eliminates the dual-engine AVAudioSession conflict.
     private var request: SFSpeechAudioBufferRecognitionRequest?
 
     /// Baseline word-per-second rate collected when shield is off (EMA).
@@ -93,8 +95,11 @@ final class ASREffectivenessService: NSObject {
 
     // MARK: - Measurement Lifecycle
 
-    /// Starts the continuous recognition loop.
-    /// - Parameter shieldActive: A closure called each measurement window to know the current shield state.
+    /// Starts the recognition loop. Buffers must be fed via `appendBuffer(_:)`.
+    ///
+    /// Callers should route mic buffers from the existing `MicCaptureNode` tap
+    /// (inside `AudioPipelineManager`) rather than creating a second `AVAudioEngine`.
+    /// This avoids `AVAudioSession` conflicts and halves audio-thread overhead.
     func startMeasuring(shieldActiveProvider: @escaping @Sendable () -> Bool) {
         guard isAuthorized, !isMeasuring else { return }
         guard let recognizer, recognizer.isAvailable else {
@@ -102,27 +107,10 @@ final class ASREffectivenessService: NSObject {
             return
         }
 
-        let engine = AVAudioEngine()
-        audioEngine = engine
-
         let req = SFSpeechAudioBufferRecognitionRequest()
         req.shouldReportPartialResults = true
         req.requiresOnDeviceRecognition = true   // Stay fully on-device (iOS 13+)
         request = req
-
-        // Tap into the main mixer for speech samples
-        let inputNode = engine.inputNode
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 4096, format: recordingFormat) { [weak self] buffer, _ in
-            self?.request?.append(buffer)
-        }
-
-        do {
-            try engine.start()
-        } catch {
-            logger.error("AVAudioEngine failed to start for ASR measurement: \(error.localizedDescription)")
-            return
-        }
 
         windowStart = Date()
         wordCountInWindow = 0
@@ -142,8 +130,7 @@ final class ASREffectivenessService: NSObject {
             }
 
             if let error {
-                // Recognition session ends normally when audio stops or after ~1 min;
-                // restart it transparently.
+                // Recognition session ends normally after ~1 min; restart transparently.
                 let nsError = error as NSError
                 let isSessionEnd = nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1110
                 if !isSessionEnd {
@@ -153,7 +140,14 @@ final class ASREffectivenessService: NSObject {
             }
         }
 
-        logger.info("ASR effectiveness measurement started")
+        logger.info("ASR effectiveness measurement started (buffer-feed mode)")
+    }
+
+    /// Feed a mic buffer into the recognition request.
+    /// Call this from the MicCaptureNode tap in AudioPipelineManager — do NOT
+    /// create a second AVAudioEngine for ASR.
+    func appendBuffer(_ buffer: AVAudioPCMBuffer) {
+        request?.append(buffer)
     }
 
     func stopMeasuring() {
@@ -162,9 +156,6 @@ final class ASREffectivenessService: NSObject {
         recognitionTask = nil
         request?.endAudio()
         request = nil
-        audioEngine?.inputNode.removeTap(onBus: 0)
-        audioEngine?.stop()
-        audioEngine = nil
         isMeasuring = false
         logger.info("ASR effectiveness measurement stopped")
     }

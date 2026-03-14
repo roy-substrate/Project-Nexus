@@ -15,6 +15,12 @@ final class PerturbationService {
     private var uapGenerator: UAPGenerator?
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
+    /// Forward raw mic PCM buffers to a consumer (e.g. ASREffectivenessService).
+    /// Set this instead of creating a second AVAudioEngine for speech recognition.
+    var onMicBuffer: ((AVAudioPCMBuffer) -> Void)? {
+        get { pipeline.onMicBuffer }
+        set { pipeline.onMicBuffer = newValue }
+    }
 
     init() throws {
         pipeline = try AudioPipelineManager()

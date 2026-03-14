@@ -20,6 +20,9 @@ final class MicCaptureNode {
     private let analysisQueue = DispatchQueue(label: "com.nexus.micanalysis", qos: .utility)
 
     var onSpectrumUpdate: (([Float], Float, Float) -> Void)?
+    /// Called on the analysis queue with each raw PCM buffer.
+    /// Use this to feed ASREffectivenessService without a second AVAudioEngine.
+    var onRawBuffer: ((AVAudioPCMBuffer) -> Void)?
 
     init() throws {
         analysisBuffer = [Float](repeating: 0, count: fftSize)
@@ -78,6 +81,8 @@ final class MicCaptureNode {
 
             let spectrum = self.computeSpectrum()
             self.onSpectrumUpdate?(spectrum, rms, peak)
+            // Forward raw buffer for ASR measurement — no second engine needed
+            self.onRawBuffer?(buffer)
         }
     }
 
