@@ -3,6 +3,7 @@ import SwiftUI
 struct DiagnosticsView: View {
     let metricsService: MetricsService
     let isActive: Bool
+    var asrService: ASREffectivenessService? = nil
 
     var body: some View {
         ZStack {
@@ -15,6 +16,7 @@ struct DiagnosticsView: View {
 
                     spectrumSection
                     metricsGrid
+                    if asrService != nil { asrEffectivenessSection }
                     engineStatusSection
                 }
                 .padding(.horizontal, NexusTheme.spacingMD)
@@ -139,6 +141,97 @@ struct DiagnosticsView: View {
                 icon: "cpu"
             )
         }
+    }
+
+    // MARK: - ASR Effectiveness
+
+    private var asrEffectivenessSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: NexusTheme.spacingSM) {
+                HStack {
+                    Text("ASR JAMMING")
+                        .font(NexusTheme.captionFont)
+                        .foregroundStyle(NexusTheme.textTertiary)
+                        .tracking(1)
+
+                    Spacer()
+
+                    if asrService?.isMeasuring == true {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(NexusTheme.accentGreen)
+                                .frame(width: 6, height: 6)
+                            Text("MEASURING")
+                                .font(NexusTheme.monoSmall)
+                                .foregroundStyle(NexusTheme.accentGreen)
+                        }
+                    }
+                }
+
+                if let asr = asrService {
+                    let score = asr.effectivenessScore
+
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(String(format: "%.0f", score * 100))
+                            .font(.system(size: 36, weight: .bold, design: .monospaced))
+                            .foregroundStyle(scoreColor(score))
+                            .contentTransition(.numericText())
+                        Text("%")
+                            .font(NexusTheme.monoSmall)
+                            .foregroundStyle(NexusTheme.textTertiary)
+                        Spacer()
+                        Text(scoreLabel(score))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(scoreColor(score))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(scoreColor(score).opacity(0.12)))
+                    }
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color(.systemFill))
+                                .frame(height: 6)
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(scoreColor(score))
+                                .frame(width: geo.size.width * CGFloat(score), height: 6)
+                                .animation(.spring(response: 0.5), value: score)
+                        }
+                    }
+                    .frame(height: 6)
+
+                    if let m = asr.latestMeasurement, !m.transcript.isEmpty {
+                        Text(""\(m.transcript)"")
+                            .font(.caption)
+                            .foregroundStyle(NexusTheme.textTertiary)
+                            .lineLimit(2)
+                            .italic()
+                    }
+
+                    Text("Baseline word recognition rate degraded by the perturbation engine.")
+                        .font(.caption)
+                        .foregroundStyle(NexusTheme.textTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("ASR measurement unavailable")
+                        .font(.subheadline)
+                        .foregroundStyle(NexusTheme.textTertiary)
+                }
+            }
+        }
+    }
+
+    private func scoreColor(_ score: Float) -> Color {
+        if score < 0.33 { return NexusTheme.positive }
+        if score < 0.66 { return NexusTheme.warning }
+        return NexusTheme.danger
+    }
+
+    private func scoreLabel(_ score: Float) -> String {
+        if score < 0.33 { return "Low" }
+        if score < 0.66 { return "Moderate" }
+        return "High"
     }
 
     private var engineStatusSection: some View {

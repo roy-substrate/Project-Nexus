@@ -8,6 +8,8 @@ struct ProjectNexusApp: App {
     @State private var appState = AppState()
     @State private var metricsService = MetricsService()
     @State private var perturbationService: PerturbationService?
+    @State private var asrService = ASREffectivenessService()
+    @State private var analyticsService = AnalyticsService()
 
     var body: some Scene {
         WindowGroup {
@@ -15,6 +17,8 @@ struct ProjectNexusApp: App {
                 ContentView(
                     state: appState,
                     metricsService: metricsService,
+                    asrService: asrService,
+                    analyticsService: analyticsService,
                     onToggleShield: toggleShield,
                     onConfigUpdate: applyConfigUpdate
                 )
@@ -40,9 +44,21 @@ struct ProjectNexusApp: App {
         let service = PerturbationService()
         metricsService.startMonitoring(perturbationService: service)
         perturbationService = service
+
+        // Start ASR effectiveness measurement
+        Task {
+            let granted = await asrService.requestAuthorization()
+            if granted {
+                asrService.startMeasuring(shieldActiveProvider: { [weak appState = appState] in
+                    appState?.isShieldActive ?? false
+                })
+            }
+        }
     }
 
     // MARK: - Shield toggle
+
+    private var shieldActivationTime: Date? = nil
 
     private func toggleShield() {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -52,11 +68,18 @@ struct ProjectNexusApp: App {
         if appState.isShieldActive {
             do {
                 try perturbationService?.start(with: appState.config)
+                shieldActivationTime = Date()
+                analyticsService.track(.shieldActivated)
             } catch {
                 appState.isShieldActive = false
                 appState.errorMessage = error.localizedDescription
             }
         } else {
+            if let t = shieldActivationTime {
+                let duration = Date().timeIntervalSince(t)
+                analyticsService.track(.shieldDeactivated(durationSeconds: duration))
+                shieldActivationTime = nil
+            }
             perturbationService?.stop()
         }
     }
@@ -77,6 +100,8 @@ struct ProjectNexusApp: App {
 struct ContentView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
+    let asrService: ASREffectivenessService
+    let analyticsService: AnalyticsService
     let onToggleShield: () -> Void
     let onConfigUpdate: () -> Void
 
@@ -96,17 +121,30 @@ struct ContentView: View {
                 AudioRoutingView(state: state)
             }
             Tab("Diagnostics", systemImage: "chart.bar.xaxis", value: AppTab.diagnostics) {
-                DiagnosticsView(metricsService: metricsService, isActive: state.isShieldActive)
+                DiagnosticsView(
+                    metricsService: metricsService,
+                    isActive: state.isShieldActive,
+                    asrService: asrService
+                )
+            }
+            Tab("Account", systemImage: "person.circle", value: AppTab.account) {
+                AccountView(analyticsService: analyticsService)
             }
         }
         .tint(.blue)
         // Propagate all config mutations to the live service + persistence
-        .onChange(of: state.config.intensity)               { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.intensity) { _, new in
+            onConfigUpdate()
+            analyticsService.track(.intensityChanged(value: new))
+        }
         .onChange(of: state.config.tier1Enabled)            { _, _ in onConfigUpdate() }
         .onChange(of: state.config.tier2Enabled)            { _, _ in onConfigUpdate() }
         .onChange(of: state.config.enabledTechniques)       { _, _ in onConfigUpdate() }
         .onChange(of: state.config.maskingAggressiveness)   { _, _ in onConfigUpdate() }
-        .onChange(of: state.config.codecTarget)             { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.codecTarget) { _, new in
+            onConfigUpdate()
+            analyticsService.track(.audioModeChanged(mode: new.rawValue))
+        }
         .onChange(of: state.config.frequencyRangeLow)       { _, _ in onConfigUpdate() }
         .onChange(of: state.config.frequencyRangeHigh)      { _, _ in onConfigUpdate() }
     }

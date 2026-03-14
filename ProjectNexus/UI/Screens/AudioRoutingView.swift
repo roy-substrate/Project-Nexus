@@ -3,15 +3,27 @@ import SwiftUI
 struct AudioRoutingView: View {
     @Bindable var state: AppState
 
+    /// Shared session configurator — used for live route info and BT HQ toggle.
+    private let session = AudioSessionConfigurator.shared
+
+    /// Bluetooth HQ toggle state, mirroring AudioSessionConfigurator.
+    @State private var bluetoothHQEnabled: Bool = AudioSessionConfigurator.shared.bluetoothHQEnabled
+    @State private var bluetoothHQError: String? = nil
+
     var body: some View {
         NavigationStack {
             List {
                 routingSection
+                bluetoothSection
                 routeInfoSection
             }
             .navigationTitle("Routing")
             .navigationBarTitleDisplayMode(.large)
             .listStyle(.insetGrouped)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .audioRouteChanged)) { _ in
+            // Sync BT HQ state when route changes
+            bluetoothHQEnabled = session.bluetoothHQEnabled
         }
     }
 
@@ -109,6 +121,63 @@ struct AudioRoutingView: View {
         .opacity(isAvailable ? 1 : 0.55)
     }
 
+    // MARK: - Bluetooth HQ section
+
+    private var bluetoothSection: some View {
+        Section {
+            Toggle(isOn: $bluetoothHQEnabled) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("AirPods High-Quality Input", systemImage: "airpodspro")
+                        .font(.body)
+                        .foregroundStyle(NexusTheme.textPrimary)
+                    Text("Switches compatible AirPods into wide-band mic mode for cleaner analysis.")
+                        .font(.caption)
+                        .foregroundStyle(NexusTheme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(NexusTheme.accent)
+            .onChange(of: bluetoothHQEnabled) { _, enabled in
+                do {
+                    if enabled {
+                        try session.enableBluetoothHQRecording()
+                    } else {
+                        try session.disableBluetoothHQRecording()
+                    }
+                    bluetoothHQError = nil
+                } catch {
+                    bluetoothHQEnabled = !enabled   // revert
+                    bluetoothHQError = error.localizedDescription
+                }
+            }
+
+            if session.isBluetoothInputActive {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(NexusTheme.positive)
+                        .frame(width: 7, height: 7)
+                    Text("Bluetooth input is active")
+                        .font(.subheadline)
+                        .foregroundStyle(NexusTheme.positive)
+                }
+            }
+
+            if let err = bluetoothHQError {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(NexusTheme.warning)
+                    Text(err)
+                        .font(.caption)
+                        .foregroundStyle(NexusTheme.textSecondary)
+                }
+            }
+        } header: {
+            Text("Bluetooth")
+        } footer: {
+            Text("Requires AirPods Pro (2nd gen) or AirPods 4. Has no effect when Bluetooth input is not the active route.")
+        }
+    }
+
     // MARK: - Route info
 
     private var routeInfoSection: some View {
@@ -117,9 +186,7 @@ struct AudioRoutingView: View {
                 Label("Output", systemImage: "speaker.fill")
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
-                Text(AudioSessionConfigurator.shared.currentRoute.isEmpty
-                     ? "—"
-                     : AudioSessionConfigurator.shared.currentRoute)
+                Text(session.currentRoute.isEmpty ? "—" : session.currentRoute)
                     .font(.system(.subheadline, design: .monospaced))
                     .foregroundStyle(NexusTheme.textPrimary)
             }
@@ -128,9 +195,9 @@ struct AudioRoutingView: View {
                 Label("Microphone", systemImage: "mic.fill")
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
-                Text(AudioSessionConfigurator.shared.isMicrophoneAvailable ? "Available" : "Unavailable")
+                Text(session.isMicrophoneAvailable ? "Available" : "Unavailable")
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(AudioSessionConfigurator.shared.isMicrophoneAvailable
+                    .foregroundStyle(session.isMicrophoneAvailable
                                      ? NexusTheme.positive : NexusTheme.danger)
             }
         }

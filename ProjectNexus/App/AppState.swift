@@ -50,15 +50,17 @@ enum AppTab: String, CaseIterable, Identifiable {
     case settings = "Settings"
     case routing = "Routing"
     case diagnostics = "Diagnostics"
+    case account = "Account"
 
     var id: String { rawValue }
 
     var iconName: String {
         switch self {
-        case .shield: "shield.checkered"
-        case .settings: "slider.horizontal.3"
-        case .routing: "antenna.radiowaves.left.and.right"
+        case .shield:      "shield.checkered"
+        case .settings:    "slider.horizontal.3"
+        case .routing:     "antenna.radiowaves.left.and.right"
         case .diagnostics: "chart.bar.xaxis"
+        case .account:     "person.circle"
         }
     }
 }
