@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+    </array>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Project Nexus uses the microphone to analyze ambient audio and compute psychoacoustic masking thresholds, ensuring perturbations remain imperceptible to human listeners while effectively disrupting ASR systems.</string>
+    <key>CFBundleName</key>
+    <string>Project Nexus</string>
+    <key>CFBundleDisplayName</key>
+    <string>Nexus</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.nexus.projectnexus</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+</dict>
+</plist>
