@@ -7,210 +7,293 @@ struct MainControlView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 20) {
+            VStack(spacing: 0) {
                 shieldHero
-                    .padding(.top, 12)
-                tierGrid
-                intensityCard
-                spectrumCard
+                    .padding(.top, 8)
+
+                VStack(spacing: 12) {
+                    tierRow
+                    spectrumCard
+                    intensityCard
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
         }
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .bottom) { statusStrip }
     }
 
-    // MARK: - Shield hero
+    // MARK: - Shield Hero
 
-    /// Audio-reactive RMS level mapped to a subtle scale pulse (0 dB → +5% scale).
+    /// RMS drives a subtle scale pulse — 0 dB = +5 % scale.
     private var audioScale: CGFloat {
         guard state.isShieldActive else { return 1.0 }
-        let rms = metricsService.currentMetrics.rmsLevel
-        let normalised = CGFloat(max(0, (rms + 60) / 60))   // 0 at silence, 1 at 0 dBFS
-        return 1.0 + normalised * 0.055
+        let norm = CGFloat(max(0, (metricsService.currentMetrics.rmsLevel + 60) / 60))
+        return 1.0 + norm * 0.05
     }
 
     private var shieldHero: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
+            // ── Button ──────────────────────────────────────────────
             Button(action: onToggleShield) {
                 ZStack {
-                    // Outermost ambient ring — pulses gently when active
+                    // Outer breathing ring — only when active
                     if state.isShieldActive {
                         Circle()
-                            .stroke(Color.blue.opacity(0.10), lineWidth: 1)
-                            .frame(width: 192, height: 192)
-                            .scaleEffect(audioScale)
-                            .animation(.interpolatingSpring(stiffness: 120, damping: 14), value: audioScale)
+                            .stroke(Color.blue.opacity(0.08), lineWidth: 48)
+                            .frame(width: 168, height: 168)
+                            .scaleEffect(audioScale * 1.06)
+                            .animation(.interpolatingSpring(stiffness: 60, damping: 10), value: audioScale)
 
                         Circle()
-                            .stroke(Color.blue.opacity(0.06), lineWidth: 1)
-                            .frame(width: 220, height: 220)
-                            .scaleEffect(audioScale * 1.03)
-                            .animation(.interpolatingSpring(stiffness: 80, damping: 12), value: audioScale)
+                            .stroke(Color.blue.opacity(0.13), lineWidth: 20)
+                            .frame(width: 168, height: 168)
+                            .scaleEffect(audioScale)
+                            .animation(.interpolatingSpring(stiffness: 100, damping: 12), value: audioScale)
                     }
 
-                    // Core button
+                    // Core
                     Circle()
-                        .fill(state.isShieldActive ? Color.blue : Color(.secondarySystemGroupedBackground))
-                        .frame(width: 140, height: 140)
+                        .fill(state.isShieldActive
+                              ? Color.blue
+                              : Color(.secondarySystemGroupedBackground))
+                        .frame(width: 120, height: 120)
                         .shadow(
-                            color: state.isShieldActive ? Color.blue.opacity(0.30) : .black.opacity(0.07),
-                            radius: state.isShieldActive ? 18 : 5,
-                            x: 0, y: state.isShieldActive ? 6 : 2
+                            color: state.isShieldActive
+                                ? Color.blue.opacity(0.35)
+                                : Color.black.opacity(0.06),
+                            radius: state.isShieldActive ? 24 : 6,
+                            x: 0, y: state.isShieldActive ? 8 : 2
                         )
                         .scaleEffect(audioScale)
-                        .animation(.interpolatingSpring(stiffness: 200, damping: 18), value: audioScale)
+                        .animation(.interpolatingSpring(stiffness: 180, damping: 18), value: audioScale)
 
-                    // Icon + state label inside button
-                    VStack(spacing: 5) {
+                    // Icon
+                    VStack(spacing: 4) {
                         Image(systemName: state.isShieldActive
-                              ? "shield.checkered.fill"
-                              : "shield.fill")
-                            .font(.system(size: 44, weight: .medium))
-                            .foregroundStyle(state.isShieldActive ? .white : Color(.tertiaryLabel))
+                              ? "shield.checkered.fill" : "shield.fill")
+                            .font(.system(size: 40, weight: .medium))
+                            .foregroundStyle(state.isShieldActive
+                                             ? .white : Color(.tertiaryLabel))
                             .symbolEffect(.bounce, value: state.isShieldActive)
                             .contentTransition(.symbolEffect(.replace))
 
-                        Text(state.isShieldActive ? "Active" : "Off")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(
-                                state.isShieldActive ? .white.opacity(0.80) : Color(.tertiaryLabel)
-                            )
-
-                        // Live waveform inside button when active
                         if state.isShieldActive {
-                            WaveformView(
-                                isActive: true,
-                                level: metricsService.currentMetrics.rmsLevel
-                            )
-                            .frame(width: 72, height: 16)
-                            .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                            WaveformView(isActive: true,
+                                         level: metricsService.currentMetrics.rmsLevel)
+                                .frame(width: 60, height: 14)
+                                .transition(.opacity.combined(with: .scale(scale: 0.85)))
                         }
                     }
                 }
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
-            .frame(height: 240)
+            .frame(height: 220)
+            .animation(.spring(response: 0.4, dampingFraction: 0.78), value: state.isShieldActive)
 
-            // Caption beneath button
-            VStack(spacing: 4) {
-                Text(state.isShieldActive
-                     ? "Protecting your voice"
-                     : "Tap to start protecting")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(state.isShieldActive ? .blue : .secondary)
+            // ── Status label ─────────────────────────────────────────
+            VStack(spacing: 6) {
+                Text(state.isShieldActive ? "Protecting your voice" : "Tap to activate")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(state.isShieldActive ? .blue : .primary)
 
                 if state.isShieldActive && state.activeTechniqueCount > 0 {
-                    Text("\(state.activeTechniqueCount) technique\(state.activeTechniqueCount == 1 ? "" : "s") running")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(.green)
+                            .frame(width: 6, height: 6)
+                        Text("\(state.activeTechniqueCount) technique\(state.activeTechniqueCount == 1 ? "" : "s") active")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                } else if !state.isShieldActive {
+                    Text("Voice protection off")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color(.tertiaryLabel))
                 }
             }
-            .animation(.easeInOut(duration: 0.22), value: state.isShieldActive)
+            .animation(.easeInOut(duration: 0.2), value: state.isShieldActive)
+            .padding(.bottom, 28)
         }
-        .padding(.vertical, 4)
     }
 
-    // MARK: - Tier grid
+    // MARK: - Tier Row
 
-    private var tierGrid: some View {
+    private var tierRow: some View {
         HStack(spacing: 10) {
-            TierCard(tier: .tier1, isEnabled: state.config.tier1Enabled) {
-                withAnimation(.spring(response: 0.32, dampingFraction: 0.72)) {
+            tierPill(
+                label: "Acoustic",
+                sublabel: "Tier 1",
+                icon: "waveform",
+                color: Color(hue: 0.58, saturation: 0.80, brightness: 0.92),
+                enabled: state.config.tier1Enabled
+            ) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
                     state.config.tier1Enabled.toggle()
                 }
             }
-            TierCard(tier: .tier2, isEnabled: state.config.tier2Enabled) {
-                withAnimation(.spring(response: 0.32, dampingFraction: 0.72)) {
+
+            tierPill(
+                label: "Adversarial",
+                sublabel: "Tier 2",
+                icon: "brain",
+                color: Color(hue: 0.73, saturation: 0.70, brightness: 0.88),
+                enabled: state.config.tier2Enabled
+            ) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
                     state.config.tier2Enabled.toggle()
                 }
             }
         }
     }
 
-    // MARK: - Intensity card
+    private func tierPill(
+        label: String,
+        sublabel: String,
+        icon: String,
+        color: Color,
+        enabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(enabled ? color : Color(.tertiaryLabel))
+                    .frame(width: 28, height: 28)
+                    .background(Circle().fill(enabled ? color.opacity(0.12) : Color(.systemFill)))
 
-    private var intensityCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Intensity")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
-                    Text("\(Int(state.config.intensity * 100))%")
-                        .font(.system(.subheadline, design: .monospaced, weight: .semibold))
-                        .foregroundStyle(.blue)
-                        .contentTransition(.numericText())
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(label)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(enabled ? .primary : .secondary)
+                    Text(sublabel)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(.tertiaryLabel))
                 }
-                Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
-                    .tint(.blue)
-                Text("Higher values are more effective but may become audible")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+
+                Spacer()
+
+                // Minimal on/off dot
+                Circle()
+                    .fill(enabled ? color : Color(.systemFill))
+                    .frame(width: 8, height: 8)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(
+                                enabled ? color.opacity(0.25) : Color(.separator).opacity(0.4),
+                                lineWidth: enabled ? 1 : 0.5
+                            )
+                    }
+                    .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
             }
         }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Spectrum card
 
     private var spectrumCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Text("Spectrum")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
-                    if state.isShieldActive {
-                        HStack(spacing: 4) {
-                            Circle().fill(Color.green).frame(width: 6, height: 6)
-                            Text("Live")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.green)
-                        }
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Spectrum")
+                    .font(.system(size: 15, weight: .semibold))
+                Spacer()
+                if state.isShieldActive {
+                    Label("Live", systemImage: "circle.fill")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.green)
+                        .labelStyle(TrailingIconLabelStyle())
                         .transition(.opacity)
-                    }
                 }
-
-                SpectrumVisualizerView(
-                    spectrumData: metricsService.currentMetrics.spectrumData,
-                    maskingThreshold: metricsService.currentMetrics.maskingThreshold,
-                    perturbationSpectrum: metricsService.currentMetrics.perturbationSpectrum,
-                    isActive: state.isShieldActive
-                )
-                .frame(height: 88)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-
-                LevelMeterView(
-                    level: metricsService.currentMetrics.rmsLevel,
-                    peak: metricsService.currentMetrics.peakLevel
-                )
-
-                // RMS sparkline — uses the history ring buffer from MetricsService
-                if state.isShieldActive && !metricsService.rmsHistory.allSatisfy({ $0 == -60 }) {
-                    SparklineView(
-                        values: metricsService.rmsHistory,
-                        color: .blue.opacity(0.45)
-                    )
-                    .frame(height: 20)
-                    .transition(.opacity)
-                }
-
-                HStack {
-                    Text("100 Hz"); Spacer()
-                    Text("1 kHz"); Spacer()
-                    Text("4 kHz"); Spacer()
-                    Text("20 kHz")
-                }
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(.quaternary)
             }
+
+            SpectrumVisualizerView(
+                spectrumData: metricsService.currentMetrics.spectrumData,
+                maskingThreshold: metricsService.currentMetrics.maskingThreshold,
+                perturbationSpectrum: metricsService.currentMetrics.perturbationSpectrum,
+                isActive: state.isShieldActive
+            )
+            .frame(height: 80)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+            LevelMeterView(
+                level: metricsService.currentMetrics.rmsLevel,
+                peak: metricsService.currentMetrics.peakLevel
+            )
+
+            if state.isShieldActive && !metricsService.rmsHistory.allSatisfy({ $0 == -60 }) {
+                SparklineView(values: metricsService.rmsHistory, color: .blue.opacity(0.4))
+                    .frame(height: 18)
+                    .transition(.opacity)
+            }
+
+            HStack {
+                Text("100 Hz").frame(maxWidth: .infinity, alignment: .leading)
+                Text("1 kHz").frame(maxWidth: .infinity, alignment: .center)
+                Text("4 kHz").frame(maxWidth: .infinity, alignment: .center)
+                Text("20 kHz").frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .font(.system(size: 10, design: .monospaced))
+            .foregroundStyle(Color(.quaternaryLabel))
+        }
+        .padding(16)
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(Color(.separator).opacity(0.45), lineWidth: 0.5)
+                }
+                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
         }
     }
 
-    // MARK: - Status strip (safe area inset)
+    // MARK: - Intensity card
+
+    private var intensityCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Intensity")
+                    .font(.system(size: 15, weight: .semibold))
+                Spacer()
+                Text("\(Int(state.config.intensity * 100))%")
+                    .font(.system(size: 15, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(.blue)
+                    .contentTransition(.numericText())
+            }
+
+            Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
+                .tint(.blue)
+
+            Text("Higher values increase jamming effectiveness but may become faintly audible.")
+                .font(.system(size: 12))
+                .foregroundStyle(Color(.tertiaryLabel))
+                .lineSpacing(3)
+        }
+        .padding(16)
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(Color(.separator).opacity(0.45), lineWidth: 0.5)
+                }
+                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
+        }
+    }
+
+    // MARK: - Status strip
 
     private var statusStrip: some View {
         HStack(spacing: 0) {
@@ -219,20 +302,20 @@ struct MainControlView: View {
                 label: "Latency",
                 accent: metricsService.currentMetrics.latencyMs < 30 ? .green : .orange
             )
-            Color(.separator).frame(width: 0.5, height: 22)
+            Divider().frame(height: 22)
             statusCell(
                 value: String(format: "%.0f dB", metricsService.currentMetrics.rmsLevel),
                 label: "Level",
                 accent: .secondary
             )
-            Color(.separator).frame(width: 0.5, height: 22)
+            Divider().frame(height: 22)
             statusCell(
                 value: state.audioMode == .speakerPlayback ? "Speaker" : "VoIP",
                 label: "Route",
                 accent: .secondary
             )
             if state.isShieldActive {
-                Color(.separator).frame(width: 0.5, height: 22)
+                Divider().frame(height: 22)
                 statusCell(
                     value: "\(state.activeTechniqueCount)",
                     label: "Active",
@@ -244,20 +327,34 @@ struct MainControlView: View {
         .padding(.vertical, 10)
         .background(.bar)
         .overlay(alignment: .top) {
-            Color(.separator).frame(height: 0.5)
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(height: 0.5)
         }
     }
 
     private func statusCell(value: String, label: String, accent: Color) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.system(.caption, design: .monospaced, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
                 .foregroundStyle(accent)
                 .contentTransition(.numericText())
             Text(label)
                 .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(.quaternary)
+                .foregroundStyle(Color(.quaternaryLabel))
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Trailing icon label style (for "Live" badge)
+
+private struct TrailingIconLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) {
+            configuration.icon
+                .font(.system(size: 7))
+            configuration.title
+        }
     }
 }

@@ -3,55 +3,52 @@ import AVFoundation
 
 // MARK: - Onboarding container
 
-/// Full-screen onboarding flow shown once on first launch.
-/// Uses @AppStorage so the completed flag persists across launches.
 struct OnboardingView: View {
     @AppStorage("nexus.onboarding.completed") private var isCompleted = false
     @State private var page = 0
-
     private let totalPages = 4
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Page content fills entire screen
+        ZStack {
             TabView(selection: $page) {
-                WelcomePage()      .tag(0)
-                HowItWorksPage()   .tag(1)
+                WelcomePage()
+                    .tag(0)
+                HowItWorksPage()
+                    .tag(1)
                 PermissionPage(onGranted: { advance() })
                     .tag(2)
                 ReadyPage(onDone: { isCompleted = true })
                     .tag(3)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: page)
+            .ignoresSafeArea()
 
-            // Shared bottom bar: page dots + CTA
             if page < 3 {
-                bottomBar
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                VStack {
+                    Spacer()
+                    bottomControls
+                }
+                .ignoresSafeArea(edges: .bottom)
+                .transition(.opacity)
             }
         }
-        .background(Color(.systemBackground))
+        .animation(.spring(response: 0.42, dampingFraction: 0.88), value: page)
     }
 
-    // MARK: - Shared bottom bar (pages 0–2)
-
-    private var bottomBar: some View {
-        VStack(spacing: 20) {
-            // Page dots
-            HStack(spacing: 6) {
+    private var bottomControls: some View {
+        VStack(spacing: 24) {
+            // Pill dots
+            HStack(spacing: 5) {
                 ForEach(0..<totalPages, id: \.self) { i in
                     Capsule()
-                        .fill(i == page ? Color.primary : Color(.systemFill))
-                        .frame(width: i == page ? 20 : 6, height: 6)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: page)
+                        .fill(i == page ? Color.primary : Color.primary.opacity(0.18))
+                        .frame(width: i == page ? 22 : 6, height: 6)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.72), value: page)
                 }
             }
 
-            // CTA — different label for permission screen
+            // CTA
             if page == 2 {
-                // Permission page manages its own primary button;
-                // show a "Skip for now" ghost option here
                 Button("Skip for now") { advance() }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -61,67 +58,85 @@ struct OnboardingView: View {
                     Text(page == 0 ? "Get Started" : "Continue")
                 }
                 .buttonStyle(.nexusPrimary)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 28)
             }
         }
-        .padding(.bottom, 44)
-        .padding(.horizontal, 32)
+        .padding(.bottom, 52)
+        .padding(.horizontal, 28)
     }
 
     private func advance() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.88)) {
             page = min(page + 1, totalPages - 1)
         }
     }
 }
 
-// MARK: - Page 1 — Welcome
+// MARK: - Page 1 — Welcome (dark, editorial)
 
 private struct WelcomePage: View {
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            // Deep background
+            Color(red: 0.05, green: 0.05, blue: 0.08)
+                .ignoresSafeArea()
 
-            // Hero illustration
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.08))
-                    .frame(width: 180, height: 180)
+            // Soft radial glow behind the wordmark
+            RadialGradient(
+                colors: [Color.blue.opacity(0.22), Color.clear],
+                center: .center,
+                startRadius: 0,
+                endRadius: 260
+            )
+            .ignoresSafeArea()
 
-                Image(systemName: "shield.checkered.fill")
-                    .font(.system(size: 80, weight: .light))
-                    .foregroundStyle(Color.blue)
-                    .symbolEffect(.pulse, options: .repeating, value: appeared)
+            VStack(alignment: .leading, spacing: 0) {
+                Spacer()
+
+                // Wordmark block
+                VStack(alignment: .leading, spacing: 16) {
+                    // App badge
+                    HStack(spacing: 10) {
+                        Image(systemName: "shield.checkered.fill")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(.white)
+                        Text("Nexus Shield")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 10)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: appeared)
+
+                    // Hero headline
+                    Text("Your voice.\nYour rules.")
+                        .font(.system(size: 52, weight: .bold, design: .default))
+                        .foregroundStyle(.white)
+                        .lineSpacing(2)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 16)
+                        .animation(.spring(response: 0.65, dampingFraction: 0.8).delay(0.18), value: appeared)
+
+                    // Subhead
+                    Text("Real-time acoustic protection that defeats AI transcription — invisibly, locally, instantly.")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundStyle(Color.white.opacity(0.55))
+                        .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 12)
+                        .animation(.spring(response: 0.65, dampingFraction: 0.8).delay(0.28), value: appeared)
+                }
+                .padding(.horizontal, 32)
+
+                Spacer()
+                Spacer()
             }
-            .padding(.bottom, 40)
-            .scaleEffect(appeared ? 1 : 0.85)
-            .opacity(appeared ? 1 : 0)
-
-            // Wordmark
-            VStack(spacing: 10) {
-                Text("Nexus Shield")
-                    .font(.system(.largeTitle, design: .default, weight: .bold))
-                    .foregroundStyle(.primary)
-
-                Text("Your voice. Your privacy.")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 12)
-
-            Spacer()
-            Spacer() // extra spacer so content sits above the bottom bar
-
         }
-        .padding(.horizontal, 32)
         .onAppear {
-            withAnimation(.spring(response: 0.65, dampingFraction: 0.8).delay(0.1)) {
-                appeared = true
-            }
+            withAnimation { appeared = true }
         }
     }
 }
@@ -131,97 +146,98 @@ private struct WelcomePage: View {
 private struct HowItWorksPage: View {
     @State private var appeared = false
 
-    private let features: [(icon: String, color: Color, title: String, body: String)] = [
-        (
-            icon: "waveform.path.ecg",
-            color: Color(hue: 0.55, saturation: 0.78, brightness: 0.92),
-            title: "Acoustic Shield",
-            body: "Psychoacoustic noise that is inaudible to you, but disrupts automatic transcription at the feature-extraction layer."
-        ),
-        (
-            icon: "brain",
-            color: Color(hue: 0.73, saturation: 0.70, brightness: 0.88),
-            title: "Adversarial AI",
-            body: "ML-crafted universal adversarial perturbations that cause state-of-the-art speech recognition models to misrecognize your words."
-        ),
-        (
-            icon: "bolt.fill",
-            color: .orange,
-            title: "Real-time",
-            body: "Perturbations are synthesised and mixed in under 10 ms — imperceptible latency while you speak naturally."
-        ),
+    private struct Step {
+        let number: String
+        let title: String
+        let body: String
+        let color: Color
+    }
+
+    private let steps: [Step] = [
+        Step(number: "01",
+             title: "Acoustic masking",
+             body: "Psychoacoustic noise below your hearing threshold disrupts the feature-extraction layer of speech recognition systems.",
+             color: Color(hue: 0.58, saturation: 0.80, brightness: 0.92)),
+        Step(number: "02",
+             title: "Adversarial AI",
+             body: "ML-crafted universal adversarial perturbations cause Whisper, DeepSpeech, and other models to misrecognize your speech.",
+             color: Color(hue: 0.73, saturation: 0.70, brightness: 0.88)),
+        Step(number: "03",
+             title: "Under 10 ms latency",
+             body: "Everything runs on-device. No cloud, no accounts, no data ever leaves your phone.",
+             color: .orange),
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header
-            VStack(alignment: .leading, spacing: 8) {
-                Text("How it works")
-                    .font(.system(.largeTitle, design: .default, weight: .bold))
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
 
-                Text("Three layers of protection, active simultaneously.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.top, 60)
-            .padding(.horizontal, 32)
-            .padding(.bottom, 36)
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 16)
+            VStack(alignment: .leading, spacing: 0) {
+                // Header
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("How it works")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundStyle(.primary)
 
-            // Feature rows
-            VStack(spacing: 0) {
-                ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
-                    featureRow(feature, delay: Double(index) * 0.08)
+                    Text("Three layers, one tap.")
+                        .font(.system(size: 17))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 72)
+                .padding(.horizontal, 32)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 14)
+                .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.05), value: appeared)
 
-                    if index < features.count - 1 {
-                        Divider().padding(.leading, 32 + 44 + 16)
+                Spacer().frame(height: 44)
+
+                // Steps
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(steps.enumerated()), id: \.offset) { idx, step in
+                        stepRow(step, delay: Double(idx) * 0.09)
+                        if idx < steps.count - 1 {
+                            Rectangle()
+                                .fill(Color(.separator).opacity(0.4))
+                                .frame(height: 0.5)
+                                .padding(.leading, 32 + 36 + 20)
+                        }
                     }
                 }
-            }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(Color(.separator).opacity(0.5), lineWidth: 0.5)
-            }
-            .padding(.horizontal, 16)
+                .padding(.horizontal, 24)
 
-            Spacer()
+                Spacer()
+            }
         }
         .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.85).delay(0.05)) {
-                appeared = true
-            }
+            withAnimation { appeared = true }
         }
     }
 
-    private func featureRow(
-        _ feature: (icon: String, color: Color, title: String, body: String),
-        delay: Double
-    ) -> some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: feature.icon)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(feature.color)
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(feature.color.opacity(0.12)))
+    private func stepRow(_ step: Step, delay: Double) -> some View {
+        HStack(alignment: .top, spacing: 20) {
+            // Large number
+            Text(step.number)
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundStyle(step.color)
+                .frame(width: 36, alignment: .leading)
+                .padding(.top, 2)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(feature.title)
-                    .font(.subheadline.weight(.semibold))
+            VStack(alignment: .leading, spacing: 5) {
+                Text(step.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
 
-                Text(feature.body)
-                    .font(.subheadline)
+                Text(step.body)
+                    .font(.system(size: 14))
                     .foregroundStyle(.secondary)
-                    .lineSpacing(3)
+                    .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(16)
+        .padding(.vertical, 22)
         .opacity(appeared ? 1 : 0)
-        .offset(x: appeared ? 0 : -12)
-        .animation(.spring(response: 0.55, dampingFraction: 0.85).delay(0.15 + delay), value: appeared)
+        .offset(x: appeared ? 0 : -10)
+        .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.18 + delay), value: appeared)
     }
 }
 
@@ -236,45 +252,46 @@ private struct PermissionPage: View {
     enum PermissionState { case unknown, requesting, granted, denied }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
 
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(micIconColor.opacity(0.1))
-                    .frame(width: 120, height: 120)
-                Image(systemName: micIconName)
-                    .font(.system(size: 52, weight: .light))
-                    .foregroundStyle(micIconColor)
-                    .symbolEffect(.bounce, value: permissionState)
-            }
-            .scaleEffect(appeared ? 1 : 0.85)
-            .opacity(appeared ? 1 : 0)
-            .padding(.bottom, 36)
+            VStack(spacing: 0) {
+                Spacer()
 
-            // Copy
-            VStack(spacing: 12) {
-                Text("Allow microphone access")
-                    .font(.system(.title2, design: .default, weight: .bold))
-                    .multilineTextAlignment(.center)
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(micIconColor.opacity(0.09))
+                        .frame(width: 96, height: 96)
+                    Image(systemName: micIconName)
+                        .font(.system(size: 42, weight: .medium))
+                        .foregroundStyle(micIconColor)
+                        .symbolEffect(.bounce, value: permissionState)
+                }
+                .scaleEffect(appeared ? 1 : 0.85)
+                .opacity(appeared ? 1 : 0)
+                .padding(.bottom, 32)
 
-                Text(permissionState == .denied
-                     ? "Microphone access was denied. Open Settings to enable it, then come back."
-                     : "Nexus listens to your microphone to calibrate the acoustic shield to your environment. Audio is processed entirely on-device and never leaves your phone.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
+                // Copy
+                VStack(spacing: 12) {
+                    Text(permissionState == .denied ? "Microphone blocked" : "Allow microphone access")
+                        .font(.system(size: 26, weight: .bold))
+                        .multilineTextAlignment(.center)
 
-            Spacer()
+                    Text(permissionState == .denied
+                         ? "Open Settings to enable microphone access, then return to Nexus."
+                         : "Audio is processed entirely on-device. Nothing is recorded or sent anywhere.")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 10)
 
-            // Primary action
-            VStack(spacing: 12) {
+                Spacer()
+
                 if permissionState == .denied {
                     Button("Open Settings") {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -282,25 +299,22 @@ private struct PermissionPage: View {
                         }
                     }
                     .buttonStyle(.nexusPrimary)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 130)
                 } else if permissionState != .requesting {
                     Button(action: requestPermission) {
-                        if permissionState == .requesting {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("Allow Microphone Access")
-                        }
+                        Text("Allow Microphone")
                     }
                     .buttonStyle(.nexusPrimary)
-                    .disabled(permissionState == .requesting)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 130)
                 }
             }
             .padding(.horizontal, 32)
-            .padding(.bottom, 110) // space for the shared bottom bar
         }
-        .padding(.horizontal, 32)
         .onAppear {
             checkCurrentPermission()
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1)) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.82).delay(0.1)) {
                 appeared = true
             }
         }
@@ -308,17 +322,17 @@ private struct PermissionPage: View {
 
     private var micIconName: String {
         switch permissionState {
-        case .granted:  return "mic.fill"
-        case .denied:   return "mic.slash.fill"
-        default:        return "mic.fill"
+        case .granted: return "mic.fill"
+        case .denied:  return "mic.slash.fill"
+        default:       return "mic.fill"
         }
     }
 
     private var micIconColor: Color {
         switch permissionState {
-        case .granted:  return .green
-        case .denied:   return .red
-        default:        return .blue
+        case .granted: return .green
+        case .denied:  return .red
+        default:       return .blue
         }
     }
 
@@ -350,57 +364,91 @@ private struct PermissionPage: View {
     }
 }
 
-// MARK: - Page 4 — Ready
+// MARK: - Page 4 — Ready (dark close, matches welcome)
 
 private struct ReadyPage: View {
     let onDone: () -> Void
-
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            Color(red: 0.05, green: 0.05, blue: 0.08).ignoresSafeArea()
 
-            // Checkmark
-            ZStack {
-                Circle()
-                    .fill(Color.green.opacity(0.1))
-                    .frame(width: 120, height: 120)
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64, weight: .light))
-                    .foregroundStyle(.green)
-                    .symbolEffect(.bounce, value: appeared)
-            }
-            .scaleEffect(appeared ? 1 : 0.85)
-            .opacity(appeared ? 1 : 0)
-            .padding(.bottom, 36)
+            RadialGradient(
+                colors: [Color.green.opacity(0.18), Color.clear],
+                center: .center,
+                startRadius: 0,
+                endRadius: 240
+            )
+            .ignoresSafeArea()
 
-            VStack(spacing: 10) {
-                Text("You're all set.")
-                    .font(.system(.largeTitle, design: .default, weight: .bold))
+            VStack(alignment: .leading, spacing: 0) {
+                Spacer()
 
-                Text("Tap the shield on the home screen to start protecting your voice.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
+                VStack(alignment: .leading, spacing: 20) {
+                    // Checkmark badge
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.15))
+                            .frame(width: 64, height: 64)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundStyle(Color.green)
+                    }
+                    .scaleEffect(appeared ? 1 : 0.75)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.55, dampingFraction: 0.7).delay(0.1), value: appeared)
 
-            Spacer()
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("All set.")
+                            .font(.system(size: 52, weight: .bold))
+                            .foregroundStyle(.white)
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 14)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.18), value: appeared)
 
-            Button("Start Using Nexus Shield", action: onDone)
-                .buttonStyle(.nexusPrimary)
+                        Text("Tap the shield on the home screen to start protecting your voice.")
+                            .font(.system(size: 17))
+                            .foregroundStyle(Color.white.opacity(0.55))
+                            .lineSpacing(5)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 10)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.26), value: appeared)
+                    }
+                }
                 .padding(.horizontal, 32)
-                .padding(.bottom, 52)
-                .opacity(appeared ? 1 : 0)
-        }
-        .padding(.horizontal, 32)
-        .onAppear {
-            withAnimation(.spring(response: 0.65, dampingFraction: 0.8).delay(0.15)) {
-                appeared = true
+
+                Spacer()
+
+                Button("Start Using Nexus", action: onDone)
+                    .buttonStyle(DarkPrimaryButtonStyle())
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 52)
+                    .opacity(appeared ? 1 : 0)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.38), value: appeared)
             }
         }
+        .onAppear {
+            withAnimation { appeared = true }
+        }
+    }
+}
+
+// MARK: - Dark-surface primary button (for dark onboarding pages)
+
+private struct DarkPrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.body.weight(.semibold))
+            .foregroundStyle(Color(red: 0.05, green: 0.05, blue: 0.08))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.white)
+                    .opacity(configuration.isPressed ? 0.82 : 1)
+            }
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
