@@ -4,167 +4,135 @@ struct AudioRoutingView: View {
     @Bindable var state: AppState
 
     var body: some View {
-        ZStack {
-            NexusTheme.backgroundPrimary.ignoresSafeArea()
-            NexusTheme.backgroundGradient.ignoresSafeArea().opacity(0.4)
-            ParticleFieldView(particleCount: 20, isActive: false).ignoresSafeArea().opacity(0.3)
-
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: NexusTheme.spacingLG) {
-                    headerSection
-
-                    speakerCard
-                    voipCard
-                    routeInfoCard
-                }
-                .padding(.horizontal, NexusTheme.spacingMD)
-                .padding(.bottom, 100)
+        NavigationStack {
+            List {
+                routingSection
+                routeInfoSection
             }
+            .navigationTitle("Routing")
+            .navigationBarTitleDisplayMode(.large)
+            .listStyle(.insetGrouped)
         }
     }
 
-    private var headerSection: some View {
-        HStack {
-            Text("AUDIO ROUTING")
-                .font(NexusTheme.captionFont)
-                .foregroundStyle(NexusTheme.textTertiary)
-                .tracking(2)
-            Spacer()
+    // MARK: - Mode selection
+
+    private var routingSection: some View {
+        Section {
+            routeRow(
+                mode: .speakerPlayback,
+                description: "Perturbation plays through the device speaker. Place your phone near the recording device for maximum effect. Works with any app, no setup required.",
+                tags: ["No setup", "Any app", "Offline"],
+                tagIcon: "checkmark.circle.fill"
+            )
+
+            routeRow(
+                mode: .voipMix,
+                description: "Mixes perturbation directly into outgoing VoIP audio via CallKit or WebRTC proxy. Requires additional configuration.",
+                tags: ["Direct mix", "Inaudible"],
+                tagIcon: "clock"
+            )
+        } header: {
+            Text("Output Mode")
         }
-        .padding(.top, NexusTheme.spacingSM)
     }
 
-    private var speakerCard: some View {
-        Button {
-            withAnimation(.bouncy) {
-                state.audioMode = .speakerPlayback
+    private func routeRow(mode: AudioMode, description: String, tags: [String], tagIcon: String) -> some View {
+        let isSelected = state.audioMode == mode
+        let isAvailable = mode.isAvailable
+
+        return Button {
+            guard isAvailable else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                state.audioMode = mode
             }
         } label: {
-            GlassCard(tint: state.audioMode == .speakerPlayback ? NexusTheme.accentCyan : nil) {
-                VStack(alignment: .leading, spacing: NexusTheme.spacingMD) {
-                    HStack {
-                        Image(systemName: "speaker.wave.3.fill")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundStyle(NexusTheme.accentCyan)
+            VStack(alignment: .leading, spacing: NexusTheme.spacingSM) {
+                HStack(alignment: .top) {
+                    Image(systemName: mode.iconName)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(isAvailable ? (isSelected ? NexusTheme.accent : NexusTheme.textSecondary) : NexusTheme.textTertiary)
+                        .frame(width: 36)
 
-                        Spacer()
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack {
+                            Text(mode.rawValue)
+                                .font(.headline)
+                                .foregroundStyle(isAvailable ? NexusTheme.textPrimary : NexusTheme.textTertiary)
 
-                        if state.audioMode == .speakerPlayback {
-                            Text("ACTIVE")
-                                .font(NexusTheme.monoSmall)
-                                .foregroundStyle(NexusTheme.accentGreen)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background {
-                                    Capsule().fill(NexusTheme.accentGreen.opacity(0.15))
-                                }
+                            Spacer()
+
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(NexusTheme.accent)
+                                    .transition(.scale.combined(with: .opacity))
+                            } else if !isAvailable {
+                                Text("Coming soon")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(NexusTheme.textTertiary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(
+                                        Capsule().fill(Color(.systemFill))
+                                    )
+                            }
                         }
-                    }
 
-                    Text("Speaker Playback")
-                        .font(NexusTheme.headlineFont)
-                        .foregroundStyle(NexusTheme.textPrimary)
-
-                    Text("Perturbation plays through device speaker. Place phone near the recording device for maximum effect.")
-                        .font(NexusTheme.captionFont)
-                        .foregroundStyle(NexusTheme.textSecondary)
-                        .lineSpacing(3)
-
-                    HStack(spacing: NexusTheme.spacingMD) {
-                        featureTag("No Setup", icon: "checkmark.circle")
-                        featureTag("Any App", icon: "app.badge")
-                        featureTag("Offline", icon: "wifi.slash")
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(isAvailable ? NexusTheme.textSecondary : NexusTheme.textTertiary)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                .padding(.top, 2)
+
+                // Feature tags
+                HStack(spacing: NexusTheme.spacingXS) {
+                    ForEach(tags, id: \.self) { tag in
+                        Label(tag, systemImage: tagIcon)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(isAvailable ? NexusTheme.accent : NexusTheme.textTertiary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(isAvailable ? NexusTheme.accentFill : Color(.systemFill))
+                            )
+                    }
+                }
+                .padding(.leading, 36)
+                .padding(.bottom, 4)
             }
         }
         .buttonStyle(.plain)
+        .opacity(isAvailable ? 1 : 0.55)
     }
 
-    private var voipCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NexusTheme.spacingMD) {
-                HStack {
-                    Image(systemName: "phone.arrow.up.right.fill")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundStyle(NexusTheme.textTertiary)
+    // MARK: - Route info
 
-                    Spacer()
-
-                    Text("COMING SOON")
-                        .font(NexusTheme.monoSmall)
-                        .foregroundStyle(NexusTheme.accentPurple)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background {
-                            Capsule().fill(NexusTheme.accentPurple.opacity(0.15))
-                        }
-                }
-
-                Text("VoIP Mix")
-                    .font(NexusTheme.headlineFont)
-                    .foregroundStyle(NexusTheme.textTertiary)
-
-                Text("Mix perturbation directly into outgoing VoIP audio stream. Requires the app to act as a VoIP audio source via CallKit or WebRTC proxy.")
-                    .font(NexusTheme.captionFont)
-                    .foregroundStyle(NexusTheme.textTertiary)
-                    .lineSpacing(3)
-
-                HStack(spacing: NexusTheme.spacingMD) {
-                    featureTag("Direct Mix", icon: "waveform.path", disabled: true)
-                    featureTag("Inaudible", icon: "ear", disabled: true)
-                }
+    private var routeInfoSection: some View {
+        Section("Current Route") {
+            HStack {
+                Label("Output", systemImage: "speaker.fill")
+                    .foregroundStyle(NexusTheme.textSecondary)
+                Spacer()
+                Text(AudioSessionConfigurator.shared.currentRoute.isEmpty
+                     ? "—"
+                     : AudioSessionConfigurator.shared.currentRoute)
+                    .font(.system(.subheadline, design: .monospaced))
+                    .foregroundStyle(NexusTheme.textPrimary)
             }
-        }
-        .opacity(0.6)
-    }
 
-    private var routeInfoCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NexusTheme.spacingSM) {
-                Text("CURRENT ROUTE")
-                    .font(NexusTheme.captionFont)
-                    .foregroundStyle(NexusTheme.textTertiary)
-                    .tracking(1)
-
-                HStack {
-                    Image(systemName: "speaker.fill")
-                        .foregroundStyle(NexusTheme.accentCyan)
-                    Text(AudioSessionConfigurator.shared.currentRoute)
-                        .font(NexusTheme.monoFont)
-                        .foregroundStyle(NexusTheme.textPrimary)
-                }
-
-                Divider().background(NexusTheme.glassStroke)
-
-                HStack {
-                    Image(systemName: "mic.fill")
-                        .foregroundStyle(
-                            AudioSessionConfigurator.shared.isMicrophoneAvailable
-                                ? NexusTheme.accentGreen
-                                : NexusTheme.accentRed
-                        )
-                    Text(AudioSessionConfigurator.shared.isMicrophoneAvailable ? "Microphone Available" : "No Microphone")
-                        .font(NexusTheme.monoFont)
-                        .foregroundStyle(NexusTheme.textPrimary)
-                }
+            HStack {
+                Label("Microphone", systemImage: "mic.fill")
+                    .foregroundStyle(NexusTheme.textSecondary)
+                Spacer()
+                Text(AudioSessionConfigurator.shared.isMicrophoneAvailable ? "Available" : "Unavailable")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AudioSessionConfigurator.shared.isMicrophoneAvailable
+                                     ? NexusTheme.positive : NexusTheme.danger)
             }
-        }
-    }
-
-    private func featureTag(_ text: String, icon: String, disabled: Bool = false) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 10))
-            Text(text)
-                .font(.system(size: 10, weight: .medium))
-        }
-        .foregroundStyle(disabled ? NexusTheme.textTertiary : NexusTheme.accentCyan)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background {
-            Capsule()
-                .fill(disabled ? NexusTheme.glassFill : NexusTheme.accentCyan.opacity(0.1))
         }
     }
 }

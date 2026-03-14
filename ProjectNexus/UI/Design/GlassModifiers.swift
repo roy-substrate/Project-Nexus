@@ -1,7 +1,9 @@
 import SwiftUI
 
-// MARK: - Card style (replaces dark glass)
+// MARK: - Card style
 
+/// Lifts content onto a card surface using the system's secondary grouped background.
+/// Matches iOS Settings-style inset cards — clean, no glow, adaptive.
 struct GlassCardStyle: ViewModifier {
     var cornerRadius: CGFloat = NexusTheme.radiusMD
     var padding: CGFloat = NexusTheme.spacingMD
@@ -11,36 +13,33 @@ struct GlassCardStyle: ViewModifier {
             .padding(padding)
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(NexusTheme.cardFill)
-                    .shadow(color: NexusTheme.cardShadow, radius: 8, x: 0, y: 2)
+                    .fill(NexusTheme.cardBackground)
                     .overlay {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .strokeBorder(NexusTheme.cardStroke, lineWidth: 0.5)
                     }
+                    .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
-// MARK: - Subtle glow (light-mode friendly)
+// MARK: - Glow (intentionally subtle for light mode)
 
 struct GlowModifier: ViewModifier {
     var color: Color
-    var radius: CGFloat = 12
+    var radius: CGFloat = 10
 
     func body(content: Content) -> some View {
         content
-            .shadow(color: color.opacity(0.22), radius: radius, x: 0, y: 0)
-            .shadow(color: color.opacity(0.10), radius: radius * 1.8, x: 0, y: 0)
+            .shadow(color: color.opacity(0.18), radius: radius, x: 0, y: 0)
     }
 }
 
-// MARK: - Shimmer (removed animation for minimal aesthetic; kept API)
+// MARK: - Shimmer (no-op — removed; presence kept for API compat)
 
 struct ShimmerModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-    }
+    func body(content: Content) -> some View { content }
 }
 
 // MARK: - View extensions
@@ -53,7 +52,7 @@ extension View {
         modifier(GlassCardStyle(cornerRadius: cornerRadius, padding: padding))
     }
 
-    func glow(color: Color, radius: CGFloat = 12) -> some View {
+    func glow(color: Color, radius: CGFloat = 10) -> some View {
         modifier(GlowModifier(color: color, radius: radius))
     }
 
@@ -61,50 +60,48 @@ extension View {
         modifier(ShimmerModifier())
     }
 
-    /// Apply the light app background to any view.
+    /// Apply the system grouped background (adapts to light/dark mode).
     func nexusBackground() -> some View {
-        self.background {
-            NexusTheme.backgroundPrimary
-                .ignoresSafeArea()
-        }
-        .preferredColorScheme(.light)
+        self.background(Color(.systemGroupedBackground).ignoresSafeArea())
     }
 }
 
-// MARK: - Reusable primary button style
+// MARK: - Primary button style  (solid, full-width, system blue)
 
 struct NexusPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(NexusTheme.bodyFont.weight(.semibold))
+            .font(.body.weight(.semibold))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background {
                 RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                    .fill(NexusTheme.accentBlue)
-                    .opacity(configuration.isPressed ? 0.85 : 1.0)
+                    .fill(Color.blue)
+                    .opacity(configuration.isPressed ? 0.80 : 1)
             }
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
-/// Ghost / secondary button — outlined, accent-colored label.
+/// Outlined secondary button — sits below a primary CTA.
 struct NexusSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(NexusTheme.bodyFont.weight(.medium))
-            .foregroundStyle(NexusTheme.accentBlue)
+            .font(.body.weight(.medium))
+            .foregroundStyle(Color.blue)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background {
                 RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                    .fill(NexusTheme.backgroundTertiary)
+                    .fill(Color.blue.opacity(0.07))
                     .overlay {
                         RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                            .strokeBorder(NexusTheme.cardStroke, lineWidth: 1)
+                            .strokeBorder(Color.blue.opacity(0.25), lineWidth: 1)
                     }
-                    .opacity(configuration.isPressed ? 0.80 : 1.0)
+                    .opacity(configuration.isPressed ? 0.75 : 1)
             }
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
