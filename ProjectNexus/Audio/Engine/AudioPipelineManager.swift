@@ -13,7 +13,7 @@ final class AudioPipelineManager {
 
     private let engine = AVAudioEngine()
     private let sessionConfigurator = AudioSessionConfigurator.shared
-    private let micCapture = MicCaptureNode()
+    private let micCapture: MicCaptureNode
     private let perturbationMixer = PerturbationMixerNode()
 
     private var sourceNode: AVAudioSourceNode?
@@ -26,14 +26,20 @@ final class AudioPipelineManager {
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
     var onSpectrumUpdate: (([Float]) -> Void)?
 
-    init() {
-        format = AVAudioFormat(
-            standardFormatWithSampleRate: 48_000,
-            channels: 1
-        )!
+    init() throws {
+        guard let fmt = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
+            throw AudioPipelineError.invalidFormat
+        }
+        format = fmt
+        micCapture = try MicCaptureNode()
         mixBuffer = [Float](repeating: 0, count: 1024)
         setupMicCallbacks()
         setupNotifications()
+    }
+
+    enum AudioPipelineError: LocalizedError {
+        case invalidFormat
+        var errorDescription: String? { "Could not create audio format (48 kHz mono)." }
     }
 
     func addGenerator(_ generator: PerturbationGenerator) {

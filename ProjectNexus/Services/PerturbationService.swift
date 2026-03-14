@@ -4,7 +4,7 @@ import os
 final class PerturbationService {
     private let logger = Logger(subsystem: "com.nexus", category: "PertService")
 
-    private let pipeline = AudioPipelineManager()
+    private let pipeline: AudioPipelineManager
     private let masker = PsychoacousticMasker()
     private let uapManager = UAPManager()
     private let speakerRouter = SpeakerPlaybackRouter()
@@ -16,7 +16,8 @@ final class PerturbationService {
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
 
-    init() {
+    init() throws {
+        pipeline = try AudioPipelineManager()
         pipeline.onMetricsUpdate = { [weak self] metrics in
             self?.onMetricsUpdate?(metrics)
         }

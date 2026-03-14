@@ -21,15 +21,22 @@ final class MicCaptureNode {
 
     var onSpectrumUpdate: (([Float], Float, Float) -> Void)?
 
-    init() {
+    init() throws {
         analysisBuffer = [Float](repeating: 0, count: fftSize)
         spectrumOutput = [Float](repeating: -60, count: fftSize / 2)
 
         let log2n = vDSP_Length(log2(Float(fftSize)))
         guard let setup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
-            fatalError("Failed to create FFT setup for MicCaptureNode")
+            throw MicCaptureError.fftSetupFailed
         }
         fftSetup = setup
+    }
+
+    enum MicCaptureError: LocalizedError {
+        case fftSetupFailed
+        var errorDescription: String? {
+            "Audio analysis could not be initialised (FFT setup failed). Try restarting the app."
+        }
     }
 
     deinit {

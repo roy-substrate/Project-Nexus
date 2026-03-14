@@ -4,6 +4,7 @@ import AVFoundation
 @main
 struct ProjectNexusApp: App {
     @AppStorage("nexus.onboarding.completed") private var onboardingCompleted = false
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var appState = AppState()
     @State private var metricsService = MetricsService()
@@ -35,15 +36,27 @@ struct ProjectNexusApp: App {
                 OnboardingView()
             }
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                // Persist the current analytics session whenever the app backgrounds.
+                // Without this, session stats would never appear in the Account tab.
+                analyticsService.endSession()
+            }
+        }
     }
 
     // MARK: - Service setup
 
     private func setupServices() {
         guard perturbationService == nil else { return }
-        let service = PerturbationService()
-        metricsService.startMonitoring(perturbationService: service)
-        perturbationService = service
+        do {
+            let service = try PerturbationService()
+            metricsService.startMonitoring(perturbationService: service)
+            perturbationService = service
+        } catch {
+            appState.errorMessage = error.localizedDescription
+            return
+        }
 
         // Start ASR effectiveness measurement
         Task {
