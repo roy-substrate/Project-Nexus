@@ -1,13 +1,17 @@
 import SwiftUI
-import Combine
+
+private let configDefaultsKey = "perturbationConfig"
 
 @Observable
 final class AppState {
     var isShieldActive: Bool = false
-    var config: PerturbationConfig = PerturbationConfig()
+    var config: PerturbationConfig = AppState.loadConfig()
     var audioMode: AudioMode = .speakerPlayback
     var metrics: AudioMetrics = .empty
     var selectedTab: AppTab = .shield
+
+    /// Non-nil when the shield failed to start; drives an alert in the root view.
+    var errorMessage: String? = nil
 
     var tier1Active: Bool {
         isShieldActive && config.tier1Enabled
@@ -23,6 +27,21 @@ final class AppState {
             let tierEnabled = technique.tier == .tier1 ? config.tier1Enabled : config.tier2Enabled
             return tierEnabled && config.isTechniqueEnabled(technique)
         }.count
+    }
+
+    // MARK: - Persistence
+
+    func saveConfig() {
+        guard let data = try? JSONEncoder().encode(config) else { return }
+        UserDefaults.standard.set(data, forKey: configDefaultsKey)
+    }
+
+    private static func loadConfig() -> PerturbationConfig {
+        guard
+            let data = UserDefaults.standard.data(forKey: configDefaultsKey),
+            let saved = try? JSONDecoder().decode(PerturbationConfig.self, from: data)
+        else { return PerturbationConfig() }
+        return saved
     }
 }
 

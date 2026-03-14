@@ -126,6 +126,18 @@ struct DiagnosticsView: View {
                     ? NexusTheme.accentRed : NexusTheme.accentGreen,
                 icon: "exclamationmark.triangle"
             )
+
+            metricTile(
+                title: "CPU",
+                value: String(format: "%.1f", metricsService.currentMetrics.cpuUsage),
+                unit: "%",
+                color: metricsService.currentMetrics.cpuUsage > 70
+                    ? NexusTheme.accentRed
+                    : metricsService.currentMetrics.cpuUsage > 40
+                        ? NexusTheme.accentOrange
+                        : NexusTheme.accentGreen,
+                icon: "cpu"
+            )
         }
     }
 
@@ -137,16 +149,37 @@ struct DiagnosticsView: View {
                     .foregroundStyle(NexusTheme.textTertiary)
                     .tracking(1)
 
-                statusRow("Audio Engine", value: metricsService.currentMetrics.isEngineRunning ? "Running" : "Stopped",
-                          color: metricsService.currentMetrics.isEngineRunning ? NexusTheme.accentGreen : NexusTheme.textTertiary)
+                statusRow(
+                    "Audio Engine",
+                    value: metricsService.currentMetrics.isEngineRunning ? "Running" : "Stopped",
+                    color: metricsService.currentMetrics.isEngineRunning ? NexusTheme.accentGreen : NexusTheme.textTertiary
+                )
 
-                statusRow("Sample Rate", value: "48,000 Hz", color: NexusTheme.textPrimary)
+                statusRow("Sample Rate", value: liveSampleRate, color: NexusTheme.textPrimary)
 
-                statusRow("Buffer Size", value: "1024 samples", color: NexusTheme.textPrimary)
+                statusRow("Buffer Size", value: liveBufferSize, color: NexusTheme.textPrimary)
 
                 statusRow("Format", value: "Float32 Mono", color: NexusTheme.textPrimary)
             }
         }
+    }
+
+    // MARK: - Live engine values from AVAudioSession
+
+    private var liveSampleRate: String {
+        let rate = AudioSessionConfigurator.shared.sampleRate
+        guard rate > 0 else { return "—" }
+        let kHz = rate / 1000
+        return kHz == kHz.rounded() ? "\(Int(rate)) Hz" : String(format: "%.1f kHz", kHz)
+    }
+
+    private var liveBufferSize: String {
+        let configurator = AudioSessionConfigurator.shared
+        let rate = configurator.sampleRate
+        let duration = configurator.ioBufferDuration
+        guard rate > 0 && duration > 0 else { return "—" }
+        let frames = Int((duration * rate).rounded())
+        return "\(frames) samples"
     }
 
     private func metricTile(title: String, value: String, unit: String, color: Color, icon: String) -> some View {

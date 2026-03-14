@@ -11,10 +11,19 @@ struct ProjectNexusApp: App {
             ContentView(
                 state: appState,
                 metricsService: metricsService,
-                onToggleShield: toggleShield
+                onToggleShield: toggleShield,
+                onConfigUpdate: applyConfigUpdate
             )
             .onAppear {
                 setupServices()
+            }
+            .alert("Shield Unavailable", isPresented: Binding(
+                get: { appState.errorMessage != nil },
+                set: { if !$0 { appState.errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { appState.errorMessage = nil }
+            } message: {
+                Text(appState.errorMessage ?? "")
             }
         }
     }
@@ -35,9 +44,18 @@ struct ProjectNexusApp: App {
                 try perturbationService?.start(with: appState.config)
             } catch {
                 appState.isShieldActive = false
+                appState.errorMessage = error.localizedDescription
             }
         } else {
             perturbationService?.stop()
+        }
+    }
+
+    /// Called whenever a config property changes while the shield may be active.
+    private func applyConfigUpdate() {
+        appState.saveConfig()
+        if appState.isShieldActive {
+            perturbationService?.updateConfig(appState.config)
         }
     }
 }
@@ -46,10 +64,11 @@ struct ContentView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
     let onToggleShield: () -> Void
+    let onConfigUpdate: () -> Void
 
     var body: some View {
         TabView(selection: $state.selectedTab) {
-            Tab("Shield", systemImage: "shield.checkered", value: .shield) {
+            Tab("Shield", systemImage: "shield.checkered", value: AppTab.shield) {
                 MainControlView(
                     state: state,
                     metricsService: metricsService,
@@ -57,35 +76,30 @@ struct ContentView: View {
                 )
             }
 
-            Tab("Settings", systemImage: "slider.horizontal.3", value: .settings) {
+            Tab("Settings", systemImage: "slider.horizontal.3", value: AppTab.settings) {
                 PerturbationSettingsView(state: state)
             }
 
-            Tab("Routing", systemImage: "antenna.radiowaves.left.and.right", value: .routing) {
+            Tab("Routing", systemImage: "antenna.radiowaves.left.and.right", value: AppTab.routing) {
                 AudioRoutingView(state: state)
             }
 
-            Tab("Diagnostics", systemImage: "chart.bar.xaxis", value: .diagnostics) {
+            Tab("Diagnostics", systemImage: "chart.bar.xaxis", value: AppTab.diagnostics) {
                 DiagnosticsView(
                     metricsService: metricsService,
                     isActive: state.isShieldActive
                 )
             }
         }
-        .tint(NexusTheme.accentCyan)
-        .preferredColorScheme(.dark)
-        .onChange(of: state.config.intensity) { _, _ in
-            updateConfig()
-        }
-        .onChange(of: state.config.tier1Enabled) { _, _ in
-            updateConfig()
-        }
-        .onChange(of: state.config.tier2Enabled) { _, _ in
-            updateConfig()
-        }
-    }
-
-    private func updateConfig() {
-        // Will be handled by perturbation service through app state observation
+        .tint(NexusTheme.accentBlue)
+        .preferredColorScheme(.light)
+        .onChange(of: state.config.intensity)           { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.tier1Enabled)        { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.tier2Enabled)        { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.enabledTechniques)   { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.maskingAggressiveness) { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.codecTarget)         { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.frequencyRangeLow)   { _, _ in onConfigUpdate() }
+        .onChange(of: state.config.frequencyRangeHigh)  { _, _ in onConfigUpdate() }
     }
 }

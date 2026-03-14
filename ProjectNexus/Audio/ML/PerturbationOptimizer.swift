@@ -72,8 +72,6 @@ final class PerturbationOptimizer {
                 if self.iteration % 10 == 0 {
                     self.logger.debug("Optimization iteration \(self.iteration), best score: \(self.bestScore)")
                 }
-
-                Thread.sleep(forTimeInterval: 0.05)
             }
 
             let optimizedPerturbation = self.paramsToWaveform(self.bestParams)

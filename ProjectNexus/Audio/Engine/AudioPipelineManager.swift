@@ -1,4 +1,5 @@
 import AVFoundation
+import Accelerate
 import os
 
 protocol PerturbationGenerator: AnyObject {
@@ -75,18 +76,14 @@ final class AudioPipelineManager {
                     guard let mixBase = mixPtr.baseAddress else { return }
                     memset(mixBase, 0, count * MemoryLayout<Float>.size)
                     generator.fillBuffer(mixBase, frameCount: count, sampleRate: sampleRate)
-
-                    // Add to output
-                    for i in 0..<count {
-                        buffer[i] += mixBase[i]
-                    }
+                    // Vectorized element-wise addition — avoids scalar loop overhead
+                    vDSP_vadd(buffer, 1, mixBase, 1, buffer, 1, vDSP_Length(count))
                 }
             }
 
-            // Soft clip to prevent distortion
-            for i in 0..<count {
-                buffer[i] = tanhf(buffer[i])
-            }
+            // Soft clip via vectorized tanh (vvtanhf processes the whole buffer in one call)
+            var n = Int32(count)
+            vvtanhf(buffer, buffer, &n)
 
             return noErr
         }

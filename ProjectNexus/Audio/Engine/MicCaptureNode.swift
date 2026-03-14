@@ -4,18 +4,36 @@ import os
 
 final class MicCaptureNode {
     private let logger = Logger(subsystem: "com.nexus.audio", category: "MicCapture")
-    private var inputTap: AVAudioNodeTapBlock?
 
     private let fftSize = 1024
+
+    // Created once and reused for every computeSpectrum() call.
+    // Creating/destroying an FFTSetup is expensive (~microseconds of allocation
+    // overhead) and was previously happening ~43 times per second.
+    private let fftSetup: FFTSetup
+
     private var analysisBuffer: [Float]
     private var spectrumOutput: [Float]
-    private let analysisQueue = DispatchQueue(label: "com.nexus.micanalysis", qos: .userInteractive)
+
+    // `.utility` is appropriate here: spectrum analysis is not on the critical path
+    // and should not compete with the real-time audio render thread.
+    private let analysisQueue = DispatchQueue(label: "com.nexus.micanalysis", qos: .utility)
 
     var onSpectrumUpdate: (([Float], Float, Float) -> Void)?
 
     init() {
         analysisBuffer = [Float](repeating: 0, count: fftSize)
         spectrumOutput = [Float](repeating: -60, count: fftSize / 2)
+
+        let log2n = vDSP_Length(log2(Float(fftSize)))
+        guard let setup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
+            fatalError("Failed to create FFT setup for MicCaptureNode")
+        }
+        fftSetup = setup
+    }
+
+    deinit {
+        vDSP_destroy_fftsetup(fftSetup)
     }
 
     func installTap(on node: AVAudioNode, bus: AVAudioNodeBus = 0, bufferSize: AVAudioFrameCount = 1024) {
@@ -25,7 +43,7 @@ final class MicCaptureNode {
             return
         }
 
-        node.installTap(onBus: bus, bufferSize: bufferSize, format: format) { [weak self] buffer, time in
+        node.installTap(onBus: bus, bufferSize: bufferSize, format: format) { [weak self] buffer, _ in
             self?.processBuffer(buffer)
         }
         logger.info("Mic tap installed: \(format.sampleRate)Hz, \(bufferSize) frames")
@@ -61,11 +79,6 @@ final class MicCaptureNode {
         let halfN = n / 2
         let log2n = vDSP_Length(log2(Float(n)))
 
-        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
-            return [Float](repeating: -60, count: halfN)
-        }
-        defer { vDSP_destroy_fftsetup(fftSetup) }
-
         var windowed = analysisBuffer.hannWindowed()
         var realPart = [Float](repeating: 0, count: halfN)
         var imagPart = [Float](repeating: 0, count: halfN)
@@ -80,6 +93,7 @@ final class MicCaptureNode {
                     windowedPtr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { complexPtr in
                         vDSP_ctoz(complexPtr, 2, &splitComplex, 1, vDSP_Length(halfN))
                     }
+                    // Use cached fftSetup — no allocation on this hot path
                     vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
 
                     var magnitudes = [Float](repeating: 0, count: halfN)
