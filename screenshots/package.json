@@ -5,19 +5,24 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "export": "bun scripts/export.mts"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "html-to-image": "^1.11.13",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "satori": "^0.25.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

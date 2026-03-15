@@ -58,3 +58,4 @@ app-store-screenshots/
 # Screenshots Next.js build artifacts
 screenshots/.next/
 screenshots/node_modules/
+# Generated screenshot PNGs are committed deliberately (screenshots-output/ is tracked)
