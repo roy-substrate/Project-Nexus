@@ -89,7 +89,7 @@ struct AccountView: View {
         } header: {
             Text("Nexus Shield Pro")
         } footer: {
-            Text("$3.99/month or $19.99/year · 3-day free trial · Cancel anytime")
+            Text("$3.99/month or $19.99/year · 7-day free trial · Cancel anytime")
         }
     }
 

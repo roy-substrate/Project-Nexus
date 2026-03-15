@@ -4,7 +4,7 @@ import StoreKit
 // MARK: - PaywallView
 //
 // CEO pricing decision:
-//   Monthly:  $3.99/month  (3-day free trial)
+//   Monthly:  $3.99/month  (7-day free trial)
 //   Annual:   $19.99/year  (~$1.67/month — save 58%)
 //
 // Free tier:  Tier 1 acoustic shield
@@ -229,7 +229,7 @@ struct PaywallView: View {
                                 .background(Capsule().fill(Color.green))
                         }
                     }
-                    Text(isAnnual ? "3-day free trial, then \(product.displayPrice)/year" : "\(product.displayPrice)/month · Try 3 days free")
+                    Text(isAnnual ? "7-day free trial, then \(product.displayPrice)/year" : "\(product.displayPrice)/month · Try 7 days free")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.5))
                 }

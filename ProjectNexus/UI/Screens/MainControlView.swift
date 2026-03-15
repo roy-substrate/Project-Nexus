@@ -4,7 +4,12 @@ struct MainControlView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
     let asrService: ASREffectivenessService
+    let analyticsService: AnalyticsService
     let onToggleShield: () -> Void
+
+    /// Captures peak jam score when shield deactivates for the post-session flash.
+    @State private var sessionResultScore: Float = 0
+    @State private var showSessionResult: Bool = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -23,7 +28,53 @@ struct MainControlView: View {
         }
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .bottom) { statusStrip }
+        .overlay(alignment: .top) { sessionResultBanner }
+        .onChange(of: state.isShieldActive) { _, isActive in
+            if !isActive {
+                let score = asrService.effectivenessScore
+                if score > 0.5 {
+                    sessionResultScore = score
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                        showSessionResult = true
+                    }
+                    // Auto-dismiss after 3 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation(.easeOut(duration: 0.3)) { showSessionResult = false }
+                    }
+                }
+            }
+        }
     }
+
+    // MARK: - Session result banner (post-shield flash)
+
+    @ViewBuilder
+    private var sessionResultBanner: some View {
+        if showSessionResult {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.green)
+                Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.primary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background {
+                Capsule()
+                    .fill(.regularMaterial)
+                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 3)
+            }
+            .padding(.top, 12)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    // MARK: - Protection history stat
+
+    /// Number of sessions protected, shown beneath the jam badge when > 0.
+    private var sessionCount: Int { analyticsService.sessionHistory.count }
 
     // MARK: - ASR Effectiveness
 
@@ -142,6 +193,19 @@ struct MainControlView: View {
                     Text("Voice protection off")
                         .font(.system(size: 13))
                         .foregroundStyle(Color(.tertiaryLabel))
+                }
+
+                // Protection history — shown when user has prior sessions
+                if sessionCount > 0 && !state.isShieldActive {
+                    HStack(spacing: 4) {
+                        Image(systemName: "shield.checkered")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                        Text("Protected \(sessionCount) session\(sessionCount == 1 ? "" : "s")")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.opacity)
                 }
 
                 // ASR jam score badge — only shown when measuring and score is meaningful

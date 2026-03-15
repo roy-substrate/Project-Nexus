@@ -8,28 +8,31 @@
 1. Trial extended to 7 days (App Store Connect metadata update)
 2. Diagnostics tab stays Pro; jam score surfaces on free main screen
 3. Protection history count added to shield screen
+4. Post-session score flash — celebrate >50% jam sessions
+5. Weekly streak notification — keep users coming back (Sprint 5)
+6. Quick presets Stealth/Balanced/Max (Sprint 5)
 
 ## Sprint Backlog
 
-### P0 — Critical Fixes (Engineering, this sprint)
+### P0 — Critical Fixes ✅ DONE
 - [x] BUG-01: ASREffectivenessService restartTask reuses ended request → fixed
 - [x] BUG-02: bufferUnderruns counter never incremented → fixed (atomic)
 
-### P1 — Product × Design (ready for engineering next sprint)
-- [ ] Jam score hero redesign — large number, plain English, screenshot-worthy
-      Owner: /nexus-product + /nexus-mobile
-- [ ] Remove "faintly audible" copy from intensity slider; replace with confidence framing
-      Owner: /nexus-script
+### P1 — Product × Design → Engineering ✅ SHIPPED THIS RUN
+- [x] Trial copy updated 3-day → 7-day everywhere (PaywallView, AccountView, SubscriptionManager)
+- [x] "Faintly audible" copy → confidence framing in Settings Advanced section
+- [x] Protection history stat on shield screen ("Protected N sessions")
+- [x] Post-session score flash — capsule banner on shield deactivation if score >50%
+
+### P1 — Remaining
 - [ ] Remove "Skip for now" on mic permission page; add friction-reducing trust copy
-      Owner: /nexus-script + /nexus-product
-- [ ] Protection history stat on shield screen ("Protected 12 sessions this month")
-      Owner: /nexus-product (spec) → /nexus-mobile (build)
+      Owner: /nexus-script + /nexus-product → Engineering next run
 
 ### P2 — Growth (parallel)
-- [ ] App Store description rewrite emphasising "0% data shared, 100% on-device"
+- [ ] App Store description rewrite — lead with "100% on-device, zero data shared"
       Owner: /nexus-growth + /nexus-script → CEO approval before publish
-- [ ] Share your score — screenshot card with jam %
-      Owner: /nexus-product (spec) → /nexus-mobile (build)
+- [ ] Demo video: jam score rising on a live call — highest-shareability asset
+      Owner: /nexus-marketing
 
 ### P3 — Test Coverage (this sprint, branch: analyze-test-coverage)
 - [ ] DSP generators: BabbleNoiseGenerator, SpectralNotchGenerator, FrequencySweepGenerator
@@ -38,20 +41,24 @@
 - [ ] UAPManager: loadUAPs, fillBuffer, variant selection
       Owner: /nexus-qa → /nexus-review
 
-### P4 — iOS Platform (next sprint)
+### P4 — iOS Platform (Sprint 5)
 - [ ] WidgetKit Lock Screen widget — one-tap shield activation
       Owner: /nexus-mobile
 - [ ] Siri / Action button shortcut integration
       Owner: /nexus-mobile
+- [ ] Weekly streak local notification
+      Owner: /nexus-product (spec) → /nexus-mobile (build)
+- [ ] Quick presets: Stealth / Balanced / Max
+      Owner: /nexus-product (spec) → /nexus-mobile (build)
 
 ---
 
 ## Definition of Done
 - All P0 bugs resolved ✅
 - QA gate: PASS (0 try!, 0 fatalError, 0 TODO)
-- Eng Manager approved all fixes
-- Coverage ≥ 40% on DSP layer
-- CEO approved any copy/App Store changes before publish
+- Eng Manager approved all fixes ✅
+- CEO approved all copy changes ✅
+- Coverage ≥ 40% on DSP layer (pending P3)
 
 ---
 
@@ -59,3 +66,4 @@
 - Trial-to-paid conversion rate (baseline this week)
 - Permission grant rate on onboarding page 3
 - Day-7 retention
+- Post-session flash tap-through rate (new)

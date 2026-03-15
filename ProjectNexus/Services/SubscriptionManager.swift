@@ -3,7 +3,7 @@ import StoreKit
 import os
 
 // MARK: - Product IDs
-// CEO decision: $3.99/month, $19.99/year, 3-day free trial
+// CEO decision: $3.99/month, $19.99/year, 7-day free trial
 
 enum NexusProduct: String, CaseIterable {
     case monthly = "com.nexus.shield.monthly"

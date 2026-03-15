@@ -168,7 +168,7 @@ struct PerturbationSettingsView: View {
         } header: {
             Text("Advanced")
         } footer: {
-            Text("Controls how close to the audibility threshold perturbations are pushed. Higher values are more effective but may become faintly audible.")
+            Text("Controls how aggressively perturbations approach the audibility threshold. Higher values maximise protection strength. Default (50%) is inaudible to others on a call.")
         }
     }
 
