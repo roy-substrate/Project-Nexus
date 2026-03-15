@@ -72,6 +72,10 @@ final class ASREffectivenessService: NSObject {
     private var wordCountInWindow: Int = 0
     private var isShieldCurrentlyActive: Bool = false
 
+    /// Tracks consecutive restart attempts to prevent infinite recursion.
+    private var restartAttempts: Int = 0
+    private let maxRestartAttempts = 5
+
     // MARK: - Init
 
     override init() {
@@ -114,6 +118,7 @@ final class ASREffectivenessService: NSObject {
 
         windowStart = Date()
         wordCountInWindow = 0
+        restartAttempts = 0
         isMeasuring = true
 
         recognitionTask = recognizer.recognitionTask(with: req) { [weak self] result, error in
@@ -174,20 +179,21 @@ final class ASREffectivenessService: NSObject {
         // Error rate: how much worse is recognition with shield vs baseline?
         let baseline = max(0.01, baselineWPS)
         let rawError = shieldActive ? max(0, 1 - (wps / baseline)) : 0
-        let newScore  = effectivenessScore * (1 - emaAlpha) + rawError * emaAlpha
-
-        let transcript = request.map { _ in "" } ?? ""    // transcript via task result above
 
         let measurement = ASRMeasurement(
-            transcript: transcript,
+            transcript: "",
             errorRate: rawError,
             perturbationActive: shieldActive,
             timestamp: Date()
         )
 
+        // Capture emaAlpha as a local to avoid capturing self off the main actor
+        let alpha = emaAlpha
         Task { @MainActor [weak self] in
-            self?.latestMeasurement = measurement
-            self?.effectivenessScore = newScore
+            guard let self else { return }
+            let newScore = self.effectivenessScore * (1 - alpha) + rawError * alpha
+            self.latestMeasurement = measurement
+            self.effectivenessScore = newScore
         }
 
         // Reset window
@@ -201,11 +207,19 @@ final class ASREffectivenessService: NSObject {
         recognitionTask?.cancel()
         recognitionTask = nil
 
+        guard restartAttempts < maxRestartAttempts else {
+            logger.error("ASR restart limit reached (\(self.maxRestartAttempts) attempts) — stopping measurement")
+            isMeasuring = false
+            return
+        }
+        restartAttempts += 1
+
         guard let recognizer, let req = request, isMeasuring else { return }
 
         recognitionTask = recognizer.recognitionTask(with: req) { [weak self] result, error in
             guard let self else { return }
             if let result, result.isFinal {
+                self.restartAttempts = 0
                 self.commitWindow(shieldActive: shieldActiveProvider())
             }
             if error != nil {

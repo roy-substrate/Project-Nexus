@@ -83,7 +83,8 @@ final class AnalyticsService {
     private var peakJamScoreThisSession: Float = 0
 
     private let storageURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         return dir.appendingPathComponent("nexus_analytics.json")
     }()
 
