@@ -139,7 +139,7 @@ struct AccountView: View {
                 Label("Build", systemImage: "hammer")
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
-                Text("iOS 18 · Swift 6")
+                Text("iOS 26 · Swift 6")
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(NexusTheme.textTertiary)
             }
@@ -181,9 +181,10 @@ struct AccountView: View {
     }
 
     private func jammingColor(_ score: Float) -> Color {
-        if score < 0.33 { return .green }
+        // High jam score = great protection = green. Low = poor = red.
+        if score < 0.33 { return .red }
         if score < 0.66 { return .orange }
-        return .red
+        return .green
     }
 
     private func resetApp() {
@@ -267,9 +268,10 @@ private struct SessionHistoryView: View {
     }
 
     private func jammingColor(_ score: Float) -> Color {
-        if score < 0.33 { return .green }
+        // High jam score = great protection = green. Low = poor = red.
+        if score < 0.33 { return .red }
         if score < 0.66 { return .orange }
-        return .red
+        return .green
     }
 
     private func jammingLabel(_ score: Float) -> String {

@@ -33,9 +33,23 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
-        for i in 0..<frameCount {
-            buffer[i] = noiseTable[readPosition] * intensity * 0.15
-            readPosition = (readPosition + 1) % noiseTableSize
+        // Copy from circular noise table without a scalar loop.
+        // Handles wrap-around with at most two vDSP_vsmul calls.
+        let scale = intensity * 0.15
+        var remaining = frameCount
+        var outOffset = 0
+        while remaining > 0 {
+            let chunk = min(remaining, noiseTableSize - readPosition)
+            noiseTable.withUnsafeBufferPointer { tablePtr in
+                var s = scale
+                vDSP_vsmul(tablePtr.baseAddress! + readPosition, 1,
+                            &s,
+                            buffer + outOffset, 1,
+                            vDSP_Length(chunk))
+            }
+            readPosition = (readPosition + chunk) % noiseTableSize
+            outOffset += chunk
+            remaining -= chunk
         }
     }
 

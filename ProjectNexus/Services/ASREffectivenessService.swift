@@ -51,6 +51,10 @@ final class ASREffectivenessService: NSObject {
     /// True while a recognition task is running.
     private(set) var isMeasuring: Bool = false
 
+    /// Called on the main actor whenever `effectivenessScore` is updated.
+    /// Wire this to `analyticsService.track(.asrScoreRecorded(score:))` in the app.
+    var onEffectivenessUpdate: (@MainActor (Float) -> Void)?
+
     // MARK: - Private
 
     private let logger = Logger(subsystem: "com.nexus.asr", category: "Effectiveness")
@@ -194,13 +198,14 @@ final class ASREffectivenessService: NSObject {
             let newScore = self.effectivenessScore * (1 - alpha) + rawError * alpha
             self.latestMeasurement = measurement
             self.effectivenessScore = newScore
+            self.onEffectivenessUpdate?(newScore)
         }
 
         // Reset window
         windowStart = Date()
         wordCountInWindow = 0
 
-        logger.debug("Window committed — WPS: \(wps, format: .fixed(precision: 2)), error: \(rawError, format: .fixed(precision: 2)), score: \(newScore, format: .fixed(precision: 2))")
+        logger.debug("Window committed — WPS: \(wps, format: .fixed(precision: 2)), error: \(rawError, format: .fixed(precision: 2))")
     }
 
     private func restartTask(shieldActiveProvider: @escaping @Sendable () -> Bool) {

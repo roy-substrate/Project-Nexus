@@ -72,6 +72,11 @@ struct ProjectNexusApp: App {
             }
         }
 
+        // Track ASR score updates to analytics (drives peakJamScore in Account tab)
+        asrService.onEffectivenessUpdate = { [weak analyticsService = analyticsService] score in
+            analyticsService?.track(.asrScoreRecorded(score: score))
+        }
+
         // Re-apply config whenever the audio route changes (e.g. headphones plug in/out).
         // Without this the perturbation output may route to the wrong port mid-session.
         NotificationCenter.default.addObserver(
