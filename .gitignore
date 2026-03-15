@@ -51,3 +51,10 @@ venv/
 .idea/
 .vscode/
 *.sublime-*
+
+# App Store Screenshots tool (cloned skill repo — not project source)
+app-store-screenshots/
+
+# Screenshots Next.js build artifacts
+screenshots/.next/
+screenshots/node_modules/
