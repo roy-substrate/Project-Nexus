@@ -3,6 +3,7 @@ import SwiftUI
 struct MainControlView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
+    let asrService: ASREffectivenessService
     let onToggleShield: () -> Void
 
     var body: some View {
@@ -22,6 +23,17 @@ struct MainControlView: View {
         }
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .bottom) { statusStrip }
+    }
+
+    // MARK: - ASR Effectiveness
+
+    /// Color encoding for the ASR jam score — from the user's perspective:
+    /// higher jam % = stronger protection = more saturated blue/green.
+    private var asrEffectivenessColor: Color {
+        let s = asrService.effectivenessScore
+        if s < 0.33 { return Color(.tertiaryLabel) }
+        if s < 0.66 { return .blue }
+        return Color(hue: 0.36, saturation: 0.78, brightness: 0.82) // vibrant green
     }
 
     // MARK: - Shield Hero
@@ -51,6 +63,23 @@ struct MainControlView: View {
                             .frame(width: 168, height: 168)
                             .scaleEffect(audioScale)
                             .animation(.interpolatingSpring(stiffness: 100, damping: 12), value: audioScale)
+
+                        // ASR effectiveness arc — fills clockwise as jam % rises.
+                        // Track ring (background)
+                        Circle()
+                            .stroke(Color(.systemFill), lineWidth: 4)
+                            .frame(width: 148, height: 148)
+
+                        // Live fill arc
+                        Circle()
+                            .trim(from: 0, to: CGFloat(asrService.effectivenessScore))
+                            .stroke(
+                                asrEffectivenessColor,
+                                style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                            )
+                            .frame(width: 148, height: 148)
+                            .rotationEffect(.degrees(-90))
+                            .animation(.spring(response: 0.6), value: asrService.effectivenessScore)
                     }
 
                     // Core
@@ -113,6 +142,23 @@ struct MainControlView: View {
                     Text("Voice protection off")
                         .font(.system(size: 13))
                         .foregroundStyle(Color(.tertiaryLabel))
+                }
+
+                // ASR jam score badge — only shown when measuring and score is meaningful
+                if state.isShieldActive && asrService.isMeasuring && asrService.effectivenessScore > 0.05 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "brain")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(asrEffectivenessColor)
+                        Text("\(Int(asrService.effectivenessScore * 100))% AI jammed")
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .foregroundStyle(asrEffectivenessColor)
+                            .contentTransition(.numericText())
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(asrEffectivenessColor.opacity(0.1)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: state.isShieldActive)

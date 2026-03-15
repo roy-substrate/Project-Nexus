@@ -71,6 +71,17 @@ struct ProjectNexusApp: App {
                 })
             }
         }
+
+        // Re-apply config whenever the audio route changes (e.g. headphones plug in/out).
+        // Without this the perturbation output may route to the wrong port mid-session.
+        NotificationCenter.default.addObserver(
+            forName: .audioRouteChanged,
+            object: nil,
+            queue: .main
+        ) { [weak perturbationService, weak appState = appState] _ in
+            guard appState?.isShieldActive == true else { return }
+            perturbationService?.updateConfig(appState?.config ?? PerturbationConfig())
+        }
     }
 
     // MARK: - Shield toggle
@@ -128,6 +139,7 @@ struct ContentView: View {
                 MainControlView(
                     state: state,
                     metricsService: metricsService,
+                    asrService: asrService,
                     onToggleShield: onToggleShield
                 )
             }
