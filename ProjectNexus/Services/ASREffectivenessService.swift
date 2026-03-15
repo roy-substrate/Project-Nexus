@@ -211,6 +211,10 @@ final class ASREffectivenessService: NSObject {
     private func restartTask(shieldActiveProvider: @escaping @Sendable () -> Bool) {
         recognitionTask?.cancel()
         recognitionTask = nil
+        // End and discard the old request — SFSpeechAudioBufferRecognitionRequest
+        // cannot be reused after a session ends (error 1110 or otherwise).
+        request?.endAudio()
+        request = nil
 
         guard restartAttempts < maxRestartAttempts else {
             logger.error("ASR restart limit reached (\(self.maxRestartAttempts) attempts) — stopping measurement")
@@ -219,9 +223,15 @@ final class ASREffectivenessService: NSObject {
         }
         restartAttempts += 1
 
-        guard let recognizer, let req = request, isMeasuring else { return }
+        guard let recognizer, isMeasuring else { return }
 
-        recognitionTask = recognizer.recognitionTask(with: req) { [weak self] result, error in
+        // Create a fresh request for the new recognition session.
+        let newReq = SFSpeechAudioBufferRecognitionRequest()
+        newReq.shouldReportPartialResults = true
+        newReq.requiresOnDeviceRecognition = true
+        request = newReq
+
+        recognitionTask = recognizer.recognitionTask(with: newReq) { [weak self] result, error in
             guard let self else { return }
             if let result, result.isFinal {
                 self.restartAttempts = 0

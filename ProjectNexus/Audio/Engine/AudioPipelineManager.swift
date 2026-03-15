@@ -1,6 +1,7 @@
 import AVFoundation
 import Accelerate
 import os
+import Synchronization
 
 protocol PerturbationGenerator: AnyObject {
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double)
@@ -22,6 +23,11 @@ final class AudioPipelineManager {
 
     private(set) var isRunning = false
     private let format: AVAudioFormat
+    /// Counts render-callback invocations where the output buffer pointer was nil
+    /// (indicative of a buffer underrun or audio graph misconfiguration).
+    /// Atomic so it can be safely incremented on the CoreAudio render thread and
+    /// read on the main thread without a data race.
+    private let underrunCount: Atomic<Int> = Atomic(0)
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
     var onSpectrumUpdate: (([Float]) -> Void)?
@@ -66,6 +72,7 @@ final class AudioPipelineManager {
             guard let self else { return noErr }
             let ablPointer = UnsafeMutableAudioBufferListPointer(buffers)
             guard let buffer = ablPointer.first?.mData?.assumingMemoryBound(to: Float.self) else {
+                self.underrunCount.add(1, ordering: .relaxed)
                 return noErr
             }
 
@@ -130,6 +137,7 @@ final class AudioPipelineManager {
 
         sessionConfigurator.deactivate()
         isRunning = false
+        underrunCount.store(0, ordering: .relaxed)
         logger.info("Audio pipeline stopped")
     }
 
@@ -146,6 +154,7 @@ final class AudioPipelineManager {
             metrics.peakLevel = peak
             metrics.isEngineRunning = self.isRunning
             metrics.latencyMs = self.sessionConfigurator.ioBufferDuration * 1000 * 2
+            metrics.bufferUnderruns = self.underrunCount.load(ordering: .relaxed)
 
             DispatchQueue.main.async {
                 self.onMetricsUpdate?(metrics)
