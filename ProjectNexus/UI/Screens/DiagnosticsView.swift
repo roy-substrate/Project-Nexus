@@ -199,7 +199,8 @@ struct DiagnosticsView: View {
     }
 
     private func jamColor(_ s: Float) -> Color {
-        s < 0.33 ? .green : s < 0.66 ? .orange : .red
+        // High jam score = excellent protection = green. Low = poor = red.
+        s < 0.33 ? .red : s < 0.66 ? .orange : .green
     }
     private func jamLabel(_ s: Float) -> String {
         s < 0.33 ? "Low" : s < 0.66 ? "Moderate" : "High"

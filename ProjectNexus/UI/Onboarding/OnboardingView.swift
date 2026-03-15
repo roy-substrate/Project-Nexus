@@ -179,7 +179,7 @@ private struct HowItWorksPage: View {
                         .font(.system(size: 36, weight: .bold))
                         .foregroundStyle(.primary)
 
-                    Text("Three layers, one tap.")
+                    Text("Two layers of protection. One tap. Zero data shared.")
                         .font(.system(size: 17))
                         .foregroundStyle(.secondary)
                 }

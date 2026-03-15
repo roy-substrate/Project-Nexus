@@ -2,10 +2,12 @@ import SwiftUI
 
 struct AccountView: View {
     let analyticsService: AnalyticsService
+    let subscriptionManager: SubscriptionManager
     @AppStorage("nexus.onboarding.completed") private var onboardingCompleted = true
 
     @State private var showDeleteConfirmation = false
     @State private var showDeleteDataConfirmation = false
+    @State private var showPaywall = false
 
     private let appVersion: String = {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -16,6 +18,7 @@ struct AccountView: View {
     var body: some View {
         NavigationStack {
             List {
+                if !subscriptionManager.isPro { upgradeSection }
                 statsSection
                 dataSection
                 dangerSection
@@ -24,6 +27,9 @@ struct AccountView: View {
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.large)
             .listStyle(.insetGrouped)
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(subscriptionManager: subscriptionManager)
         }
         .confirmationDialog(
             "Delete Analytics Data",
@@ -48,6 +54,42 @@ struct AccountView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This clears all your settings, analytics data, and resets the app to its first-launch state.")
+        }
+    }
+
+    // MARK: - Upgrade Banner
+
+    private var upgradeSection: some View {
+        Section {
+            Button { showPaywall = true } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(NexusTheme.tier2.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "brain")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(NexusTheme.tier2)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Unlock Adversarial AI")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Text("Tier 2 · UAP · Session History · Diagnostics")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            Text("Nexus Shield Pro")
+        } footer: {
+            Text("$3.99/month or $19.99/year · 3-day free trial · Cancel anytime")
         }
     }
 
@@ -199,6 +241,8 @@ struct AccountView: View {
 private struct SessionHistoryView: View {
     let analyticsService: AnalyticsService
 
+    @State private var shareItem: ShareItem? = nil
+
     private var sortedHistory: [SessionSummary] {
         analyticsService.sessionHistory.sorted { $0.date > $1.date }
     }
@@ -214,12 +258,25 @@ private struct SessionHistoryView: View {
             } else {
                 ForEach(sortedHistory) { session in
                     sessionRow(session)
+                        .swipeActions(edge: .leading) {
+                            if session.peakASRJamScore > 0.3 {
+                                Button {
+                                    shareItem = ShareItem(text: shareText(for: session))
+                                } label: {
+                                    Label("Share", systemImage: "square.and.arrow.up")
+                                }
+                                .tint(.blue)
+                            }
+                        }
                 }
             }
         }
         .navigationTitle("Session History")
         .navigationBarTitleDisplayMode(.large)
         .listStyle(.insetGrouped)
+        .sheet(item: $shareItem) { item in
+            ShareSheet(text: item.text)
+        }
     }
 
     private func sessionRow(_ session: SessionSummary) -> some View {
@@ -259,6 +316,12 @@ private struct SessionHistoryView: View {
         .padding(.vertical, 4)
     }
 
+    private func shareText(for session: SessionSummary) -> String {
+        let jam = Int(session.peakASRJamScore * 100)
+        let duration = formattedDuration(session.totalShieldSeconds)
+        return "I blocked \(jam)% of AI transcription for \(duration) with Nexus Shield 🛡️\n\nYour voice. Your rules. — nexusshield.app"
+    }
+
     private func formattedDuration(_ seconds: Double) -> String {
         let hours = Int(seconds) / 3600
         let minutes = (Int(seconds) % 3600) / 60
@@ -277,5 +340,21 @@ private struct SessionHistoryView: View {
     private func jammingLabel(_ score: Float) -> String {
         if score < 0.33 { return "Low" }
         if score < 0.66 { return "Moderate" }
-        return "High jam" }
+        return "High jam"
+    }
+}
+
+// MARK: - Share helpers
+
+private struct ShareItem: Identifiable {
+    let id = UUID()
+    let text: String
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let text: String
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [text], applicationActivities: nil)
+    }
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }

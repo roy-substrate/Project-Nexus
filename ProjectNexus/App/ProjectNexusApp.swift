@@ -1,16 +1,20 @@
 import SwiftUI
 import AVFoundation
+import StoreKit
 
 @main
 struct ProjectNexusApp: App {
     @AppStorage("nexus.onboarding.completed") private var onboardingCompleted = false
+    @AppStorage("nexus.reviewRequested") private var reviewRequested = false
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.requestReview) private var requestReview
 
     @State private var appState = AppState()
     @State private var metricsService = MetricsService()
     @State private var perturbationService: PerturbationService?
     @State private var asrService = ASREffectivenessService()
     @State private var analyticsService = AnalyticsService()
+    @State private var subscriptionManager = SubscriptionManager()
 
     var body: some Scene {
         WindowGroup {
@@ -20,6 +24,7 @@ struct ProjectNexusApp: App {
                     metricsService: metricsService,
                     asrService: asrService,
                     analyticsService: analyticsService,
+                    subscriptionManager: subscriptionManager,
                     onToggleShield: toggleShield,
                     onConfigUpdate: applyConfigUpdate
                 )
@@ -72,9 +77,15 @@ struct ProjectNexusApp: App {
             }
         }
 
-        // Track ASR score updates to analytics (drives peakJamScore in Account tab)
-        asrService.onEffectivenessUpdate = { [weak analyticsService = analyticsService] score in
-            analyticsService?.track(.asrScoreRecorded(score: score))
+        // Track ASR score updates to analytics (drives peakJamScore in Account tab).
+        // Also trigger a one-time App Store review request when the user first sees
+        // a high jam score (>70%) — maximum social proof moment.
+        asrService.onEffectivenessUpdate = { [weak self] score in
+            self?.analyticsService.track(.asrScoreRecorded(score: score))
+            if score > 0.70 && !(self?.reviewRequested ?? true) {
+                self?.reviewRequested = true
+                self?.requestReview()
+            }
         }
 
         // Re-apply config whenever the audio route changes (e.g. headphones plug in/out).
@@ -135,6 +146,7 @@ struct ContentView: View {
     let metricsService: MetricsService
     let asrService: ASREffectivenessService
     let analyticsService: AnalyticsService
+    let subscriptionManager: SubscriptionManager
     let onToggleShield: () -> Void
     let onConfigUpdate: () -> Void
 
@@ -162,7 +174,7 @@ struct ContentView: View {
                 )
             }
             Tab("Account", systemImage: "person.circle", value: AppTab.account) {
-                AccountView(analyticsService: analyticsService)
+                AccountView(analyticsService: analyticsService, subscriptionManager: subscriptionManager)
             }
         }
         .tint(.blue)
