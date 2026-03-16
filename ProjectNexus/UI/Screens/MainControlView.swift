@@ -19,21 +19,17 @@ struct MainControlView: View {
     @AppStorage("nexus.asrPermissionNudgeShown") private var nudgeShown = false
     @State private var showASRNudge: Bool = false
 
-    // MARK: - MeshGradient animation state
-    /// Animating point offsets for the 3×3 mesh — drifts subtly when inactive,
-    /// shifts color when active.
-    @State private var meshPhase: Bool = false
-
-    // MARK: - GlassEffectContainer namespace for tier row
-    @Namespace private var tierNamespace
+    // MARK: - Blinking cursor state
+    @State private var cursorVisible: Bool = true
+    private let cursorTimer = Timer.publish(every: 0.6, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
-            // ── Animated MeshGradient background ─────────────────────
-            meshGradientBackground
+            // ── Pure black background ─────────────────────────────────
+            PixelColor.background
                 .ignoresSafeArea()
 
-            // ── Main content ─────────────────────────────────────────
+            // ── Main content ──────────────────────────────────────────
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     shieldHero
@@ -52,26 +48,16 @@ struct MainControlView: View {
             .overlay(alignment: .top) { sessionResultBanner }
             .overlay(alignment: .bottom) { asrPermissionNudge }
         }
+        .scanlines()
         .onChange(of: state.isShieldActive) { _, isActive in
-            // Re-start mesh animation with new timing whenever active state changes.
-            // Wrap in withAnimation so color/point changes are interpolated smoothly.
-            withAnimation(
-                isActive
-                    ? .easeInOut(duration: 2).repeatForever(autoreverses: true)
-                    : .easeInOut(duration: 4).repeatForever(autoreverses: true)
-            ) {
-                meshPhase.toggle()
-            }
-
             if isActive {
                 sessionStartTime = .now
-                // Show ASR nudge once if mic permission was skipped during onboarding
                 if !asrService.isAuthorized && !nudgeShown {
-                    withAnimation(NexusAnimation.appear) {
+                    withAnimation(PixelAnimation.appear) {
                         showASRNudge = true
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-                        withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
+                        withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                     }
                 }
             } else {
@@ -79,138 +65,81 @@ struct MainControlView: View {
                 let score = asrService.effectivenessScore
                 if score > 0.5 {
                     sessionResultScore = score
-                    withAnimation(NexusAnimation.appear) {
+                    withAnimation(PixelAnimation.appear) {
                         showSessionResult = true
                     }
-                    // Auto-dismiss after 3 seconds
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation(NexusAnimation.dismiss) { showSessionResult = false }
+                        withAnimation(PixelAnimation.dismiss) { showSessionResult = false }
                     }
                 }
             }
         }
-        .onAppear {
-            // Start initial slow drift on appearance
-            withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
-                meshPhase = true
-            }
+        .onReceive(cursorTimer) { _ in
+            cursorVisible.toggle()
         }
     }
 
-    // MARK: - Animated MeshGradient background (iOS 18+)
-
-    @available(iOS 18, *)
-    private var meshGradientBackground: some View {
-        // Points drift slightly between two phases.
-        // meshPhase=false: canonical grid; meshPhase=true: subtle node displacement.
-        let points: [SIMD2<Float>] = meshPhase
-            ? [
-                [0,    0   ], [0.5,  0   ], [1,    0   ],
-                [0.02, 0.48], [0.52, 0.52], [0.98, 0.48],
-                [0,    1   ], [0.5,  1   ], [1,    1   ]
-              ]
-            : [
-                [0,   0  ], [0.5, 0  ], [1,   0  ],
-                [0,   0.5], [0.5, 0.5], [1,   0.5],
-                [0,   1  ], [0.5, 1  ], [1,   1  ]
-              ]
-
-        // Inactive: barely-perceptible drift, very dark navy/indigo variations.
-        let inactiveColors: [Color] = [
-            Color(hex: "#0A0A0F"),
-            Color(hex: "#0D0D1A"),
-            Color(hex: "#0A0A0F"),
-            Color(hex: "#0A0F1E"),
-            Color(hex: "#111118"),
-            Color(hex: "#0F0A1E"),
-            Color(hex: "#070710"),
-            Color(hex: "#0D0D1A"),
-            Color(hex: "#0A0A0F"),
-        ]
-
-        // Active: near-black tones with tiny emerald/indigo casts baked in as hex.
-        // #0A0F12 = near-black + trace emerald-green channel
-        // #0E1116 = near-black + faint emerald-indigo blend
-        // #07100F = near-black + trace emerald at bottom-left
-        let activeColors: [Color] = [
-            Color(hex: "#0A0A0F"),
-            Color(hex: "#0D0D1A"),
-            Color(hex: "#0A0F12"),
-            Color(hex: "#0A0F1E"),
-            Color(hex: "#0E1116"),
-            Color(hex: "#0F0A1E"),
-            Color(hex: "#07100F"),
-            Color(hex: "#0D0F1A"),
-            Color(hex: "#0A0A0F"),
-        ]
-
-        return MeshGradient(
-            width: 3, height: 3,
-            points: points,
-            colors: state.isShieldActive ? activeColors : inactiveColors
-        )
-    }
-
-    // MARK: - Session result banner (post-shield flash)
+    // MARK: - Session result banner
 
     @ViewBuilder
     private var sessionResultBanner: some View {
         if showSessionResult {
-            GlassEffectContainer(spacing: 0) {
-                HStack(spacing: 10) {
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(NexusColor.accentEmerald)
-                    Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
-                        .font(NexusFont.label())
-                        .foregroundStyle(NexusColor.textPrimary)
-                }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 11)
-                // Emerald-tinted glass capsule — floats above mesh gradient
-                .glassEffect(.regular.tint(NexusColor.accentEmerald), in: .capsule)
+            HStack(spacing: 10) {
+                Text("[OK]")
+                    .font(PixelFont.terminal(12, weight: .bold))
+                    .foregroundStyle(PixelColor.phosphor)
+                    .phosphorGlow()
+                Text("SESSION COMPLETE · \(Int(sessionResultScore * 100))% AI BLOCKED")
+                    .font(PixelFont.terminal(12))
+                    .foregroundStyle(PixelColor.text)
             }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .background(PixelColor.background)
+            .pixelBorder(PixelColor.phosphor)
             .padding(.top, 14)
+            .padding(.horizontal, 18)
             .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 
-    // MARK: - ASR permission nudge banner (one-time, non-blocking)
+    // MARK: - ASR permission nudge
 
     @ViewBuilder
     private var asrPermissionNudge: some View {
         if showASRNudge {
             HStack(spacing: 12) {
-                Image(systemName: "mic.slash.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(NexusColor.warning)
+                Text("[MIC]")
+                    .font(PixelFont.terminal(11, weight: .bold))
+                    .foregroundStyle(PixelColor.warning)
 
-                Text("Enable speech measurement to see your jam score")
-                    .font(NexusFont.label())
-                    .foregroundStyle(NexusColor.textPrimary)
+                Text("ENABLE SPEECH MEASUREMENT FOR JAM SCORE")
+                    .font(PixelFont.terminal(11))
+                    .foregroundStyle(PixelColor.text)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
-                Button("Enable") {
+                Button("[ ON ]") {
                     Task { await asrService.requestAuthorization() }
                     nudgeShown = true
-                    withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
+                    withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                 }
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(NexusColor.accent)
+                .font(PixelFont.terminal(11, weight: .bold))
+                .foregroundStyle(PixelColor.phosphor)
+                .phosphorGlow()
 
-                Button("Not now") {
+                Button("[ X ]") {
                     nudgeShown = true
-                    withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
+                    withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                 }
-                .font(.system(size: 13))
-                .foregroundStyle(NexusColor.textSecondary)
+                .font(PixelFont.terminal(11))
+                .foregroundStyle(PixelColor.textSecondary)
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 14)
-            // Glass surface — floats above mesh gradient, no manual fill needed
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18))
+            .background(PixelColor.background)
+            .pixelBorder()
             .padding(.horizontal, 18)
             .padding(.bottom, 14)
             .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -219,22 +148,18 @@ struct MainControlView: View {
 
     // MARK: - Protection history stat
 
-    /// Number of sessions protected, shown beneath the jam badge when > 0.
     private var sessionCount: Int { analyticsService.sessionHistory.count }
 
     // MARK: - ASR Effectiveness
 
-    /// Color encoding for the ASR jam score — higher jam % = more protected = emerald.
     private var asrEffectivenessColor: Color {
         let s = asrService.effectivenessScore
-        if s < 0.33 { return NexusColor.textTertiary }
-        if s < 0.66 { return NexusColor.accent }
-        return NexusColor.accentEmerald
+        if !state.isShieldActive || s < 0.05 { return PixelColor.textSecondary }
+        return PixelColor.phosphor
     }
 
     // MARK: - Shield Hero
 
-    /// RMS drives a subtle scale pulse — 0 dB = +5 % scale.
     private var audioScale: CGFloat {
         guard state.isShieldActive else { return 1.0 }
         let norm = CGFloat(max(0, (metricsService.currentMetrics.rmsLevel + 60) / 60))
@@ -243,181 +168,141 @@ struct MainControlView: View {
 
     private var shieldHero: some View {
         VStack(spacing: 0) {
-            // ── Button ──────────────────────────────────────────────
+            // ── Button ────────────────────────────────────────────────
             Button(action: onToggleShield) {
                 ZStack {
-                    // Outermost ambient glow — only when active
+                    // Shield box — 120×120 rectangle, square corners
                     if state.isShieldActive {
-                        Circle()
-                            .fill(NexusColor.accentEmerald.opacity(0.04))
-                            .frame(width: 220, height: 220)
-                            .scaleEffect(audioScale * 1.08)
-                            .animation(NexusAnimation.audioPulse, value: audioScale)
-
-                        // Mid breathing ring
-                        Circle()
-                            .stroke(NexusColor.accentEmerald.opacity(0.10), lineWidth: 28)
-                            .frame(width: 175, height: 175)
-                            .scaleEffect(audioScale * 1.04)
-                            .animation(.interpolatingSpring(stiffness: 55, damping: 12), value: audioScale)
-
-                        // Inner breathing ring
-                        Circle()
-                            .stroke(NexusColor.accentEmerald.opacity(0.16), lineWidth: 12)
-                            .frame(width: 155, height: 155)
-                            .scaleEffect(audioScale)
-                            .animation(.interpolatingSpring(stiffness: 100, damping: 14), value: audioScale)
-
-                        // ASR effectiveness arc — track ring (background)
-                        Circle()
-                            .stroke(NexusColor.textTertiary.opacity(0.4), lineWidth: 3)
-                            .frame(width: 148, height: 148)
-
-                        // Live fill arc — instrument gauge aesthetic
-                        Circle()
-                            .trim(from: 0, to: CGFloat(asrService.effectivenessScore))
-                            .stroke(
-                                asrEffectivenessColor,
-                                style: StrokeStyle(lineWidth: 3, lineCap: .round)
-                            )
-                            .frame(width: 148, height: 148)
-                            .rotationEffect(.degrees(-90))
-                            .animation(NexusAnimation.arcFill, value: asrService.effectivenessScore)
-
-                        // Liquid glass ring — refractive overlay around the outermost
-                        // breathing circle; gives the shield a physical glass quality
-                        // when active and the mesh gradient is visible behind it.
-                        Circle()
-                            .frame(width: 226, height: 226)
-                            .glassEffect(.clear)
-                            .scaleEffect(audioScale * 1.1)
-                            .animation(NexusAnimation.audioPulse, value: audioScale)
-                    }
-
-                    // Core circle — recessed when inactive, glowing when active
-                    Circle()
-                        .fill(
-                            state.isShieldActive
-                                ? NexusColor.accentEmerald.opacity(0.18)
-                                : NexusColor.surface
+                        // Active: phosphor dither fill
+                        DitherPatternView(
+                            density: 0.15,
+                            foreground: PixelColor.phosphor,
+                            background: .black
                         )
                         .frame(width: 120, height: 120)
-                        .overlay {
-                            // Inner border — defines the physical edge
-                            Circle()
-                                .strokeBorder(
-                                    state.isShieldActive
-                                        ? NexusColor.accentEmerald.opacity(0.45)
-                                        : NexusColor.textTertiary.opacity(0.3),
-                                    lineWidth: 1
-                                )
-                        }
-                        .shadow(
-                            color: state.isShieldActive
-                                ? NexusColor.accentEmerald.opacity(0.30)
-                                : Color.clear,
-                            radius: 28,
-                            x: 0, y: 0
-                        )
+                        .pixelBorder(PixelColor.phosphor, width: 1)
                         .scaleEffect(audioScale)
-                        .animation(NexusAnimation.audioPulse, value: audioScale)
+                        .animation(PixelAnimation.audioPulse, value: audioScale)
+                    } else {
+                        // Inactive: pure black, white border
+                        Rectangle()
+                            .fill(PixelColor.background)
+                            .frame(width: 120, height: 120)
+                            .pixelBorder(PixelColor.border)
+                    }
 
-                    // Icon
-                    VStack(spacing: 5) {
-                        Image(systemName: state.isShieldActive
-                              ? "shield.checkered.fill" : "shield.fill")
-                            .font(.system(size: 38, weight: .medium))
+                    // ASCII shield label inside the box
+                    VStack(spacing: 4) {
+                        Text("[NEXUS]")
+                            .font(PixelFont.hero(16))
                             .foregroundStyle(
-                                state.isShieldActive
-                                    ? NexusColor.accentEmerald
-                                    : NexusColor.textTertiary
+                                state.isShieldActive ? PixelColor.phosphor : PixelColor.text
                             )
-                            .symbolEffect(.bounce, value: state.isShieldActive)
-                            .contentTransition(.symbolEffect(.replace))
+                            .if(state.isShieldActive) { $0.phosphorGlow() }
 
                         if state.isShieldActive {
                             WaveformView(isActive: true,
                                          level: metricsService.currentMetrics.rmsLevel)
                                 .frame(width: 56, height: 12)
-                                .transition(.opacity.combined(with: .scale(scale: 0.85)))
+                                .transition(.opacity)
+                        } else {
+                            Text("/  \\")
+                                .font(PixelFont.hero(10))
+                                .foregroundStyle(PixelColor.textSecondary)
+                            Text("| S |")
+                                .font(PixelFont.hero(10))
+                                .foregroundStyle(PixelColor.textSecondary)
+                            Text(" \\_/")
+                                .font(PixelFont.hero(10))
+                                .foregroundStyle(PixelColor.textSecondary)
                         }
                     }
                 }
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
-            .frame(height: 226)
-            .animation(NexusAnimation.primary, value: state.isShieldActive)
+            .frame(height: 136)
+            .animation(PixelAnimation.primary, value: state.isShieldActive)
 
             // ── Status labels ─────────────────────────────────────────
-            VStack(spacing: 8) {
-                Text(state.isShieldActive ? "Protecting your voice" : "Tap to activate")
-                    .font(.system(size: 17, weight: .semibold, design: .default))
-                    .kerning(-0.3)
-                    .foregroundStyle(
-                        state.isShieldActive ? NexusColor.accentEmerald : NexusColor.textSecondary
-                    )
+            VStack(spacing: 6) {
+                // Primary status line
+                HStack(spacing: 0) {
+                    Text("> ")
+                        .font(PixelFont.terminal(14))
+                        .foregroundStyle(PixelColor.textSecondary)
+                    Text(state.isShieldActive ? "SHIELD ACTIVE" : "SHIELD OFFLINE")
+                        .font(PixelFont.terminal(14, weight: .bold))
+                        .foregroundStyle(
+                            state.isShieldActive ? PixelColor.phosphor : PixelColor.textSecondary
+                        )
+                        .if(state.isShieldActive) { $0.phosphorGlow() }
+                    // Blinking cursor when active
+                    if state.isShieldActive {
+                        Text(cursorVisible ? " ▌" : "  ")
+                            .font(PixelFont.terminal(14))
+                            .foregroundStyle(PixelColor.phosphor)
+                            .phosphorGlow()
+                    }
+                }
 
-                // Session timer — hero metric, SF Rounded for warmth
+                // Session timer — hero metric, monospaced
                 if state.isShieldActive, let startTime = sessionStartTime {
-                    TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        Text(sessionDurationString(since: startTime))
-                            .font(NexusFont.heroNumber(size: 44))
-                            .foregroundStyle(NexusColor.textPrimary)
-                            .contentTransition(.numericText())
+                    VStack(spacing: 2) {
+                        Text("UPTIME")
+                            .font(PixelFont.stripLabel())
+                            .foregroundStyle(PixelColor.textSecondary)
+                            .kerning(1.5)
+                        TimelineView(.periodic(from: .now, by: 1)) { _ in
+                            Text(sessionDurationString(since: startTime))
+                                .font(PixelFont.hero(44))
+                                .foregroundStyle(PixelColor.phosphor)
+                                .phosphorGlow()
+                                .contentTransition(.numericText())
+                        }
                     }
                     .transition(.opacity.combined(with: .scale(scale: 0.92)))
                 }
 
                 if state.isShieldActive && state.activeTechniqueCount > 0 {
-                    HStack(spacing: 6) {
-                        // Precision status dot
-                        Circle()
-                            .fill(NexusColor.accentEmerald)
-                            .frame(width: 5, height: 5)
-                        Text("\(state.activeTechniqueCount) technique\(state.activeTechniqueCount == 1 ? "" : "s") active")
-                            .font(NexusFont.caption())
-                            .foregroundStyle(NexusColor.textSecondary)
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    Text("TECH:\(state.activeTechniqueCount)  ACTIVE")
+                        .font(PixelFont.terminal(11))
+                        .foregroundStyle(PixelColor.textSecondary)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 } else if !state.isShieldActive {
-                    Text("Voice protection off")
-                        .font(NexusFont.caption())
-                        .foregroundStyle(NexusColor.textTertiary)
+                    Text("VOICE PROTECTION OFFLINE")
+                        .font(PixelFont.terminal(11))
+                        .foregroundStyle(PixelColor.textSecondary)
                 }
 
-                // Protection history — shown when user has prior sessions
                 if sessionCount > 0 && !state.isShieldActive {
-                    HStack(spacing: 5) {
-                        Image(systemName: "shield.checkered")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(NexusColor.textTertiary)
-                        Text("Protected \(sessionCount) session\(sessionCount == 1 ? "" : "s")")
-                            .font(NexusFont.caption())
-                            .foregroundStyle(NexusColor.textTertiary)
-                    }
-                    .transition(.opacity)
+                    Text("SESSIONS LOGGED: \(sessionCount)")
+                        .font(PixelFont.terminal(11))
+                        .foregroundStyle(PixelColor.textSecondary)
+                        .transition(.opacity)
                 }
 
-                // ASR jam score badge — only shown when measuring and score is meaningful
+                // JAM score badge — pixel rectangle, text-art bar
                 if state.isShieldActive && asrService.isMeasuring && asrService.effectivenessScore > 0.05 {
-                    HStack(spacing: 5) {
-                        Image(systemName: "brain")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(asrEffectivenessColor)
-                        Text("\(Int(asrService.effectivenessScore * 100))% AI jammed")
-                            .font(NexusFont.mono(size: 12))
-                            .foregroundStyle(asrEffectivenessColor)
-                            .contentTransition(.numericText())
+                    HStack(spacing: 8) {
+                        Text("JAM:")
+                            .font(PixelFont.terminal(12, weight: .bold))
+                            .foregroundStyle(PixelColor.phosphor)
+                            .phosphorGlow()
+                        PixelTextProgressBar(
+                            value: asrService.effectivenessScore,
+                            width: 8,
+                            color: PixelColor.phosphor
+                        )
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    // Color-tinted glass capsule — reads against mesh gradient
-                    .glassEffect(.regular.tint(asrEffectivenessColor), in: .capsule)
+                    .background(PixelColor.background)
+                    .pixelBorder(PixelColor.phosphor)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
-            .animation(.easeOut(duration: 0.2), value: state.isShieldActive)
+            .animation(.easeOut(duration: 0.15), value: state.isShieldActive)
             .padding(.bottom, 32)
         }
     }
@@ -439,90 +324,62 @@ struct MainControlView: View {
     // MARK: - Tier Row
 
     private var tierRow: some View {
-        // GlassEffectContainer enables coordinated morphing between enabled/disabled
-        // states via glassEffectID — pills morph together when toggled.
-        GlassEffectContainer(spacing: 10) {
+        HStack(spacing: 10) {
             tierToggle(
-                label: "Standard",
+                label: "STD",
                 sublabel: "TIER 1",
-                icon: "waveform",
-                color: NexusColor.tier1,
+                color: state.config.tier1Enabled ? PixelColor.phosphor : PixelColor.border,
                 enabled: state.config.tier1Enabled
             ) {
-                withAnimation(NexusAnimation.primary) {
+                withAnimation(PixelAnimation.primary) {
                     state.config.tier1Enabled.toggle()
                 }
             }
-            .glassEffectID("tier1", in: tierNamespace)
 
             tierToggle(
-                label: "Advanced AI",
+                label: "AI",
                 sublabel: "TIER 2",
-                icon: "brain",
-                color: NexusColor.tier2,
+                color: state.config.tier2Enabled ? PixelColor.phosphor : PixelColor.border,
                 enabled: state.config.tier2Enabled
             ) {
-                withAnimation(NexusAnimation.primary) {
+                withAnimation(PixelAnimation.primary) {
                     state.config.tier2Enabled.toggle()
                 }
             }
-            .glassEffectID("tier2", in: tierNamespace)
         }
     }
 
-    /// Hardware toggle pill — the entire component changes state, not just a dot.
     private func tierToggle(
         label: String,
         sublabel: String,
-        icon: String,
         color: Color,
         enabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 11) {
-                // Icon container
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(enabled ? color.opacity(0.18) : NexusColor.surfaceHigh)
-                        .frame(width: 34, height: 34)
-                    Image(systemName: icon)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(enabled ? color : NexusColor.textTertiary)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
+            VStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Text(label)
-                        .font(NexusFont.label())
-                        .foregroundStyle(enabled ? NexusColor.textPrimary : NexusColor.textSecondary)
-                    Text(sublabel)
-                        .font(NexusFont.sublabel())
-                        .kerning(0.4)
-                        .foregroundStyle(NexusColor.textTertiary)
+                        .font(PixelFont.terminal(14, weight: .bold))
+                        .foregroundStyle(enabled ? PixelColor.phosphor : PixelColor.text)
+                        .if(enabled) { $0.phosphorGlow() }
+                    Text(enabled ? "●" : "○")
+                        .font(PixelFont.terminal(12))
+                        .foregroundStyle(enabled ? PixelColor.phosphor : PixelColor.textSecondary)
+                        .if(enabled) { $0.phosphorGlow() }
                 }
-
-                Spacer()
-
-                // Hardware-style status indicator — pill shape, not dot
-                Capsule()
-                    .fill(enabled ? color : NexusColor.textTertiary.opacity(0.3))
-                    .frame(width: 26, height: 14)
-                    .overlay(alignment: enabled ? .trailing : .leading) {
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 10, height: 10)
-                            .padding(.horizontal, 2)
-                            .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 1)
-                    }
-                    .animation(NexusAnimation.primary, value: enabled)
+                Text(sublabel)
+                    .font(PixelFont.stripLabel())
+                    .kerning(1.5)
+                    .foregroundStyle(PixelColor.textSecondary)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 13)
-            // Interactive glass pill — touch-responsive, floats above mesh gradient
-            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 14))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(PixelColor.background)
+            .pixelBorder(enabled ? PixelColor.phosphor : PixelColor.border)
+            .animation(PixelAnimation.primary, value: enabled)
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Spectrum card
@@ -530,17 +387,23 @@ struct MainControlView: View {
     private var spectrumCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Spectrum")
-                    .font(NexusFont.sectionHead())
-                    .kerning(-0.3)
-                    .foregroundStyle(NexusColor.textPrimary)
+                Text("SPECTRUM ANALYSIS")
+                    .font(PixelFont.sectionHead())
+                    .kerning(1.5)
+                    .foregroundStyle(PixelColor.text)
                 Spacer()
                 if state.isShieldActive {
-                    Label("Live", systemImage: "circle.fill")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(NexusColor.accentEmerald)
-                        .labelStyle(TrailingIconLabelStyle())
-                        .transition(.opacity)
+                    HStack(spacing: 4) {
+                        Text("●")
+                            .font(.system(size: 6, design: .monospaced))
+                            .foregroundStyle(PixelColor.phosphor)
+                            .phosphorGlow()
+                        Text("LIVE")
+                            .font(PixelFont.sectionHead())
+                            .foregroundStyle(PixelColor.phosphor)
+                            .phosphorGlow()
+                    }
+                    .transition(.opacity)
                 }
             }
 
@@ -551,7 +414,8 @@ struct MainControlView: View {
                 isActive: state.isShieldActive
             )
             .frame(height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            // Square corners — no clipShape roundedRectangle
+            .pixelBorder()
 
             LevelMeterView(
                 level: metricsService.currentMetrics.rmsLevel,
@@ -559,24 +423,27 @@ struct MainControlView: View {
             )
 
             if state.isShieldActive && !metricsService.rmsHistory.allSatisfy({ $0 == -60 }) {
-                SparklineView(values: metricsService.rmsHistory, color: NexusColor.accent.opacity(0.45))
-                    .frame(height: 18)
-                    .transition(.opacity)
+                SparklineView(
+                    values: metricsService.rmsHistory,
+                    color: PixelColor.phosphorDim
+                )
+                .frame(height: 18)
+                .transition(.opacity)
             }
 
             HStack {
-                Text("100 Hz").frame(maxWidth: .infinity, alignment: .leading)
-                Text("1 kHz").frame(maxWidth: .infinity, alignment: .center)
-                Text("4 kHz").frame(maxWidth: .infinity, alignment: .center)
-                Text("20 kHz").frame(maxWidth: .infinity, alignment: .trailing)
+                Text("100HZ").frame(maxWidth: .infinity, alignment: .leading)
+                Text("1KHZ").frame(maxWidth: .infinity, alignment: .center)
+                Text("4KHZ").frame(maxWidth: .infinity, alignment: .center)
+                Text("20KHZ").frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .font(NexusFont.monoSmall())
-            .foregroundStyle(NexusColor.textTertiary)
+            .font(PixelFont.monoSmall(size: 9))
+            .foregroundStyle(PixelColor.textSecondary)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
-        // Glass card surface — translucent over mesh gradient
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .background(PixelColor.surface)
+        .pixelBorder()
     }
 
     // MARK: - Intensity card
@@ -584,111 +451,80 @@ struct MainControlView: View {
     private var intensityCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Intensity")
-                    .font(NexusFont.sectionHead())
-                    .kerning(-0.3)
-                    .foregroundStyle(NexusColor.textPrimary)
+                Text("INTENSITY")
+                    .font(PixelFont.sectionHead())
+                    .kerning(1.5)
+                    .foregroundStyle(PixelColor.text)
                 Spacer()
                 Text("\(Int(state.config.intensity * 100))%")
-                    .font(NexusFont.mono(size: 15))
-                    .foregroundStyle(NexusColor.accent)
+                    .font(PixelFont.terminal(15, weight: .bold))
+                    .foregroundStyle(
+                        state.isShieldActive ? PixelColor.phosphor : PixelColor.text
+                    )
+                    .if(state.isShieldActive) { $0.phosphorGlow() }
                     .contentTransition(.numericText())
             }
 
-            Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
-                .tint(NexusColor.accent)
+            // Text-art intensity bar
+            PixelTextProgressBar(
+                value: state.config.intensity,
+                width: 12,
+                color: state.isShieldActive ? PixelColor.phosphor : PixelColor.text
+            )
 
-            Text("Higher values increase jamming effectiveness but may become faintly audible.")
-                .font(NexusFont.caption())
-                .foregroundStyle(NexusColor.textSecondary)
+            Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
+                .tint(state.isShieldActive ? PixelColor.phosphor : PixelColor.border)
+
+            Text("HIGHER VALUES INCREASE JAM EFFECTIVENESS — MAY BECOME FAINTLY AUDIBLE.")
+                .font(PixelFont.monoSmall(size: 10))
+                .foregroundStyle(PixelColor.textSecondary)
                 .lineSpacing(4)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
-        // Glass card surface — translucent over mesh gradient
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
+        .background(PixelColor.surface)
+        .pixelBorder()
     }
 
-    // MARK: - Status strip (precision instrument readout)
+    // MARK: - Status strip
 
     private var statusStrip: some View {
         HStack(spacing: 0) {
-            statusCell(
-                value: String(format: "%.0f", metricsService.currentMetrics.latencyMs),
-                unit: "ms",
-                label: "LATENCY",
-                accent: metricsService.currentMetrics.latencyMs < 30
-                    ? NexusColor.accentEmerald
-                    : NexusColor.warning
-            )
-            stripDivider
-            statusCell(
-                value: String(format: "%.0f", metricsService.currentMetrics.rmsLevel),
-                unit: "dB",
-                label: "LEVEL",
-                accent: NexusColor.textSecondary
-            )
-            stripDivider
-            statusCell(
-                value: state.audioMode == .speakerPlayback ? "SPKR" : "VoIP",
-                unit: nil,
-                label: "ROUTE",
-                accent: NexusColor.textSecondary
-            )
-            if state.isShieldActive {
-                stripDivider
-                statusCell(
-                    value: "\(state.activeTechniqueCount)",
-                    unit: nil,
-                    label: "ACTIVE",
-                    accent: NexusColor.accent
-                )
-            }
+            // Single-line terminal readout
+            Text(statusLine)
+                .font(PixelFont.stripLabel())
+                .foregroundStyle(PixelColor.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 11)
-        // Glass strip — floats above mesh gradient; replaces solid surface background
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
-        .padding(.horizontal, 12)
-        .padding(.bottom, 8)
-    }
-
-    private var stripDivider: some View {
-        Rectangle()
-            .fill(NexusColor.separator)
-            .frame(width: 0.5, height: 18)
-    }
-
-    private func statusCell(value: String, unit: String?, label: String, accent: Color) -> some View {
-        VStack(spacing: 3) {
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(value)
-                    .font(NexusFont.mono(size: 13))
-                    .foregroundStyle(accent)
-                    .contentTransition(.numericText())
-                if let unit {
-                    Text(unit)
-                        .font(NexusFont.mono(size: 9))
-                        .foregroundStyle(accent.opacity(0.7))
-                }
-            }
-            Text(label)
-                .font(NexusFont.stripLabel())
-                .kerning(0.5)
-                .foregroundStyle(NexusColor.textTertiary)
+        .background(PixelColor.background)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(PixelColor.border)
+                .frame(height: 1)
         }
-        .frame(maxWidth: .infinity)
+    }
+
+    private var statusLine: String {
+        let lat = String(format: "LAT:%.0fms", metricsService.currentMetrics.latencyMs)
+        let lvl = String(format: "LVL:%.0fdB", metricsService.currentMetrics.rmsLevel)
+        let route = state.audioMode == .speakerPlayback ? "ROUTE:SPK" : "ROUTE:VoIP"
+        let tech = "TECH:\(state.activeTechniqueCount)"
+        return "\(lat)  \(lvl)  \(route)  \(tech)"
     }
 }
 
-// MARK: - Trailing icon label style (for "Live" badge)
+// MARK: - View.if helper
 
-private struct TrailingIconLabelStyle: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 4) {
-            configuration.icon
-                .font(.system(size: 6))
-            configuration.title
+extension View {
+    @ViewBuilder
+    func `if`<T: View>(_ condition: Bool, transform: (Self) -> T) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
         }
     }
 }
