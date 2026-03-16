@@ -42,9 +42,10 @@ struct ProjectNexusApp: App {
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background {
-                // Persist the current analytics session whenever the app backgrounds.
-                // Without this, session stats would never appear in the Account tab.
+            if phase == .inactive || phase == .background {
+                // Persist the current analytics session on both inactive and background
+                // transitions. The inactive check ensures session data is saved even when
+                // the user force-quits, which skips the background phase entirely.
                 analyticsService.endSession()
             }
         }

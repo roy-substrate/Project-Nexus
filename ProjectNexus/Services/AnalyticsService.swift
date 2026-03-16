@@ -155,6 +155,7 @@ final class AnalyticsService {
         case .shieldActivated:
             shieldActivationCount += 1
             shieldActivationTime = Date()
+            if shieldActivationCount % 3 == 0 { saveHistory() }
 
         case .shieldDeactivated(let duration):
             totalShieldSecondsThisSession += duration
