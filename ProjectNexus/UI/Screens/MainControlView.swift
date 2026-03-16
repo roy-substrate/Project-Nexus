@@ -244,6 +244,15 @@ struct MainControlView: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(state.isShieldActive ? .blue : .primary)
 
+                if state.isShieldActive, let startTime = sessionStartTime {
+                    TimelineView(.periodic(from: .now, by: 1)) { _ in
+                        Text("Protected for \(sessionDurationString(since: startTime))")
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
                 if state.isShieldActive && state.activeTechniqueCount > 0 {
                     HStack(spacing: 5) {
                         Circle()
@@ -292,6 +301,20 @@ struct MainControlView: View {
             }
             .animation(.easeInOut(duration: 0.2), value: state.isShieldActive)
             .padding(.bottom, 28)
+        }
+    }
+
+    // MARK: - Session timer helper
+
+    private func sessionDurationString(since start: Date) -> String {
+        let elapsed = Int(Date.now.timeIntervalSince(start))
+        let seconds = elapsed % 60
+        let minutes = (elapsed / 60) % 60
+        let hours   = elapsed / 3600
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, seconds)
         }
     }
 
