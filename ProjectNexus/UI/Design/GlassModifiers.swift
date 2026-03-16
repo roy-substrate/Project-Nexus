@@ -1,37 +1,32 @@
 import SwiftUI
 
-// MARK: - NexusSurfaceCardStyle (replaces GlassCardStyle)
+// MARK: - GlassCardStyle (replaced by PixelSurface — kept for API compat)
 
-/// Lifts content onto the Nexus card surface.
-/// Uses NexusColor tokens — dark fill, 1pt border, no drop shadow.
+/// Legacy name kept so other views still compile.
+/// All visual properties now forward to the pixel design system.
 struct GlassCardStyle: ViewModifier {
-    var cornerRadius: CGFloat = 20
+    var cornerRadius: CGFloat = 0   // always 0 — pixel aesthetic
     var padding: CGFloat = 18
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(NexusColor.surface)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
-                    }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(PixelColor.surface)
+            .pixelBorder()
     }
 }
 
-// MARK: - GlowModifier
+// MARK: - GlowModifier (no-op except phosphor glow — kept for API compat)
 
+/// Drop shadows are removed in the pixel aesthetic.
+/// Only phosphor glow (radius 1-2) is permitted on active green text — use .phosphorGlow().
 struct GlowModifier: ViewModifier {
     var color: Color
     var radius: CGFloat = 10
 
     func body(content: Content) -> some View {
+        // No-op: drop shadows removed. Phosphor glow is applied via .phosphorGlow().
         content
-            .shadow(color: color.opacity(0.28), radius: radius, x: 0, y: 0)
     }
 }
 
@@ -45,13 +40,14 @@ struct ShimmerModifier: ViewModifier {
 
 extension View {
     func glassCard(
-        cornerRadius: CGFloat = 20,
+        cornerRadius: CGFloat = 0,
         padding: CGFloat = 18
     ) -> some View {
         modifier(GlassCardStyle(cornerRadius: cornerRadius, padding: padding))
     }
 
     func glow(color: Color, radius: CGFloat = 10) -> some View {
+        // No-op in pixel aesthetic — use .phosphorGlow() for active green text only.
         modifier(GlowModifier(color: color, radius: radius))
     }
 
@@ -59,79 +55,57 @@ extension View {
         modifier(ShimmerModifier())
     }
 
-    /// Apply the Nexus dark background.
+    /// Apply the pixel black background.
     func nexusBackground() -> some View {
-        self.background(NexusColor.background.ignoresSafeArea())
+        self.background(PixelColor.background.ignoresSafeArea())
     }
 }
 
-// MARK: - NexusPrimaryButtonStyle
+// MARK: - NexusPrimaryButtonStyle → forwards to PixelButtonStyle
 
-/// Full-width accent-filled button with subtle inner shadow.
 struct NexusPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(Color.white)
+            .font(PixelFont.terminal(16, weight: .medium))
+            .foregroundStyle(PixelColor.text)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(NexusColor.accent)
-                    .overlay {
-                        // Subtle inner highlight along the top edge
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
-                    }
-                    .opacity(configuration.isPressed ? 0.78 : 1)
-            }
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .background(configuration.isPressed ? Color.white.opacity(0.08) : .black)
+            .pixelBorder()
+            .cornerRadius(0)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
     }
 }
 
-// MARK: - NexusSecondaryButtonStyle
+// MARK: - NexusSecondaryButtonStyle → forwards to PixelButtonStyle
 
-/// Outline-only button in accent color.
 struct NexusSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .medium))
-            .foregroundStyle(NexusColor.accent)
+            .font(PixelFont.terminal(16, weight: .regular))
+            .foregroundStyle(PixelColor.textSecondary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(NexusColor.accentFill)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(NexusColor.accent.opacity(0.35), lineWidth: 1)
-                    }
-                    .opacity(configuration.isPressed ? 0.72 : 1)
-            }
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .background(configuration.isPressed ? Color.white.opacity(0.05) : .black)
+            .pixelBorder(PixelColor.border.opacity(0.5))
+            .cornerRadius(0)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
     }
 }
 
 // MARK: - NexusDangerButtonStyle
 
-/// Full-width danger-red filled button.
 struct NexusDangerButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(Color.white)
+            .font(PixelFont.terminal(16, weight: .medium))
+            .foregroundStyle(PixelColor.warning)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(NexusColor.danger)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
-                    }
-                    .opacity(configuration.isPressed ? 0.78 : 1)
-            }
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .background(configuration.isPressed ? Color.white.opacity(0.05) : .black)
+            .pixelBorder(PixelColor.warning)
+            .cornerRadius(0)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
     }
 }
 

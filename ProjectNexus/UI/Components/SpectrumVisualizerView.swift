@@ -64,7 +64,7 @@ struct SpectrumVisualizerView: View {
                     }
                     context.stroke(
                         path,
-                        with: .color(NexusColor.warning.opacity(0.55)),
+                        with: .color(PixelColor.phosphorDim),
                         style: StrokeStyle(lineWidth: 1, dash: [4, 3])
                     )
                 }
@@ -89,12 +89,10 @@ struct SpectrumVisualizerView: View {
         (max(-60, min(0, value)) + 60) / 60
     }
 
-    /// Returns a colour that transitions from accent indigo-blue (low) to violet (high).
+    /// Pixel aesthetic: phosphor green when active, white when inactive.
     private func barColor(index: Int, alpha: CGFloat) -> Color {
-        let t = CGFloat(index) / CGFloat(barCount)
-        // Transition from NexusColor.tier1 (indigo-blue) to NexusColor.tier2 (violet)
-        return t < 0.5
-            ? NexusColor.tier1.opacity(alpha)
-            : NexusColor.tier2.opacity(alpha)
+        return isActive
+            ? PixelColor.phosphor.opacity(alpha)
+            : PixelColor.text.opacity(alpha)
     }
 }
