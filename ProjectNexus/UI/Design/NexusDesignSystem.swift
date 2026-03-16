@@ -1,178 +1,130 @@
 import SwiftUI
 
 // MARK: - NexusColor
+//
+// All tokens now forward to PixelColor / pixel palette.
+// Legacy names preserved so all other views compile without modification.
 
-/// All color tokens for Nexus Shield's dark-native design system.
-/// Every value is a deliberate design decision — nothing is a system default.
 enum NexusColor {
 
     // MARK: Backgrounds
 
-    /// Primary canvas: near-black with a cool blue-black undertone.
-    static let background       = Color(hex: "#0A0A0F")
-    /// Card / section surface — lifts one step from background.
-    static let surface          = Color(hex: "#111118")
-    /// Modal, overlay, popover surface — two steps from background.
-    static let surfaceHigh      = Color(hex: "#1A1A24")
+    static let background       = PixelColor.background
+    static let surface          = PixelColor.surface
+    static let surfaceHigh      = Color(red: 0.08, green: 0.08, blue: 0.08)
 
-    // MARK: Accent
+    // MARK: Accent (pixel aesthetic: phosphor green for active, white for inactive)
 
-    /// Electric indigo-blue — the brand interactive color.
-    static let accent           = Color(hex: "#4B7BFF")
-    /// Soft fill version of accent (for backgrounds, tints).
-    static let accentFill       = Color(hex: "#4B7BFF").opacity(0.12)
-    /// Cold emerald — ONLY for "active / protected" states.
-    static let accentEmerald    = Color(hex: "#00E5A0")
-    /// Soft fill version of emerald.
-    static let accentEmeraldFill = Color(hex: "#00E5A0").opacity(0.12)
+    /// Legacy accent — now maps to white border/text.
+    static let accent           = PixelColor.text
+    static let accentFill       = Color.white.opacity(0.05)
+    /// Active phosphor green — ONLY used for active shield state.
+    static let accentEmerald    = PixelColor.phosphor
+    static let accentEmeraldFill = PixelColor.phosphorDim
 
     // MARK: Text
 
-    /// Slightly cool white — primary labels.
-    static let textPrimary      = Color(hex: "#F0F0F8")
-    /// Muted purple-grey — secondary descriptions.
-    static let textSecondary    = Color(hex: "#6B6B7E")
-    /// Near-invisible — tertiary labels, placeholders.
-    static let textTertiary     = Color(hex: "#3A3A4E")
+    static let textPrimary      = PixelColor.text
+    static let textSecondary    = PixelColor.textSecondary
+    static let textTertiary     = Color.white.opacity(0.2)
 
     // MARK: Semantic Status
 
-    static let danger           = Color(hex: "#FF4B4B")
-    static let dangerFill       = Color(hex: "#FF4B4B").opacity(0.12)
-    static let warning          = Color(hex: "#FFB347")
-    static let warningFill      = Color(hex: "#FFB347").opacity(0.12)
-    static let positive         = Color(hex: "#00E5A0")   // alias for emerald
+    static let danger           = PixelColor.warning
+    static let dangerFill       = PixelColor.warning.opacity(0.1)
+    static let warning          = PixelColor.warning
+    static let warningFill      = PixelColor.warning.opacity(0.1)
+    static let positive         = PixelColor.phosphor
 
-    // MARK: Tier Colors
+    // MARK: Tier Colors (now both white — no color in inactive state)
 
-    /// Tier 1 — Acoustic (indigo-teal, brighter for dark surfaces)
-    static let tier1            = Color(hex: "#4B7BFF")
-    /// Tier 2 — Adversarial ML (violet-purple)
-    static let tier2            = Color(hex: "#A259FF")
+    static let tier1            = PixelColor.text
+    static let tier2            = PixelColor.text
 
     // MARK: Structural
 
-    /// Card border — 1 pt, barely-there depth signal.
-    static let cardBorder       = Color.white.opacity(0.06)
-    /// Separator line between sections.
-    static let separator        = Color.white.opacity(0.08)
-    /// Status strip top border.
-    static let stripBorder      = Color.white.opacity(0.06)
+    static let cardBorder       = PixelColor.border
+    static let separator        = Color.white.opacity(0.15)
+    static let stripBorder      = Color.white.opacity(0.85)
 }
 
 // MARK: - NexusFont
+//
+// All typography now forwards to PixelFont (SF Mono exclusively).
 
-/// Typography helpers calibrated to the design spec.
-/// Always prefer these over raw `.system()` calls in views.
 enum NexusFont {
 
-    // MARK: Hero
-
-    /// Hero numerics — jam score, session timer. SF Pro Rounded, Bold.
     static func heroNumber(size: CGFloat = 52) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+        PixelFont.hero(size)
     }
 
-    // MARK: Display
-
-    /// Onboarding headline, "All set." — tight tracking.
     static func display(size: CGFloat = 52) -> Font {
-        .system(size: size, weight: .bold, design: .default)
+        PixelFont.hero(size)
     }
 
-    // MARK: Section / Card Heads
-
-    /// Section titles — SF Pro Display feel via .semibold at 17.
     static func sectionHead() -> Font {
-        .system(size: 17, weight: .semibold, design: .default)
+        PixelFont.sectionHead()
     }
 
-    // MARK: Labels
-
-    /// Component labels — 14pt Medium.
     static func label() -> Font {
-        .system(size: 14, weight: .medium, design: .default)
+        PixelFont.terminal(14, weight: .medium)
     }
 
-    /// Slightly smaller label used for tier sublabels.
     static func sublabel() -> Font {
-        .system(size: 11, weight: .medium, design: .default)
+        PixelFont.terminal(11, weight: .medium)
     }
 
-    // MARK: Captions
-
-    /// Caption text — 12pt Regular, slightly open tracking.
     static func caption() -> Font {
-        .system(size: 12, weight: .regular, design: .default)
+        PixelFont.terminal(12)
     }
 
-    /// Status strip label — 9pt Medium.
     static func stripLabel() -> Font {
-        .system(size: 9, weight: .medium, design: .default)
+        PixelFont.stripLabel()
     }
 
-    // MARK: Monospaced Data
-
-    /// Precision data readout — SF Mono, 13pt.
     static func mono(size: CGFloat = 13) -> Font {
-        .system(size: size, weight: .medium, design: .monospaced)
+        PixelFont.terminal(size, weight: .medium)
     }
 
-    /// Small mono — 11pt for frequency axis labels.
     static func monoSmall(size: CGFloat = 11) -> Font {
-        .system(size: size, weight: .regular, design: .monospaced)
+        PixelFont.monoSmall(size: size)
     }
 }
 
-// MARK: - NexusSurface ViewModifier
+// MARK: - NexusSurface ViewModifier (square corners, pixel border)
 
-/// Applies the standard Nexus card surface: dark fill + 1pt border, no shadow.
-/// Depth comes from background contrast, not drop shadows.
 struct NexusSurface: ViewModifier {
-    var cornerRadius: CGFloat = 20
+    var cornerRadius: CGFloat = 0    // always 0 — pixel aesthetic
     var padding: CGFloat = 18
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(NexusColor.surface)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
-                    }
-            }
+            .background(PixelColor.surface)
+            .pixelBorder()
     }
 }
 
 extension View {
-    /// Wraps content in the Nexus card surface style.
-    func nexusSurface(cornerRadius: CGFloat = 20, padding: CGFloat = 18) -> some View {
+    func nexusSurface(cornerRadius: CGFloat = 0, padding: CGFloat = 18) -> some View {
         modifier(NexusSurface(cornerRadius: cornerRadius, padding: padding))
     }
 }
 
-// MARK: - Animation constants
+// MARK: - Animation constants (crisp, no spring bounce)
 
-/// Shared animation presets. Tuned to feel physical, not bouncy.
 enum NexusAnimation {
-    /// Primary state transition — crisp, no jitter.
-    static let primary    = Animation.spring(response: 0.38, dampingFraction: 0.9)
-    /// Appearing / revealing elements.
-    static let appear     = Animation.spring(response: 0.5, dampingFraction: 0.88)
-    /// Dismissal / fade — never spring.
-    static let dismiss    = Animation.easeOut(duration: 0.22)
-    /// Audio-reactive pulse — tight, fast.
-    static let audioPulse = Animation.interpolatingSpring(stiffness: 180, damping: 20)
-    /// ASR arc fill — smooth, slow.
-    static let arcFill    = Animation.spring(response: 0.6, dampingFraction: 0.92)
+    static let primary    = Animation.easeOut(duration: 0.15)
+    static let appear     = Animation.easeOut(duration: 0.2)
+    static let dismiss    = Animation.easeOut(duration: 0.12)
+    static let audioPulse = Animation.easeOut(duration: 0.08)
+    static let arcFill    = Animation.easeOut(duration: 0.3)
 }
 
 // MARK: - Hex Color init
 
 extension Color {
-    /// Convenience initializer from a CSS hex string (e.g. "#4B7BFF").
+    /// Convenience initializer from a CSS hex string (e.g. "#39FF14").
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
