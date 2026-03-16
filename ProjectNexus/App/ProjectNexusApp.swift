@@ -179,7 +179,7 @@ struct ContentView: View {
                 AccountView(analyticsService: analyticsService, subscriptionManager: subscriptionManager)
             }
         }
-        .tint(.blue)
+        .tint(NexusColor.accent)
         // Propagate all config mutations to the live service + persistence
         .onChange(of: state.config.intensity) { _, new in
             onConfigUpdate()

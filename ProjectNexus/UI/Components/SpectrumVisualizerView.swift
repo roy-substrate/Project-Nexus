@@ -64,7 +64,7 @@ struct SpectrumVisualizerView: View {
                     }
                     context.stroke(
                         path,
-                        with: .color(Color.orange.opacity(0.55)),
+                        with: .color(NexusColor.warning.opacity(0.55)),
                         style: StrokeStyle(lineWidth: 1, dash: [4, 3])
                     )
                 }
@@ -89,12 +89,12 @@ struct SpectrumVisualizerView: View {
         (max(-60, min(0, value)) + 60) / 60
     }
 
-    /// Returns a colour that transitions from blue (low freq) to indigo (high freq).
+    /// Returns a colour that transitions from accent indigo-blue (low) to violet (high).
     private func barColor(index: Int, alpha: CGFloat) -> Color {
         let t = CGFloat(index) / CGFloat(barCount)
-        // Lerp between system blue and indigo
+        // Transition from NexusColor.tier1 (indigo-blue) to NexusColor.tier2 (violet)
         return t < 0.5
-            ? Color(hue: 0.60, saturation: 0.75, brightness: 0.90).opacity(alpha)
-            : Color(hue: 0.72, saturation: 0.65, brightness: 0.85).opacity(alpha)
+            ? NexusColor.tier1.opacity(alpha)
+            : NexusColor.tier2.opacity(alpha)
     }
 }

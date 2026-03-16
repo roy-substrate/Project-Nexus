@@ -1,7 +1,6 @@
 import SwiftUI
 
 /// Animated sine-wave waveform that breathes with the audio level.
-/// Uses adaptive system colours so it looks correct in both light and dark mode.
 struct WaveformView: View {
     let isActive: Bool
     let level: Float   // dB, typically -60...0
@@ -18,22 +17,28 @@ struct WaveformView: View {
 
                 let amplitude = drive * size.height * 0.36
 
-                // Primary wave — blue when active, quaternary when not
+                // Primary wave — emerald when active
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude, frequency: 2.5, phase: 0,
-                         color: isActive ? Color.blue.opacity(0.55) : Color(.quaternaryLabel),
+                         color: isActive
+                            ? Color(hex: "#00E5A0").opacity(0.60)
+                            : Color(hex: "#3A3A4E"),
                          lineWidth: 2)
 
                 // Secondary wave — slightly offset
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude * 0.65, frequency: 3.5, phase: 0.8,
-                         color: isActive ? Color.blue.opacity(0.30) : Color(.quaternaryLabel).opacity(0.5),
+                         color: isActive
+                            ? Color(hex: "#00E5A0").opacity(0.30)
+                            : Color(hex: "#3A3A4E").opacity(0.5),
                          lineWidth: 1.5)
 
                 // Tertiary subtle wave
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude * 0.45, frequency: 5.0, phase: 1.6,
-                         color: isActive ? Color.blue.opacity(0.18) : Color.clear,
+                         color: isActive
+                            ? Color(hex: "#00E5A0").opacity(0.15)
+                            : Color.clear,
                          lineWidth: 1)
             }
         }
@@ -66,7 +71,6 @@ struct WaveformView: View {
 // MARK: - SparklineView
 
 /// Draws the last N RMS readings as a smooth line chart.
-/// Useful for showing audio history in the status strip or diagnostics.
 struct SparklineView: View {
     let values: [Float]     // expects dB values, e.g. from MetricsService.rmsHistory
     let color: Color

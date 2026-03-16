@@ -24,16 +24,16 @@ struct MainControlView: View {
                 shieldHero
                     .padding(.top, 8)
 
-                VStack(spacing: 12) {
+                VStack(spacing: 14) {
                     tierRow
                     spectrumCard
                     intensityCard
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 18)
+                .padding(.bottom, 36)
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(NexusColor.background.ignoresSafeArea())
         .safeAreaInset(edge: .bottom) { statusStrip }
         .overlay(alignment: .top) { sessionResultBanner }
         .overlay(alignment: .bottom) { asrPermissionNudge }
@@ -42,11 +42,11 @@ struct MainControlView: View {
                 sessionStartTime = .now
                 // Show ASR nudge once if mic permission was skipped during onboarding
                 if !asrService.isAuthorized && !nudgeShown {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.78)) {
+                    withAnimation(NexusAnimation.appear) {
                         showASRNudge = true
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-                        withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                        withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
                     }
                 }
             } else {
@@ -54,12 +54,12 @@ struct MainControlView: View {
                 let score = asrService.effectivenessScore
                 if score > 0.5 {
                     sessionResultScore = score
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                    withAnimation(NexusAnimation.appear) {
                         showSessionResult = true
                     }
                     // Auto-dismiss after 3 seconds
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation(.easeOut(duration: 0.3)) { showSessionResult = false }
+                        withAnimation(NexusAnimation.dismiss) { showSessionResult = false }
                     }
                 }
             }
@@ -71,22 +71,25 @@ struct MainControlView: View {
     @ViewBuilder
     private var sessionResultBanner: some View {
         if showSessionResult {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.green)
-                Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(NexusColor.accentEmerald)
+                Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
+                    .font(NexusFont.label())
+                    .foregroundStyle(NexusColor.textPrimary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
             .background {
                 Capsule()
-                    .fill(.regularMaterial)
-                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 3)
+                    .fill(NexusColor.surfaceHigh)
+                    .overlay {
+                        Capsule()
+                            .strokeBorder(NexusColor.accentEmerald.opacity(0.25), lineWidth: 1)
+                    }
             }
-            .padding(.top, 12)
+            .padding(.top, 14)
             .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
@@ -96,14 +99,14 @@ struct MainControlView: View {
     @ViewBuilder
     private var asrPermissionNudge: some View {
         if showASRNudge {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 Image(systemName: "mic.slash.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.orange)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(NexusColor.warning)
 
                 Text("Enable speech measurement to see your jam score")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.primary)
+                    .font(NexusFont.label())
+                    .foregroundStyle(NexusColor.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
@@ -111,27 +114,30 @@ struct MainControlView: View {
                 Button("Enable") {
                     Task { await asrService.requestAuthorization() }
                     nudgeShown = true
-                    withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                    withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
                 }
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.blue)
+                .foregroundStyle(NexusColor.accent)
 
                 Button("Not now") {
                     nudgeShown = true
-                    withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                    withAnimation(NexusAnimation.dismiss) { showASRNudge = false }
                 }
                 .font(.system(size: 13))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(NexusColor.textSecondary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
             .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(.regularMaterial)
-                    .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 4)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(NexusColor.surfaceHigh)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
+                    }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 14)
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
@@ -143,13 +149,12 @@ struct MainControlView: View {
 
     // MARK: - ASR Effectiveness
 
-    /// Color encoding for the ASR jam score — from the user's perspective:
-    /// higher jam % = stronger protection = more saturated blue/green.
+    /// Color encoding for the ASR jam score — higher jam % = more protected = emerald.
     private var asrEffectivenessColor: Color {
         let s = asrService.effectivenessScore
-        if s < 0.33 { return Color(.tertiaryLabel) }
-        if s < 0.66 { return .blue }
-        return Color(hue: 0.36, saturation: 0.78, brightness: 0.82) // vibrant green
+        if s < 0.33 { return NexusColor.textTertiary }
+        if s < 0.66 { return NexusColor.accent }
+        return NexusColor.accentEmerald
     }
 
     // MARK: - Shield Hero
@@ -166,68 +171,90 @@ struct MainControlView: View {
             // ── Button ──────────────────────────────────────────────
             Button(action: onToggleShield) {
                 ZStack {
-                    // Outer breathing ring — only when active
+                    // Outermost ambient glow — only when active
                     if state.isShieldActive {
                         Circle()
-                            .stroke(Color.blue.opacity(0.08), lineWidth: 48)
-                            .frame(width: 168, height: 168)
-                            .scaleEffect(audioScale * 1.06)
-                            .animation(.interpolatingSpring(stiffness: 60, damping: 10), value: audioScale)
+                            .fill(NexusColor.accentEmerald.opacity(0.04))
+                            .frame(width: 220, height: 220)
+                            .scaleEffect(audioScale * 1.08)
+                            .animation(NexusAnimation.audioPulse, value: audioScale)
 
+                        // Mid breathing ring
                         Circle()
-                            .stroke(Color.blue.opacity(0.13), lineWidth: 20)
-                            .frame(width: 168, height: 168)
+                            .stroke(NexusColor.accentEmerald.opacity(0.10), lineWidth: 28)
+                            .frame(width: 175, height: 175)
+                            .scaleEffect(audioScale * 1.04)
+                            .animation(.interpolatingSpring(stiffness: 55, damping: 12), value: audioScale)
+
+                        // Inner breathing ring
+                        Circle()
+                            .stroke(NexusColor.accentEmerald.opacity(0.16), lineWidth: 12)
+                            .frame(width: 155, height: 155)
                             .scaleEffect(audioScale)
-                            .animation(.interpolatingSpring(stiffness: 100, damping: 12), value: audioScale)
+                            .animation(.interpolatingSpring(stiffness: 100, damping: 14), value: audioScale)
 
-                        // ASR effectiveness arc — fills clockwise as jam % rises.
-                        // Track ring (background)
+                        // ASR effectiveness arc — track ring (background)
                         Circle()
-                            .stroke(Color(.systemFill), lineWidth: 4)
+                            .stroke(NexusColor.textTertiary.opacity(0.4), lineWidth: 3)
                             .frame(width: 148, height: 148)
 
-                        // Live fill arc
+                        // Live fill arc — instrument gauge aesthetic
                         Circle()
                             .trim(from: 0, to: CGFloat(asrService.effectivenessScore))
                             .stroke(
                                 asrEffectivenessColor,
-                                style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                                style: StrokeStyle(lineWidth: 3, lineCap: .round)
                             )
                             .frame(width: 148, height: 148)
                             .rotationEffect(.degrees(-90))
-                            .animation(.spring(response: 0.6), value: asrService.effectivenessScore)
+                            .animation(NexusAnimation.arcFill, value: asrService.effectivenessScore)
                     }
 
-                    // Core
+                    // Core circle — recessed when inactive, glowing when active
                     Circle()
-                        .fill(state.isShieldActive
-                              ? Color.blue
-                              : Color(.secondarySystemGroupedBackground))
+                        .fill(
+                            state.isShieldActive
+                                ? NexusColor.accentEmerald.opacity(0.18)
+                                : NexusColor.surface
+                        )
                         .frame(width: 120, height: 120)
+                        .overlay {
+                            // Inner border — defines the physical edge
+                            Circle()
+                                .strokeBorder(
+                                    state.isShieldActive
+                                        ? NexusColor.accentEmerald.opacity(0.45)
+                                        : NexusColor.textTertiary.opacity(0.3),
+                                    lineWidth: 1
+                                )
+                        }
                         .shadow(
                             color: state.isShieldActive
-                                ? Color.blue.opacity(0.35)
-                                : Color.black.opacity(0.06),
-                            radius: state.isShieldActive ? 24 : 6,
-                            x: 0, y: state.isShieldActive ? 8 : 2
+                                ? NexusColor.accentEmerald.opacity(0.30)
+                                : Color.clear,
+                            radius: 28,
+                            x: 0, y: 0
                         )
                         .scaleEffect(audioScale)
-                        .animation(.interpolatingSpring(stiffness: 180, damping: 18), value: audioScale)
+                        .animation(NexusAnimation.audioPulse, value: audioScale)
 
                     // Icon
-                    VStack(spacing: 4) {
+                    VStack(spacing: 5) {
                         Image(systemName: state.isShieldActive
                               ? "shield.checkered.fill" : "shield.fill")
-                            .font(.system(size: 40, weight: .medium))
-                            .foregroundStyle(state.isShieldActive
-                                             ? .white : Color(.tertiaryLabel))
+                            .font(.system(size: 38, weight: .medium))
+                            .foregroundStyle(
+                                state.isShieldActive
+                                    ? NexusColor.accentEmerald
+                                    : NexusColor.textTertiary
+                            )
                             .symbolEffect(.bounce, value: state.isShieldActive)
                             .contentTransition(.symbolEffect(.replace))
 
                         if state.isShieldActive {
                             WaveformView(isActive: true,
                                          level: metricsService.currentMetrics.rmsLevel)
-                                .frame(width: 60, height: 14)
+                                .frame(width: 56, height: 12)
                                 .transition(.opacity.combined(with: .scale(scale: 0.85)))
                         }
                     }
@@ -235,72 +262,85 @@ struct MainControlView: View {
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
-            .frame(height: 220)
-            .animation(.spring(response: 0.4, dampingFraction: 0.78), value: state.isShieldActive)
+            .frame(height: 226)
+            .animation(NexusAnimation.primary, value: state.isShieldActive)
 
-            // ── Status label ─────────────────────────────────────────
-            VStack(spacing: 6) {
+            // ── Status labels ─────────────────────────────────────────
+            VStack(spacing: 8) {
                 Text(state.isShieldActive ? "Protecting your voice" : "Tap to activate")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(state.isShieldActive ? .blue : .primary)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .kerning(-0.3)
+                    .foregroundStyle(
+                        state.isShieldActive ? NexusColor.accentEmerald : NexusColor.textSecondary
+                    )
 
+                // Session timer — hero metric, SF Rounded for warmth
                 if state.isShieldActive, let startTime = sessionStartTime {
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        Text("Protected for \(sessionDurationString(since: startTime))")
-                            .font(.system(size: 12, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.secondary)
+                        Text(sessionDurationString(since: startTime))
+                            .font(NexusFont.heroNumber(size: 44))
+                            .foregroundStyle(NexusColor.textPrimary)
+                            .contentTransition(.numericText())
                     }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
                 }
 
                 if state.isShieldActive && state.activeTechniqueCount > 0 {
-                    HStack(spacing: 5) {
+                    HStack(spacing: 6) {
+                        // Precision status dot
                         Circle()
-                            .fill(.green)
-                            .frame(width: 6, height: 6)
+                            .fill(NexusColor.accentEmerald)
+                            .frame(width: 5, height: 5)
                         Text("\(state.activeTechniqueCount) technique\(state.activeTechniqueCount == 1 ? "" : "s") active")
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
+                            .font(NexusFont.caption())
+                            .foregroundStyle(NexusColor.textSecondary)
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 } else if !state.isShieldActive {
                     Text("Voice protection off")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(NexusFont.caption())
+                        .foregroundStyle(NexusColor.textTertiary)
                 }
 
                 // Protection history — shown when user has prior sessions
                 if sessionCount > 0 && !state.isShieldActive {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: "shield.checkered")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(NexusColor.textTertiary)
                         Text("Protected \(sessionCount) session\(sessionCount == 1 ? "" : "s")")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .font(NexusFont.caption())
+                            .foregroundStyle(NexusColor.textTertiary)
                     }
                     .transition(.opacity)
                 }
 
                 // ASR jam score badge — only shown when measuring and score is meaningful
                 if state.isShieldActive && asrService.isMeasuring && asrService.effectivenessScore > 0.05 {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: "brain")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(asrEffectivenessColor)
                         Text("\(Int(asrService.effectivenessScore * 100))% AI jammed")
-                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .font(NexusFont.mono(size: 12))
                             .foregroundStyle(asrEffectivenessColor)
                             .contentTransition(.numericText())
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Capsule().fill(asrEffectivenessColor.opacity(0.1)))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background {
+                        Capsule()
+                            .fill(asrEffectivenessColor.opacity(0.10))
+                            .overlay {
+                                Capsule()
+                                    .strokeBorder(asrEffectivenessColor.opacity(0.25), lineWidth: 1)
+                            }
+                    }
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: state.isShieldActive)
-            .padding(.bottom, 28)
+            .animation(.easeOut(duration: 0.2), value: state.isShieldActive)
+            .padding(.bottom, 32)
         }
     }
 
@@ -321,34 +361,35 @@ struct MainControlView: View {
     // MARK: - Tier Row
 
     private var tierRow: some View {
-        HStack(spacing: 10) {
-            tierPill(
+        HStack(spacing: 12) {
+            tierToggle(
                 label: "Standard",
-                sublabel: "Tier 1",
+                sublabel: "TIER 1",
                 icon: "waveform",
-                color: Color(hue: 0.58, saturation: 0.80, brightness: 0.92),
+                color: NexusColor.tier1,
                 enabled: state.config.tier1Enabled
             ) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
+                withAnimation(NexusAnimation.primary) {
                     state.config.tier1Enabled.toggle()
                 }
             }
 
-            tierPill(
+            tierToggle(
                 label: "Advanced AI",
-                sublabel: "Tier 2",
+                sublabel: "TIER 2",
                 icon: "brain",
-                color: Color(hue: 0.73, saturation: 0.70, brightness: 0.88),
+                color: NexusColor.tier2,
                 enabled: state.config.tier2Enabled
             ) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
+                withAnimation(NexusAnimation.primary) {
                     state.config.tier2Enabled.toggle()
                 }
             }
         }
     }
 
-    private func tierPill(
+    /// Hardware toggle pill — the entire component changes state, not just a dot.
+    private func tierToggle(
         label: String,
         sublabel: String,
         icon: String,
@@ -357,42 +398,54 @@ struct MainControlView: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(enabled ? color : Color(.tertiaryLabel))
-                    .frame(width: 28, height: 28)
-                    .background(Circle().fill(enabled ? color.opacity(0.12) : Color(.systemFill)))
+            HStack(spacing: 11) {
+                // Icon container
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(enabled ? color.opacity(0.18) : NexusColor.surfaceHigh)
+                        .frame(width: 34, height: 34)
+                    Image(systemName: icon)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(enabled ? color : NexusColor.textTertiary)
+                }
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(label)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(enabled ? .primary : .secondary)
+                        .font(NexusFont.label())
+                        .foregroundStyle(enabled ? NexusColor.textPrimary : NexusColor.textSecondary)
                     Text(sublabel)
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color(.quaternaryLabel))
+                        .font(NexusFont.sublabel())
+                        .kerning(0.4)
+                        .foregroundStyle(NexusColor.textTertiary)
                 }
 
                 Spacer()
 
-                // Minimal on/off dot
-                Circle()
-                    .fill(enabled ? color : Color(.systemFill))
-                    .frame(width: 8, height: 8)
+                // Hardware-style status indicator — pill shape, not dot
+                Capsule()
+                    .fill(enabled ? color : NexusColor.textTertiary.opacity(0.3))
+                    .frame(width: 26, height: 14)
+                    .overlay(alignment: enabled ? .trailing : .leading) {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 10, height: 10)
+                            .padding(.horizontal, 2)
+                            .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 1)
+                    }
+                    .animation(NexusAnimation.primary, value: enabled)
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.vertical, 13)
             .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color(.secondarySystemGroupedBackground))
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(enabled ? color.opacity(0.07) : NexusColor.surface)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .strokeBorder(
-                                enabled ? color.opacity(0.25) : Color(.separator).opacity(0.4),
-                                lineWidth: enabled ? 1 : 0.5
+                                enabled ? color.opacity(0.28) : NexusColor.cardBorder,
+                                lineWidth: 1
                             )
                     }
-                    .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
             }
         }
         .buttonStyle(.plain)
@@ -402,15 +455,17 @@ struct MainControlView: View {
     // MARK: - Spectrum card
 
     private var spectrumCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Spectrum")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(NexusFont.sectionHead())
+                    .kerning(-0.3)
+                    .foregroundStyle(NexusColor.textPrimary)
                 Spacer()
                 if state.isShieldActive {
                     Label("Live", systemImage: "circle.fill")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.green)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(NexusColor.accentEmerald)
                         .labelStyle(TrailingIconLabelStyle())
                         .transition(.opacity)
                 }
@@ -423,7 +478,7 @@ struct MainControlView: View {
                 isActive: state.isShieldActive
             )
             .frame(height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             LevelMeterView(
                 level: metricsService.currentMetrics.rmsLevel,
@@ -431,7 +486,7 @@ struct MainControlView: View {
             )
 
             if state.isShieldActive && !metricsService.rmsHistory.allSatisfy({ $0 == -60 }) {
-                SparklineView(values: metricsService.rmsHistory, color: .blue.opacity(0.4))
+                SparklineView(values: metricsService.rmsHistory, color: NexusColor.accent.opacity(0.45))
                     .frame(height: 18)
                     .transition(.opacity)
             }
@@ -442,104 +497,126 @@ struct MainControlView: View {
                 Text("4 kHz").frame(maxWidth: .infinity, alignment: .center)
                 Text("20 kHz").frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .font(.system(size: 10, design: .monospaced))
-            .foregroundStyle(Color(.quaternaryLabel))
+            .font(NexusFont.monoSmall())
+            .foregroundStyle(NexusColor.textTertiary)
         }
-        .padding(16)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 18)
         .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(NexusColor.surface)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color(.separator).opacity(0.45), lineWidth: 0.5)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
                 }
-                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
         }
     }
 
     // MARK: - Intensity card
 
     private var intensityCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Intensity")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(NexusFont.sectionHead())
+                    .kerning(-0.3)
+                    .foregroundStyle(NexusColor.textPrimary)
                 Spacer()
                 Text("\(Int(state.config.intensity * 100))%")
-                    .font(.system(size: 15, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(.blue)
+                    .font(NexusFont.mono(size: 15))
+                    .foregroundStyle(NexusColor.accent)
                     .contentTransition(.numericText())
             }
 
             Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
-                .tint(.blue)
+                .tint(NexusColor.accent)
 
             Text("Higher values increase jamming effectiveness but may become faintly audible.")
-                .font(.system(size: 12))
-                .foregroundStyle(Color(.tertiaryLabel))
-                .lineSpacing(3)
+                .font(NexusFont.caption())
+                .foregroundStyle(NexusColor.textSecondary)
+                .lineSpacing(4)
         }
-        .padding(16)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 18)
         .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(NexusColor.surface)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color(.separator).opacity(0.45), lineWidth: 0.5)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
                 }
-                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
         }
     }
 
-    // MARK: - Status strip
+    // MARK: - Status strip (precision instrument readout)
 
     private var statusStrip: some View {
         HStack(spacing: 0) {
             statusCell(
-                value: String(format: "%.0f ms", metricsService.currentMetrics.latencyMs),
-                label: "Latency",
-                accent: metricsService.currentMetrics.latencyMs < 30 ? .green : .orange
+                value: String(format: "%.0f", metricsService.currentMetrics.latencyMs),
+                unit: "ms",
+                label: "LATENCY",
+                accent: metricsService.currentMetrics.latencyMs < 30
+                    ? NexusColor.accentEmerald
+                    : NexusColor.warning
             )
-            Divider().frame(height: 22)
+            stripDivider
             statusCell(
-                value: String(format: "%.0f dB", metricsService.currentMetrics.rmsLevel),
-                label: "Level",
-                accent: .secondary
+                value: String(format: "%.0f", metricsService.currentMetrics.rmsLevel),
+                unit: "dB",
+                label: "LEVEL",
+                accent: NexusColor.textSecondary
             )
-            Divider().frame(height: 22)
+            stripDivider
             statusCell(
-                value: state.audioMode == .speakerPlayback ? "Speaker" : "VoIP",
-                label: "Route",
-                accent: .secondary
+                value: state.audioMode == .speakerPlayback ? "SPKR" : "VoIP",
+                unit: nil,
+                label: "ROUTE",
+                accent: NexusColor.textSecondary
             )
             if state.isShieldActive {
-                Divider().frame(height: 22)
+                stripDivider
                 statusCell(
                     value: "\(state.activeTechniqueCount)",
-                    label: "Active",
-                    accent: .blue
+                    unit: nil,
+                    label: "ACTIVE",
+                    accent: NexusColor.accent
                 )
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(.bar)
+        .padding(.vertical, 11)
+        .background(NexusColor.surface)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(Color(.separator))
+                .fill(NexusColor.stripBorder)
                 .frame(height: 0.5)
         }
     }
 
-    private func statusCell(value: String, label: String, accent: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(accent)
-                .contentTransition(.numericText())
+    private var stripDivider: some View {
+        Rectangle()
+            .fill(NexusColor.separator)
+            .frame(width: 0.5, height: 18)
+    }
+
+    private func statusCell(value: String, unit: String?, label: String, accent: Color) -> some View {
+        VStack(spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(NexusFont.mono(size: 13))
+                    .foregroundStyle(accent)
+                    .contentTransition(.numericText())
+                if let unit {
+                    Text(unit)
+                        .font(NexusFont.mono(size: 9))
+                        .foregroundStyle(accent.opacity(0.7))
+                }
+            }
             Text(label)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(Color(.quaternaryLabel))
+                .font(NexusFont.stripLabel())
+                .kerning(0.5)
+                .foregroundStyle(NexusColor.textTertiary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -551,7 +628,7 @@ private struct TrailingIconLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 4) {
             configuration.icon
-                .font(.system(size: 7))
+                .font(.system(size: 6))
             configuration.title
         }
     }

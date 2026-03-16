@@ -2,17 +2,15 @@ import SwiftUI
 
 // MARK: - GlassCard
 
-/// A container that renders its content on a raised card surface.
-///
-/// Uses the system's secondary grouped background so it lifts cleanly from the
-/// page in both light and dark mode without any hardcoded colours.
+/// A container that renders its content on a Nexus surface card.
+/// Uses NexusColor tokens — dark fill, 1pt border, no drop shadow.
 struct GlassCard<Content: View>: View {
     let cornerRadius: CGFloat
     let tintColor: Color?
     @ViewBuilder let content: () -> Content
 
     init(
-        cornerRadius: CGFloat = NexusTheme.radiusMD,
+        cornerRadius: CGFloat = 20,
         tint: Color? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -23,25 +21,23 @@ struct GlassCard<Content: View>: View {
 
     var body: some View {
         content()
-            .padding(NexusTheme.spacingMD)
+            .padding(18)
             .background {
                 ZStack {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(NexusTheme.cardBackground)
+                        .fill(NexusColor.surface)
 
                     if let tint = tintColor {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(tint.opacity(0.09))
+                            .fill(tint.opacity(0.07))
                     }
 
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(
-                            tintColor.map { $0.opacity(0.25) } ?? NexusTheme.cardStroke,
-                            lineWidth: tintColor != nil ? 1 : 0.5
+                            tintColor.map { $0.opacity(0.28) } ?? NexusColor.cardBorder,
+                            lineWidth: 1
                         )
                 }
-                .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-                .shadow(color: .black.opacity(0.02), radius: 1, x: 0, y: 0)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
@@ -55,7 +51,7 @@ struct TierCard: View {
     let onToggle: () -> Void
 
     private var tintColor: Color {
-        tier == .tier1 ? NexusTheme.tier1 : NexusTheme.tier2
+        tier == .tier1 ? NexusColor.tier1 : NexusColor.tier2
     }
 
     private var iconName: String {
@@ -65,36 +61,45 @@ struct TierCard: View {
     var body: some View {
         Button(action: onToggle) {
             GlassCard(tint: isEnabled ? tintColor : nil) {
-                VStack(alignment: .leading, spacing: NexusTheme.spacingSM) {
+                VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Image(systemName: iconName)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(isEnabled ? tintColor : NexusTheme.textTertiary)
-                            .frame(width: 28, height: 28)
+                            .foregroundStyle(isEnabled ? tintColor : NexusColor.textTertiary)
+                            .frame(width: 30, height: 30)
                             .background(
-                                Circle()
-                                    .fill(isEnabled ? tintColor.opacity(0.12) : Color(.quaternarySystemFill))
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .fill(isEnabled ? tintColor.opacity(0.16) : NexusColor.surfaceHigh)
                             )
 
                         Spacer()
 
-                        // On/off indicator dot
-                        Circle()
-                            .fill(isEnabled ? tintColor : Color(.systemFill))
-                            .frame(width: 8, height: 8)
+                        // Hardware-style toggle pill
+                        Capsule()
+                            .fill(isEnabled ? tintColor : NexusColor.textTertiary.opacity(0.3))
+                            .frame(width: 26, height: 14)
+                            .overlay(alignment: isEnabled ? .trailing : .leading) {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 10, height: 10)
+                                    .padding(.horizontal, 2)
+                                    .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            }
+                            .animation(NexusAnimation.primary, value: isEnabled)
                     }
 
                     Text(tier == .tier1 ? "Acoustic" : "Adversarial")
-                        .font(.caption)
-                        .foregroundStyle(NexusTheme.textTertiary)
+                        .font(NexusFont.sublabel())
+                        .kerning(0.3)
+                        .foregroundStyle(NexusColor.textTertiary)
 
                     Text(tier.rawValue)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(isEnabled ? NexusTheme.textPrimary : NexusTheme.textSecondary)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(isEnabled ? NexusColor.textPrimary : NexusColor.textSecondary)
                 }
             }
         }
         .buttonStyle(.plain)
-        .animation(.spring(response: 0.32, dampingFraction: 0.72), value: isEnabled)
+        .animation(NexusAnimation.primary, value: isEnabled)
     }
 }

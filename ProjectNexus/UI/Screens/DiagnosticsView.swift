@@ -17,7 +17,7 @@ struct DiagnosticsView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(NexusColor.background.ignoresSafeArea())
             .navigationTitle("Diagnostics")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
