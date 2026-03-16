@@ -1,8 +1,13 @@
 import Foundation
 import Accelerate
+import Synchronization
 
 final class BabbleNoiseGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let layerCount = 4
     private let segmentLength = 48000 * 3  // 3 seconds at 48kHz

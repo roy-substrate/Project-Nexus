@@ -1,8 +1,15 @@
 import Foundation
 import Accelerate
+import Synchronization
 
 final class SpectralNotchGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    // Atomic backing so the CoreAudio render thread (read) and main thread (write)
+    // can access isEnabled without a data race.
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let noiseTableSize = 48000  // 1 second at 48kHz
     private var noiseTable: [Float]

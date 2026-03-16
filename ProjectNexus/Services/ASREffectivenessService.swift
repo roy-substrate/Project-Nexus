@@ -236,8 +236,11 @@ final class ASREffectivenessService: NSObject {
             if let result, result.isFinal {
                 self.restartAttempts = 0
                 self.commitWindow(shieldActive: shieldActiveProvider())
-            }
-            if error != nil {
+            } else if error != nil {
+                // Use else-if to prevent both branches firing when the framework
+                // delivers a partial result and an error in the same callback.
+                // Without this guard, restartTask() could recurse while
+                // restartAttempts hasn't been reset, exhausting the retry budget.
                 self.restartTask(shieldActiveProvider: shieldActiveProvider)
             }
         }

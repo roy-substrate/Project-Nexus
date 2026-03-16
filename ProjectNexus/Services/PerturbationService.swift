@@ -1,5 +1,6 @@
 import Foundation
 import os
+import Synchronization
 
 final class PerturbationService {
     private let logger = Logger(subsystem: "com.nexus", category: "PertService")
@@ -105,7 +106,11 @@ final class PerturbationService {
 }
 
 private final class UAPGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let uapManager: UAPManager
     private var intensity: Float
