@@ -439,7 +439,9 @@ struct MainControlView: View {
     // MARK: - Tier Row
 
     private var tierRow: some View {
-        HStack(spacing: 12) {
+        // GlassEffectContainer enables coordinated morphing between enabled/disabled
+        // states via glassEffectID — pills morph together when toggled.
+        GlassEffectContainer(spacing: 10) {
             tierToggle(
                 label: "Standard",
                 sublabel: "TIER 1",
@@ -451,6 +453,7 @@ struct MainControlView: View {
                     state.config.tier1Enabled.toggle()
                 }
             }
+            .glassEffectID("tier1", in: tierNamespace)
 
             tierToggle(
                 label: "Advanced AI",
@@ -463,6 +466,7 @@ struct MainControlView: View {
                     state.config.tier2Enabled.toggle()
                 }
             }
+            .glassEffectID("tier2", in: tierNamespace)
         }
     }
 

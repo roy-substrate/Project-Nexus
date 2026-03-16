@@ -191,6 +191,8 @@ struct ContentView: View {
             }
         }
         .tint(NexusColor.accent)
+        // iOS 26 floating tab bar — minimizes on scroll down for more content area
+        .tabBarMinimizeBehavior(.onScrollDown)
         // Propagate all config mutations to the live service + persistence
         .onChange(of: state.config.intensity) { _, new in
             onConfigUpdate()

@@ -3,6 +3,7 @@ import AVFoundation
 
 // MARK: - Onboarding container
 
+@available(iOS 26, *)
 struct OnboardingView: View {
     @AppStorage("nexus.onboarding.completed") private var isCompleted = false
     @State private var page = 0
@@ -55,11 +56,19 @@ struct OnboardingView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(NexusColor.textSecondary)
                     .padding(.bottom, 4)
-            } else {
+            } else if page == 0 {
+                // Welcome — dark page: glassProminent (opaque primary action)
                 Button(action: advance) {
-                    Text(page == 0 ? "Get Started" : "Continue")
+                    Text("Get Started")
                 }
-                .buttonStyle(.nexusPrimary)
+                .buttonStyle(.glassProminent)
+                .padding(.horizontal, 28)
+            } else {
+                // HowItWorks (page 1) — dark page: glass (translucent secondary)
+                Button(action: advance) {
+                    Text("Continue")
+                }
+                .buttonStyle(.glass)
                 .padding(.horizontal, 28)
             }
         }
@@ -76,6 +85,7 @@ struct OnboardingView: View {
 
 // MARK: - Page 1 — Welcome (dark, editorial)
 
+@available(iOS 26, *)
 private struct WelcomePage: View {
     @State private var appeared = false
 
@@ -146,6 +156,7 @@ private struct WelcomePage: View {
 
 // MARK: - Page 2 — How it works (editorial dark)
 
+@available(iOS 26, *)
 private struct HowItWorksPage: View {
     @State private var appeared = false
 
@@ -267,6 +278,7 @@ private struct HowItWorksPage: View {
 
 // MARK: - Page 3 — Microphone permission
 
+@available(iOS 26, *)
 private struct PermissionPage: View {
     let onGranted: () -> Void
 
@@ -323,19 +335,20 @@ private struct PermissionPage: View {
                 Spacer()
 
                 if permissionState == .denied {
+                    // Permission page — use .glass (translucent, less aggressive)
                     Button("Open Settings") {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .buttonStyle(.nexusPrimary)
+                    .buttonStyle(.glass)
                     .padding(.horizontal, 28)
                     .padding(.bottom, 130)
                 } else if permissionState != .requesting {
                     Button(action: requestPermission) {
                         Text("Allow Microphone")
                     }
-                    .buttonStyle(.nexusPrimary)
+                    .buttonStyle(.glass)
                     .padding(.horizontal, 28)
                     .padding(.bottom, 130)
                 }
@@ -396,6 +409,7 @@ private struct PermissionPage: View {
 
 // MARK: - Page 4 — Ready (dark close, matches welcome)
 
+@available(iOS 26, *)
 private struct ReadyPage: View {
     let onDone: () -> Void
     @State private var appeared = false
@@ -457,8 +471,9 @@ private struct ReadyPage: View {
 
                 Spacer()
 
+                // Ready — dark page: glassProminent (opaque primary, strongest CTA)
                 Button("Start Using Nexus", action: onDone)
-                    .buttonStyle(.nexusPrimary)
+                    .buttonStyle(.glassProminent)
                     .padding(.horizontal, 28)
                     .padding(.bottom, 54)
                     .opacity(appeared ? 1 : 0)
