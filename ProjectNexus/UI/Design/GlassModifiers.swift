@@ -1,30 +1,29 @@
 import SwiftUI
 
-// MARK: - Card style
+// MARK: - NexusSurfaceCardStyle (replaces GlassCardStyle)
 
-/// Lifts content onto a card surface using the system's secondary grouped background.
-/// Matches iOS Settings-style inset cards — clean, no glow, adaptive.
+/// Lifts content onto the Nexus card surface.
+/// Uses NexusColor tokens — dark fill, 1pt border, no drop shadow.
 struct GlassCardStyle: ViewModifier {
-    var cornerRadius: CGFloat = NexusTheme.radiusMD
-    var padding: CGFloat = NexusTheme.spacingMD
+    var cornerRadius: CGFloat = 20
+    var padding: CGFloat = 18
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(NexusTheme.cardBackground)
+                    .fill(NexusColor.surface)
                     .overlay {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(NexusTheme.cardStroke, lineWidth: 0.5)
+                            .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
                     }
-                    .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
-// MARK: - Glow (intentionally subtle for light mode)
+// MARK: - GlowModifier
 
 struct GlowModifier: ViewModifier {
     var color: Color
@@ -32,11 +31,11 @@ struct GlowModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .shadow(color: color.opacity(0.18), radius: radius, x: 0, y: 0)
+            .shadow(color: color.opacity(0.28), radius: radius, x: 0, y: 0)
     }
 }
 
-// MARK: - Shimmer (no-op — removed; presence kept for API compat)
+// MARK: - ShimmerModifier (no-op — kept for API compat)
 
 struct ShimmerModifier: ViewModifier {
     func body(content: Content) -> some View { content }
@@ -46,8 +45,8 @@ struct ShimmerModifier: ViewModifier {
 
 extension View {
     func glassCard(
-        cornerRadius: CGFloat = NexusTheme.radiusMD,
-        padding: CGFloat = NexusTheme.spacingMD
+        cornerRadius: CGFloat = 20,
+        padding: CGFloat = 18
     ) -> some View {
         modifier(GlassCardStyle(cornerRadius: cornerRadius, padding: padding))
     }
@@ -60,50 +59,83 @@ extension View {
         modifier(ShimmerModifier())
     }
 
-    /// Apply the system grouped background (adapts to light/dark mode).
+    /// Apply the Nexus dark background.
     func nexusBackground() -> some View {
-        self.background(Color(.systemGroupedBackground).ignoresSafeArea())
+        self.background(NexusColor.background.ignoresSafeArea())
     }
 }
 
-// MARK: - Primary button style  (solid, full-width, system blue)
+// MARK: - NexusPrimaryButtonStyle
 
+/// Full-width accent-filled button with subtle inner shadow.
 struct NexusPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
-            .foregroundStyle(.white)
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(Color.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 17)
             .background {
-                RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                    .fill(Color.blue)
-                    .opacity(configuration.isPressed ? 0.80 : 1)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(NexusColor.accent)
+                    .overlay {
+                        // Subtle inner highlight along the top edge
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+                    }
+                    .opacity(configuration.isPressed ? 0.78 : 1)
             }
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
-/// Outlined secondary button — sits below a primary CTA.
+// MARK: - NexusSecondaryButtonStyle
+
+/// Outline-only button in accent color.
 struct NexusSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.medium))
-            .foregroundStyle(Color.blue)
+            .font(.system(size: 16, weight: .medium))
+            .foregroundStyle(NexusColor.accent)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.vertical, 15)
             .background {
-                RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                    .fill(Color.blue.opacity(0.07))
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(NexusColor.accentFill)
                     .overlay {
-                        RoundedRectangle(cornerRadius: NexusTheme.radiusMD, style: .continuous)
-                            .strokeBorder(Color.blue.opacity(0.25), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(NexusColor.accent.opacity(0.35), lineWidth: 1)
                     }
-                    .opacity(configuration.isPressed ? 0.75 : 1)
+                    .opacity(configuration.isPressed ? 0.72 : 1)
             }
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
+
+// MARK: - NexusDangerButtonStyle
+
+/// Full-width danger-red filled button.
+struct NexusDangerButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(Color.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 17)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(NexusColor.danger)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+                    }
+                    .opacity(configuration.isPressed ? 0.78 : 1)
+            }
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Static style extensions
 
 extension ButtonStyle where Self == NexusPrimaryButtonStyle {
     static var nexusPrimary: NexusPrimaryButtonStyle { .init() }
@@ -111,4 +143,8 @@ extension ButtonStyle where Self == NexusPrimaryButtonStyle {
 
 extension ButtonStyle where Self == NexusSecondaryButtonStyle {
     static var nexusSecondary: NexusSecondaryButtonStyle { .init() }
+}
+
+extension ButtonStyle where Self == NexusDangerButtonStyle {
+    static var nexusDanger: NexusDangerButtonStyle { .init() }
 }
