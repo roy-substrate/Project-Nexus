@@ -2,7 +2,29 @@
 
 ## Current State
 
-**Coverage: 0% → Initial tests added for ~20% coverage of testable units**
+**Coverage: 0% → Sprint 4 P3 complete — ~55% coverage of testable units**
+
+**Total tests: 267** (153 existing + 114 new in Sprint 4 P3 run)
+
+| Sprint | Tests Added | Files | Coverage Δ |
+|--------|------------|-------|-----------|
+| Initial | 93 | 5 | 0% → ~20% |
+| Sprint 4 P3 | 114 | 6 | ~20% → ~55% |
+
+### Sprint 4 P3 — Newly Added
+
+| File | Component | Tests |
+|------|-----------|-------|
+| `BabbleNoiseGeneratorTests.swift` | `BabbleNoiseGenerator` | 15 |
+| `SpectralNotchGeneratorTests.swift` | `SpectralNotchGenerator` | 17 |
+| `FrequencySweepGeneratorTests.swift` | `FrequencySweepGenerator` | 18 |
+| `PsychoacousticMaskerTests.swift` | `PsychoacousticMasker` | 20 |
+| `UAPManagerTests.swift` | `UAPManager`, `UAPVariant` | 27 |
+| `PerturbationServiceTests.swift` | `PerturbationService` | 17 |
+
+**PerturbationServiceTests note:** Tests that call `service.start()` are guarded
+with `XCTSkip` for environments without audio hardware (CI). Tests of init,
+stop-without-start, and callback assignment run unconditionally.
 
 The project had zero tests. This document outlines what has been added and what
 remains to be addressed.
@@ -129,13 +151,20 @@ layout and state-driven rendering.
 
 ## Suggested Code Coverage Target
 
-| Area | Current | Target |
-|------|---------|--------|
-| Models | 0% | 90% |
-| Extensions | 0% | 90% |
-| DSP Utilities | 0% | 80% |
-| DSP Generators | 0% | 70% |
-| ML Components | 0% | 60% |
-| Services | 0% | 70% |
-| Audio Engine | 0% | 50% |
-| UI Views | 0% | 30% |
+| Area | Sprint 3 | Sprint 4 P3 | Target |
+|------|---------|-------------|--------|
+| Models | ~60% | ~60% | 90% |
+| Extensions | ~80% | ~80% | 90% |
+| DSP Utilities | ~70% | ~70% | 80% |
+| DSP Generators | 0% | **~70%** ✅ | 70% |
+| ML Components | 0% | **~65%** ✅ | 60% |
+| Services | 0% | **~45%** | 70% |
+| Audio Engine | 0% | 0% | 50% |
+| UI Views | 0% | 0% | 30% |
+
+### Remaining Gaps (Sprint 5)
+- `AudioPipelineManager` — requires mock AVAudioEngine protocol
+- `MicCaptureNode`, `SpeakerPlaybackRouter` — require audio session
+- `PerturbationOptimizer` — CMA-ES convergence tests
+- `AVAudioPCMBuffer+Utilities` — extension tests
+- SwiftUI views — ViewInspector or snapshot tests
