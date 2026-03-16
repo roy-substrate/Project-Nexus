@@ -11,6 +11,13 @@ struct MainControlView: View {
     @State private var sessionResultScore: Float = 0
     @State private var showSessionResult: Bool = false
 
+    /// Tracks when the current shield session started for the live timer.
+    @State private var sessionStartTime: Date?
+
+    // MARK: - ASR permission nudge
+    @AppStorage("nexus.asrPermissionNudgeShown") private var nudgeShown = false
+    @State private var showASRNudge: Bool = false
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
@@ -29,8 +36,21 @@ struct MainControlView: View {
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .bottom) { statusStrip }
         .overlay(alignment: .top) { sessionResultBanner }
+        .overlay(alignment: .bottom) { asrPermissionNudge }
         .onChange(of: state.isShieldActive) { _, isActive in
-            if !isActive {
+            if isActive {
+                sessionStartTime = .now
+                // Show ASR nudge once if mic permission was skipped during onboarding
+                if !asrService.isAuthorized && !nudgeShown {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.78)) {
+                        showASRNudge = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                        withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                    }
+                }
+            } else {
+                sessionStartTime = nil
                 let score = asrService.effectivenessScore
                 if score > 0.5 {
                     sessionResultScore = score
@@ -68,6 +88,51 @@ struct MainControlView: View {
             }
             .padding(.top, 12)
             .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    // MARK: - ASR permission nudge banner (one-time, non-blocking)
+
+    @ViewBuilder
+    private var asrPermissionNudge: some View {
+        if showASRNudge {
+            HStack(spacing: 10) {
+                Image(systemName: "mic.slash.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.orange)
+
+                Text("Enable speech measurement to see your jam score")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                Button("Enable") {
+                    Task { await asrService.requestAuthorization() }
+                    nudgeShown = true
+                    withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                }
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.blue)
+
+                Button("Not now") {
+                    nudgeShown = true
+                    withAnimation(.easeOut(duration: 0.3)) { showASRNudge = false }
+                }
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.regularMaterial)
+                    .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
 
@@ -235,7 +300,7 @@ struct MainControlView: View {
     private var tierRow: some View {
         HStack(spacing: 10) {
             tierPill(
-                label: "Acoustic",
+                label: "Standard",
                 sublabel: "Tier 1",
                 icon: "waveform",
                 color: Color(hue: 0.58, saturation: 0.80, brightness: 0.92),
@@ -247,7 +312,7 @@ struct MainControlView: View {
             }
 
             tierPill(
-                label: "Adversarial",
+                label: "Advanced AI",
                 sublabel: "Tier 2",
                 icon: "brain",
                 color: Color(hue: 0.73, saturation: 0.70, brightness: 0.88),
@@ -281,8 +346,8 @@ struct MainControlView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(enabled ? .primary : .secondary)
                     Text(sublabel)
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color(.quaternaryLabel))
                 }
 
                 Spacer()

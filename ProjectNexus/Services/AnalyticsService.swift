@@ -68,6 +68,27 @@ final class AnalyticsService {
     /// Peak ASR jamming score seen across all sessions.
     var peakJamScore: Float { sessionHistory.map(\.peakASRJamScore).max() ?? 0 }
 
+    /// Number of consecutive calendar days (ending today) that had at least one session
+    /// with one or more shield activations.
+    var protectionStreak: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        // Build a set of calendar days that have at least one qualifying session.
+        let protectedDays = Set(
+            sessionHistory
+                .filter { $0.shieldActivations > 0 }
+                .map { calendar.startOfDay(for: $0.date) }
+        )
+        var streak = 0
+        var day = today
+        while protectedDays.contains(day) {
+            streak += 1
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            day = previous
+        }
+        return streak
+    }
+
     // MARK: - Private
 
     private let logger = Logger(subsystem: "com.nexus.analytics", category: "Events")

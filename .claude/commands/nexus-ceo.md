@@ -54,7 +54,17 @@ Find the 10 most impactful changes that would make this app significantly better
 [Rating 1-10 with one sentence why]
 ```
 
-5. **After the review** — Ask: "Should I delegate specific improvements to `/nexus-review` (code quality), `/nexus-optimize` (performance), or `/nexus-ship` (release)?"
+5. **Autonomous Delegation** — After producing the review, WITHOUT asking for permission:
+   - Identify which HIGH-impact items are immediately actionable in code
+   - For each actionable item, decide which agent owns it:
+     - `/nexus-review` → code quality, refactoring, architecture fixes
+     - `/nexus-optimize` → DSP performance, audio latency, CPU/memory
+     - `/nexus-mobile` → iOS platform features, SwiftUI improvements, UX polish
+     - `/nexus-product` → product strategy, feature spec, user journey
+     - `/nexus-eng-manager` → sprint planning, tech debt prioritization
+   - Use the Agent tool to launch the relevant agents IN PARALLEL for all HIGH-impact items
+   - Each agent invocation should include: the specific item number from the review, what to implement, and which files to modify
+   - Report back: "Delegated items 1, 2, 3 to [agents]. Items 4–6 queued for next sprint."
 
 ## Mindset
 
