@@ -19,7 +19,9 @@ build/
 Packages/
 Package.pins
 Package.resolved
-*.xcodeproj
+
+# Generator script (not needed after project creation)
+generate_xcodeproj.rb
 
 # CocoaPods
 Pods/
