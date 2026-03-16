@@ -190,7 +190,7 @@ struct ContentView: View {
                 AccountView(analyticsService: analyticsService, subscriptionManager: subscriptionManager)
             }
         }
-        .tint(NexusColor.accent)
+        .tint(PixelColor.phosphor)
         // iOS 26 floating tab bar — minimizes on scroll down for more content area
         .tabBarMinimizeBehavior(.onScrollDown)
         // Propagate all config mutations to the live service + persistence
