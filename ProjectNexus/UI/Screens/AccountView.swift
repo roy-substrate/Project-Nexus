@@ -95,8 +95,20 @@ struct AccountView: View {
 
     // MARK: - Stats Section
 
+    private var streakLabel: String {
+        let streak = analyticsService.protectionStreak
+        let prefix = streak >= 3 ? "🔥 " : ""
+        return "\(prefix)\(streak)-day streak"
+    }
+
     private var statsSection: some View {
         Section("Your Shield Stats") {
+            statRow(
+                icon: "flame.fill",
+                label: "Protection Streak",
+                value: streakLabel,
+                color: analyticsService.protectionStreak >= 3 ? .orange : .secondary
+            )
             statRow(
                 icon: "shield.checkered.fill",
                 label: "Total Activations",
