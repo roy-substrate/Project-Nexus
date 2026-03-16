@@ -156,23 +156,19 @@ struct MainControlView: View {
     @ViewBuilder
     private var sessionResultBanner: some View {
         if showSessionResult {
-            HStack(spacing: 10) {
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(NexusColor.accentEmerald)
-                Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
-                    .font(NexusFont.label())
-                    .foregroundStyle(NexusColor.textPrimary)
-            }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 11)
-            .background {
-                Capsule()
-                    .fill(NexusColor.surfaceHigh)
-                    .overlay {
-                        Capsule()
-                            .strokeBorder(NexusColor.accentEmerald.opacity(0.25), lineWidth: 1)
-                    }
+            GlassEffectContainer(spacing: 0) {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(NexusColor.accentEmerald)
+                    Text("Session complete · \(Int(sessionResultScore * 100))% AI blocked")
+                        .font(NexusFont.label())
+                        .foregroundStyle(NexusColor.textPrimary)
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 11)
+                // Emerald-tinted glass capsule — floats above mesh gradient
+                .glassEffect(.regular.tint(NexusColor.accentEmerald), in: .capsule)
             }
             .padding(.top, 14)
             .transition(.move(edge: .top).combined(with: .opacity))
@@ -213,14 +209,8 @@ struct MainControlView: View {
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 14)
-            .background {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(NexusColor.surfaceHigh)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
-                    }
-            }
+            // Glass surface — floats above mesh gradient, no manual fill needed
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18))
             .padding(.horizontal, 18)
             .padding(.bottom, 14)
             .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -422,14 +412,8 @@ struct MainControlView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background {
-                        Capsule()
-                            .fill(asrEffectivenessColor.opacity(0.10))
-                            .overlay {
-                                Capsule()
-                                    .strokeBorder(asrEffectivenessColor.opacity(0.25), lineWidth: 1)
-                            }
-                    }
+                    // Color-tinted glass capsule — reads against mesh gradient
+                    .glassEffect(.regular.tint(asrEffectivenessColor), in: .capsule)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
@@ -530,17 +514,8 @@ struct MainControlView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(enabled ? color.opacity(0.07) : NexusColor.surface)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .strokeBorder(
-                                enabled ? color.opacity(0.28) : NexusColor.cardBorder,
-                                lineWidth: 1
-                            )
-                    }
-            }
+            // Interactive glass pill — touch-responsive, floats above mesh gradient
+            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
@@ -596,14 +571,8 @@ struct MainControlView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
-        .background {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(NexusColor.surface)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
-                }
-        }
+        // Glass card surface — translucent over mesh gradient
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
     }
 
     // MARK: - Intensity card
@@ -632,14 +601,8 @@ struct MainControlView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
-        .background {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(NexusColor.surface)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(NexusColor.cardBorder, lineWidth: 1)
-                }
-        }
+        // Glass card surface — translucent over mesh gradient
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20))
     }
 
     // MARK: - Status strip (precision instrument readout)
@@ -680,12 +643,10 @@ struct MainControlView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 11)
-        .background(NexusColor.surface)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(NexusColor.stripBorder)
-                .frame(height: 0.5)
-        }
+        // Glass strip — floats above mesh gradient; replaces solid surface background
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
     }
 
     private var stripDivider: some View {
