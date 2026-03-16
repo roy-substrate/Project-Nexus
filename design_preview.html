@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Nexus — Design Preview</title>
+<style>
+  :root {
+    --bg:           #000000;
+    --surface:      #0D0D0D;
+    --border:       #D9D9D9;  /* white 85% on black */
+    --text:         #F0F0F0;
+    --text-dim:     #737373;  /* white 45% on black */
+    --phosphor:     #39FF14;
+    --phosphor-dim: #1A5C09;
+    --warning:      #FFB32E;
+    --mono: 'Courier New', 'Lucida Console', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111111;
+    font-family: var(--mono);
+    color: var(--text);
+    padding: 40px 24px;
+  }
+
+  h1.doc-title {
+    font-family: var(--mono);
+    color: var(--phosphor);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  p.doc-sub {
+    font-family: var(--mono);
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 44px;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* Phone frame                                  */
+  /* ═══════════════════════════════════════════ */
+
+  .screens-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 36px;
+    justify-content: center;
+  }
+
+  .screen-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .screen-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  .phone {
+    width: 300px;
+    height: 620px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Scanlines via background repeating gradient */
+  .phone-inner {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 1px,
+      rgba(0,0,0,0.05) 1px,
+      rgba(0,0,0,0.05) 2px
+    );
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  .phone-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* ── Status bar ─────────────────────────────── */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px 4px;
+    flex-shrink: 0;
+  }
+
+  .status-bar-time {
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--text);
+  }
+
+  .status-bar-icons {
+    font-size: 9px;
+    color: var(--text);
+  }
+
+  /* ── Scrollable body ────────────────────────── */
+  .body-scroll {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* MAIN CONTROL — common                        */
+  /* ═══════════════════════════════════════════ */
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 20px;
+  }
+
+  /* Shield box */
+  .shield-box {
+    width: 110px;
+    height: 110px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  .shield-box-on {
+    border: 2px solid var(--phosphor);
+    background: #020E00;   /* very dark green tint, simulates dither */
+  }
+
+  .shield-label {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .shield-ascii {
+    font-size: 8px;
+    line-height: 1.5;
+    text-align: center;
+    white-space: pre;
+  }
+
+  /* Waveform (active) */
+  .waveform-block {
+    font-size: 11px;
+    letter-spacing: -1px;
+    color: var(--phosphor);
+  }
+
+  .status-primary {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .status-secondary {
+    margin-top: 5px;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .uptime-wrap {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .uptime-lbl {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  .uptime-val {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--phosphor);
+    line-height: 1;
+  }
+
+  .jam-badge {
+    margin-top: 8px;
+    border: 1px solid var(--phosphor);
+    padding: 4px 10px;
+    font-size: 10px;
+    color: var(--phosphor);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .cards {
+    padding: 0 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tier-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tier-btn {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .tier-btn-on { border: 1px solid var(--phosphor); }
+
+  .tier-main {
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    gap: 4px;
+  }
+
+  .tier-sub {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  .card {
+    border: 1px solid var(--border);
+    background: #0D0D0D;
+    padding: 12px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--phosphor);
+    margin-right: 3px;
+  }
+
+  .live-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--phosphor);
+  }
+
+  /* Spectrum bars - CSS-rendered */
+  .spectrum {
+    border: 1px solid var(--border);
+    height: 60px;
+    background: var(--bg);
+    display: flex;
+    align-items: flex-end;
+    padding: 2px;
+    gap: 1px;
+    margin-bottom: 5px;
+  }
+
+  .bar {
+    flex: 1;
+    background: var(--text-dim);
+    min-height: 2px;
+  }
+
+  .bar-on {
+    background: var(--phosphor);
+  }
+
+  .bar-notch {
+    background: var(--phosphor-dim);
+  }
+
+  .spec-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .level-bar {
+    height: 4px;
+    background: #1A1A1A;
+    border: 1px solid #333;
+    margin-bottom: 4px;
+  }
+
+  .level-fill { height: 100%; background: var(--text-dim); }
+  .level-fill-on { background: var(--phosphor); }
+
+  .progress-text {
+    font-size: 10px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .progress-text-on { color: var(--phosphor); }
+
+  .slider-track {
+    height: 3px;
+    background: #1A1A1A;
+    margin: 5px 0;
+    position: relative;
+  }
+
+  .slider-fill { height: 100%; background: var(--text-dim); }
+  .slider-fill-on { background: var(--phosphor); }
+
+  .hint {
+    font-size: 8px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* Status strip */
+  .strip {
+    border-top: 1px solid var(--border);
+    padding: 6px 14px;
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* ONBOARDING                                   */
+  /* ═══════════════════════════════════════════ */
+
+  .ob-scroll {
+    flex: 1;
+    padding: 0 28px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .ascii-logo {
+    font-size: 6.5px;
+    line-height: 1.6;
+    white-space: pre;
+    color: var(--phosphor);
+    margin-bottom: 14px;
+    margin-top: 50px;
+  }
+
+  .ob-version {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ob-headline {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .ob-subhead {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .ob-bottom {
+    flex-shrink: 0;
+    padding: 0 22px 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .dot {
+    height: 3px;
+    background: var(--text-dim);
+    width: 5px;
+  }
+
+  .dot-on {
+    background: var(--phosphor);
+    width: 18px;
+  }
+
+  .ob-btn {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .ob-btn-on {
+    border: 1px solid var(--phosphor);
+    color: var(--phosphor);
+  }
+
+  .ob-skip {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  /* How it works */
+  .hw-top {
+    padding-top: 50px;
+    margin-bottom: 28px;
+  }
+
+  .hw-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .hw-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .step { margin-bottom: 20px; }
+
+  .step-head {
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 3px;
+  }
+
+  .step-body {
+    font-size: 10px;
+    color: var(--text-dim);
+    padding-left: 4px;
+    line-height: 1.7;
+  }
+
+  /* Permission page */
+  .mic-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 28px;
+  }
+
+  .mic-icon {
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .perm-head {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    width: 100%;
+  }
+
+  /* Ready page */
+  .ready-wrap {
+    padding: 70px 28px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .check-box {
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre;
+    color: var(--phosphor);
+    margin-bottom: 20px;
+  }
+
+  .ready-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--phosphor);
+    margin-bottom: 8px;
+  }
+
+  .ready-nominal {
+    font-size: 11px;
+    color: var(--phosphor);
+    margin-bottom: 10px;
+  }
+
+  .ready-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* Section dividers                             */
+  /* ═══════════════════════════════════════════ */
+
+  .section-div {
+    max-width: 900px;
+    margin: 52px auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .div-line {
+    flex: 1;
+    height: 1px;
+    background: #2A2A2A;
+  }
+
+  .div-label {
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* Design tokens                                */
+  /* ═══════════════════════════════════════════ */
+
+  .tokens-wrap {
+    max-width: 840px;
+    margin: 0 auto 50px;
+    border: 1px solid #2A2A2A;
+    background: #060606;
+    padding: 28px;
+  }
+
+  .tokens-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+
+  .tokens-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .tc {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tc-swatch {
+    height: 32px;
+    border: 1px solid #2A2A2A;
+  }
+
+  .tc-name {
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .tc-val {
+    font-size: 8px;
+    color: var(--text);
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* Typography                                   */
+  /* ═══════════════════════════════════════════ */
+
+  .type-specimen {
+    max-width: 840px;
+    margin: 0 auto 50px;
+    border: 1px solid #1A1A1A;
+    background: #060606;
+    padding: 24px 28px;
+  }
+
+  .type-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+  }
+
+  .type-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-bottom: 1px solid #111;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+
+  .type-meta {
+    width: 90px;
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════ */
+  /* Components                                   */
+  /* ═══════════════════════════════════════════ */
+
+  .comps-wrap {
+    max-width: 840px;
+    margin: 0 auto 50px;
+  }
+
+  .comps-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .comp-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .comp-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .comp-lbl {
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .c-btn {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 10px 22px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 1px;
+    display: inline-block;
+  }
+
+  .c-btn-on {
+    border: 1px solid var(--phosphor);
+    color: var(--phosphor);
+  }
+
+  .c-btn-dim {
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+  }
+
+  .c-prog {
+    font-size: 11px;
+    color: var(--phosphor);
+    padding: 7px 11px;
+    border: 1px solid var(--phosphor);
+    display: inline-block;
+  }
+
+  .c-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--phosphor);
+    padding: 9px 13px;
+    font-size: 10px;
+  }
+
+  .c-surface {
+    border: 1px solid var(--border);
+    background: #0D0D0D;
+    padding: 11px 15px;
+    font-size: 9px;
+    width: 180px;
+  }
+
+  .c-dither {
+    width: 72px;
+    height: 36px;
+    border: 1px solid var(--phosphor);
+    background: repeating-linear-gradient(
+      45deg,
+      var(--phosphor-dim) 0px, var(--phosphor-dim) 2px,
+      transparent 2px, transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--phosphor-dim) 0px, var(--phosphor-dim) 2px,
+      transparent 2px, transparent 8px
+    );
+    background-color: var(--bg);
+  }
+
+  .c-shield-off {
+    width: 70px;
+    height: 70px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+  }
+
+  .c-shield-on {
+    width: 70px;
+    height: 70px;
+    border: 2px solid var(--phosphor);
+    background: #020E00;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .c-tier-on {
+    width: 90px;
+    border: 1px solid var(--phosphor);
+    background: var(--bg);
+    padding: 9px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .c-tier-off {
+    width: 90px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 9px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .phosphor { color: var(--phosphor); }
+  .text-dim  { color: var(--text-dim); }
+
+  .footer {
+    text-align: center;
+    margin: 50px 0 20px;
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="doc-title">&gt; PROJECT NEXUS — DESIGN SYSTEM v1.0</h1>
+<p class="doc-sub">PIXEL TERMINAL AESTHETIC · COURIER MONO · PHOSPHOR #39FF14 · 2026-03-16</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SCREENS ROW 1: MAIN CONTROL                                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="screens-grid">
+
+  <!-- MAIN · OFFLINE -->
+  <div class="screen-wrap">
+    <div class="screen-label">MAIN · SHIELD OFFLINE</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <!-- Hero -->
+          <div class="hero">
+            <div class="shield-box">
+              <span class="shield-label text-dim">[NEXUS]</span>
+              <pre class="shield-ascii text-dim">/  \
+| S |
+ \_/</pre>
+            </div>
+            <div class="status-primary text-dim">&gt; SHIELD OFFLINE</div>
+            <div class="status-secondary">VOICE PROTECTION OFFLINE</div>
+            <div class="status-secondary">SESSIONS LOGGED: 4</div>
+          </div>
+
+          <!-- Cards -->
+          <div class="cards">
+            <!-- Tier row -->
+            <div class="tier-row">
+              <div class="tier-btn tier-btn-on">
+                <div class="tier-main">
+                  <span class="phosphor">STD</span>
+                  <span class="phosphor">●</span>
+                </div>
+                <div class="tier-sub">TIER 1</div>
+              </div>
+              <div class="tier-btn tier-btn-on">
+                <div class="tier-main">
+                  <span class="phosphor">AI</span>
+                  <span class="phosphor">●</span>
+                </div>
+                <div class="tier-sub">TIER 2</div>
+              </div>
+            </div>
+
+            <!-- Spectrum -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">SPECTRUM ANALYSIS</span>
+              </div>
+              <div class="spectrum">
+                <div class="bar" style="height:28%"></div>
+                <div class="bar" style="height:42%"></div>
+                <div class="bar" style="height:58%"></div>
+                <div class="bar" style="height:48%"></div>
+                <div class="bar" style="height:35%"></div>
+                <div class="bar" style="height:65%"></div>
+                <div class="bar" style="height:52%"></div>
+                <div class="bar" style="height:38%"></div>
+                <div class="bar" style="height:28%"></div>
+                <div class="bar" style="height:22%"></div>
+                <div class="bar" style="height:18%"></div>
+                <div class="bar" style="height:13%"></div>
+              </div>
+              <div class="spec-axis">
+                <span>100HZ</span><span>1KHZ</span><span>4KHZ</span><span>20KHZ</span>
+              </div>
+              <div class="level-bar"><div class="level-fill" style="width:18%"></div></div>
+            </div>
+
+            <!-- Intensity -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">INTENSITY</span>
+                <span style="font-size:12px;font-weight:bold;">70%</span>
+              </div>
+              <div class="progress-text">[███████░░░░░ 70%]</div>
+              <div class="slider-track"><div class="slider-fill" style="width:70%"></div></div>
+              <div class="hint">HIGHER VALUES INCREASE JAM<br>EFFECTIVENESS — MAY BECOME<br>FAINTLY AUDIBLE.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="strip">LAT:8ms&nbsp;&nbsp;LVL:-42dB&nbsp;&nbsp;ROUTE:SPK&nbsp;&nbsp;TECH:5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN · ACTIVE -->
+  <div class="screen-wrap">
+    <div class="screen-label">MAIN · SHIELD ACTIVE</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <div class="hero">
+            <!-- Shield box active: dither fill simulation + phosphor border -->
+            <div class="shield-box shield-box-on">
+              <span class="shield-label phosphor">[NEXUS]</span>
+              <!-- ASCII waveform -->
+              <div class="waveform-block">_/\/\__/\/\_</div>
+            </div>
+
+            <div class="status-primary">
+              <span class="text-dim">&gt; </span>
+              <span class="phosphor">SHIELD ACTIVE</span>
+              <span class="phosphor"> ▌</span>
+            </div>
+
+            <div class="uptime-wrap">
+              <div class="uptime-lbl">UPTIME</div>
+              <div class="uptime-val">03:47</div>
+            </div>
+
+            <div class="status-secondary">TECH:5  ACTIVE</div>
+
+            <div class="jam-badge">
+              <span style="font-weight:bold;">JAM:</span>
+              <span>[████████░░ 82%]</span>
+            </div>
+          </div>
+
+          <div class="cards">
+            <div class="tier-row">
+              <div class="tier-btn tier-btn-on">
+                <div class="tier-main"><span class="phosphor">STD</span><span class="phosphor">●</span></div>
+                <div class="tier-sub">TIER 1</div>
+              </div>
+              <div class="tier-btn tier-btn-on">
+                <div class="tier-main"><span class="phosphor">AI</span><span class="phosphor">●</span></div>
+                <div class="tier-sub">TIER 2</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">SPECTRUM ANALYSIS</span>
+                <div>
+                  <span class="live-dot"></span>
+                  <span class="live-label">LIVE</span>
+                </div>
+              </div>
+              <div class="spectrum">
+                <div class="bar bar-on" style="height:35%"></div>
+                <div class="bar bar-on" style="height:55%"></div>
+                <div class="bar bar-on" style="height:78%"></div>
+                <div class="bar bar-notch" style="height:20%"></div>
+                <div class="bar bar-on" style="height:62%"></div>
+                <div class="bar bar-on" style="height:88%"></div>
+                <div class="bar bar-on" style="height:70%"></div>
+                <div class="bar bar-notch" style="height:22%"></div>
+                <div class="bar bar-on" style="height:44%"></div>
+                <div class="bar bar-on" style="height:34%"></div>
+                <div class="bar bar-on" style="height:28%"></div>
+                <div class="bar bar-on" style="height:18%"></div>
+              </div>
+              <div class="spec-axis">
+                <span>100HZ</span><span>1KHZ</span><span>4KHZ</span><span>20KHZ</span>
+              </div>
+              <div class="level-bar"><div class="level-fill level-fill-on" style="width:63%"></div></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">INTENSITY</span>
+                <span class="phosphor" style="font-size:12px;font-weight:bold;">70%</span>
+              </div>
+              <div class="progress-text progress-text-on">[███████░░░░░ 70%]</div>
+              <div class="slider-track"><div class="slider-fill slider-fill-on" style="width:70%"></div></div>
+              <div class="hint">HIGHER VALUES INCREASE JAM<br>EFFECTIVENESS — MAY BECOME<br>FAINTLY AUDIBLE.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="strip">LAT:7ms&nbsp;&nbsp;LVL:-28dB&nbsp;&nbsp;ROUTE:SPK&nbsp;&nbsp;TECH:5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING · WELCOME -->
+  <div class="screen-wrap">
+    <div class="screen-label">ONBOARDING · WELCOME</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <div class="ob-scroll">
+            <pre class="ascii-logo">  _   _ _______  ___  ___
+ | \ | | ____\ \/ / |/ /
+ |  \| |  _|  \  /| ' /
+ | |\  | |___ /  \| . \
+ |_| \_|_____/_/\_\_|\_\</pre>
+
+            <div class="ob-version">
+              <span class="phosphor">&gt; </span>
+              <span class="text-dim">NEXUS SHIELD v1.0</span>
+            </div>
+
+            <div class="ob-headline">YOUR VOICE.<br>YOUR RULES.</div>
+
+            <div class="ob-subhead">
+              REAL-TIME ACOUSTIC PROTECTION.<br>
+              DEFEATS AI TRANSCRIPTION.<br>
+              INVISIBLY. LOCALLY. INSTANTLY.
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-bottom">
+          <div class="dots">
+            <div class="dot dot-on"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="ob-btn">[ GET STARTED ]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING · HOW IT WORKS -->
+  <div class="screen-wrap">
+    <div class="screen-label">ONBOARDING · HOW IT WORKS</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <div class="ob-scroll">
+            <div class="hw-top">
+              <div class="hw-title">
+                <span class="phosphor">&gt; </span>HOW IT WORKS
+              </div>
+              <div class="hw-sub">TWO LAYERS. ONE TAP. ZERO DATA.</div>
+            </div>
+
+            <div class="step">
+              <div class="step-head">
+                <span class="phosphor">01/ </span>ACOUSTIC MASKING
+              </div>
+              <div class="step-body">
+                Psychoacoustic noise below hearing<br>
+                threshold disrupts ASR systems.
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-head">
+                <span class="phosphor">02/ </span>ADVERSARIAL AI
+              </div>
+              <div class="step-body">
+                ML-crafted perturbations cause<br>
+                Whisper and DeepSpeech to fail.
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-head">
+                <span class="phosphor">03/ </span>ON-DEVICE ONLY
+              </div>
+              <div class="step-body">
+                Under 10ms. Zero data leaves phone.<br>
+                No cloud. No accounts.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-bottom">
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot dot-on"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="ob-btn">[ CONTINUE ]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING · PERMISSION -->
+  <div class="screen-wrap">
+    <div class="screen-label">ONBOARDING · MICROPHONE</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <div class="mic-center">
+            <pre class="mic-icon">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502; MIC &#x2502;
+&#x2502; ))) &#x2502;
+&#x2514;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2518;
+   &#x2502;
+&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;</pre>
+
+            <div class="perm-head">
+              <span class="phosphor">&gt; </span>REQUESTING<br>MICROPHONE ACCESS
+            </div>
+            <div class="ob-subhead">
+              AUDIO PROCESSED ON-DEVICE ONLY.<br>
+              NOTHING RECORDED OR TRANSMITTED.
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-bottom">
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot dot-on"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="ob-btn">[ ALLOW ACCESS ]</div>
+          <div class="ob-skip">[ SKIP FOR NOW ]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING · READY -->
+  <div class="screen-wrap">
+    <div class="screen-label">ONBOARDING · READY</div>
+    <div class="phone">
+      <div class="phone-inner"></div>
+      <div class="phone-content">
+        <div class="status-bar">
+          <span class="status-bar-time">9:41</span>
+          <span class="status-bar-icons">||| 100%</span>
+        </div>
+
+        <div class="body-scroll">
+          <div class="ready-wrap">
+            <pre class="check-box">&#x250C;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502; &#x2713; &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2518;</pre>
+
+            <div class="ready-title">&gt; SYSTEM READY ▌</div>
+            <div class="ready-nominal phosphor">&gt; ALL SYSTEMS NOMINAL</div>
+            <div class="ready-hint">
+              TAP THE SHIELD ON THE HOME SCREEN<br>
+              TO BEGIN VOICE PROTECTION.
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-bottom">
+          <div class="ob-btn ob-btn-on">[ START NEXUS SHIELD ]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DESIGN TOKENS                                                    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="section-div">
+  <div class="div-line"></div>
+  <div class="div-label">DESIGN TOKENS</div>
+  <div class="div-line"></div>
+</div>
+
+<div class="tokens-wrap">
+  <div class="tokens-title">PIXELCOLOR PALETTE — PixelDesignSystem.swift</div>
+  <div class="tokens-grid">
+    <div class="tc">
+      <div class="tc-swatch" style="background:#000000;border-color:#333;"></div>
+      <div class="tc-name">BACKGROUND</div>
+      <div class="tc-val">#000000</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#0D0D0D;"></div>
+      <div class="tc-name">SURFACE</div>
+      <div class="tc-val">#0D0D0D  5%</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#D9D9D9;"></div>
+      <div class="tc-name">BORDER</div>
+      <div class="tc-val">WHITE 85%</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#F0F0F0;"></div>
+      <div class="tc-name">TEXT</div>
+      <div class="tc-val">#F0F0F0</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#737373;"></div>
+      <div class="tc-name">TEXT-DIM</div>
+      <div class="tc-val">WHITE 45%</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#39FF14;"></div>
+      <div class="tc-name">PHOSPHOR</div>
+      <div class="tc-val">#39FF14</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#1A5C09;"></div>
+      <div class="tc-name">PHOSPHOR-DIM</div>
+      <div class="tc-val">#39FF14 35%</div>
+    </div>
+    <div class="tc">
+      <div class="tc-swatch" style="background:#FFB32E;"></div>
+      <div class="tc-name">WARNING</div>
+      <div class="tc-val">#FFB32E</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TYPOGRAPHY                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="section-div">
+  <div class="div-line"></div>
+  <div class="div-label">TYPOGRAPHY · PIXELFONT</div>
+  <div class="div-line"></div>
+</div>
+
+<div class="type-specimen">
+  <div class="type-title">ALL TYPEFACES — SF Mono / System Monospaced</div>
+
+  <div class="type-row">
+    <div class="type-meta">hero() 44px<br>bold</div>
+    <div style="font-family:var(--mono);font-size:38px;font-weight:bold;color:#39FF14;line-height:1;">03:47</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">hero() 32px<br>bold phosphor</div>
+    <div style="font-family:var(--mono);font-size:26px;font-weight:bold;color:#39FF14;">&gt; SYSTEM READY ▌</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">hero() 42px<br>bold white</div>
+    <div style="font-family:var(--mono);font-size:32px;font-weight:bold;color:#F0F0F0;line-height:1.1;">YOUR VOICE.<br>YOUR RULES.</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">terminal() 14px<br>medium</div>
+    <div style="font-family:var(--mono);font-size:13px;color:#F0F0F0;">&gt; SHIELD ACTIVE ▌</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">sectionHead() 11px<br>medium 1.5× track</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:#F0F0F0;">SPECTRUM ANALYSIS</div>
+  </div>
+  <div class="type-row" style="border:none;margin-bottom:0;padding-bottom:0;">
+    <div class="type-meta">stripLabel() 9px<br>medium 1.5× track</div>
+    <div style="font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:#737373;">LAT:7ms &nbsp; LVL:-28dB &nbsp; ROUTE:SPK &nbsp; TECH:5</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- COMPONENTS                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<div class="section-div">
+  <div class="div-line"></div>
+  <div class="div-label">COMPONENTS</div>
+  <div class="div-line"></div>
+</div>
+
+<div class="comps-wrap">
+  <div class="comps-title">UI COMPONENTS — PixelDesignSystem.swift</div>
+
+  <!-- Buttons -->
+  <div class="comp-row">
+    <div class="comp-item">
+      <div class="comp-lbl">PIXELBUTTONSTYLE · DEFAULT</div>
+      <div class="c-btn">[ CONTINUE ]</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">PIXELBUTTONSTYLE · ACTIVE</div>
+      <div class="c-btn c-btn-on">[ START NEXUS SHIELD ]</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">PIXELBUTTONSTYLE · MUTED</div>
+      <div class="c-btn c-btn-dim">[ SKIP FOR NOW ]</div>
+    </div>
+  </div>
+
+  <!-- Progress bars -->
+  <div class="comp-row">
+    <div class="comp-item">
+      <div class="comp-lbl">PIXELTEXTPROGRESSBAR · 82%</div>
+      <div class="c-prog">[████████░░ 82%]</div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">JAM BADGE</div>
+      <div class="c-prog" style="display:flex;gap:6px;align-items:center;">
+        <span style="font-weight:bold;">JAM:</span>
+        <span>[████████░░ 82%]</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surface + Banner -->
+  <div class="comp-row">
+    <div class="comp-item">
+      <div class="comp-lbl">PIXELSURFACE (CARD)</div>
+      <div class="c-surface">
+        SPECTRUM ANALYSIS<br>
+        <span style="color:#737373;font-size:8px;">100HZ · 1KHZ · 4KHZ · 20KHZ</span>
+      </div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">SESSION RESULT BANNER</div>
+      <div class="c-banner">
+        <span class="phosphor" style="font-weight:bold;">[OK]</span>
+        <span>SESSION COMPLETE · 82% AI BLOCKED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shield boxes + tier -->
+  <div class="comp-row">
+    <div class="comp-item">
+      <div class="comp-lbl">SHIELD · OFFLINE</div>
+      <div class="c-shield-off">
+        <span style="font-size:9px;font-weight:bold;color:#737373;">[NEXUS]</span>
+        <pre style="font-size:7px;color:#737373;line-height:1.5;">/  \
+| S |
+ \_/</pre>
+      </div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">SHIELD · ACTIVE</div>
+      <div class="c-shield-on">
+        <span style="font-size:9px;font-weight:bold;color:#39FF14;">[NEXUS]</span>
+        <span style="font-size:10px;color:#39FF14;letter-spacing:-1px;">_/\/\__/\_</span>
+      </div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">TIER · ENABLED</div>
+      <div class="c-tier-on">
+        <div style="display:flex;gap:4px;font-size:12px;font-weight:bold;color:#39FF14;">STD ●</div>
+        <div style="font-size:7px;letter-spacing:2px;color:#737373;">TIER 1</div>
+      </div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">TIER · DISABLED</div>
+      <div class="c-tier-off">
+        <div style="display:flex;gap:4px;font-size:12px;font-weight:bold;color:#F0F0F0;">AI <span style="color:#737373;">○</span></div>
+        <div style="font-size:7px;letter-spacing:2px;color:#737373;">TIER 2</div>
+      </div>
+    </div>
+    <div class="comp-item">
+      <div class="comp-lbl">DITHER PATTERN</div>
+      <div class="c-dither"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  PROJECT NEXUS · PIXEL TERMINAL AESTHETIC · MARCH 2026
+</div>
+
+</body>
+</html>
