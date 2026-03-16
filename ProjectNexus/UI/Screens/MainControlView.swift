@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(iOS 26, *)
 struct MainControlView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
@@ -18,26 +19,50 @@ struct MainControlView: View {
     @AppStorage("nexus.asrPermissionNudgeShown") private var nudgeShown = false
     @State private var showASRNudge: Bool = false
 
-    var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                shieldHero
-                    .padding(.top, 8)
+    // MARK: - MeshGradient animation state
+    /// Animating point offsets for the 3×3 mesh — drifts subtly when inactive,
+    /// shifts color when active.
+    @State private var meshPhase: Bool = false
 
-                VStack(spacing: 14) {
-                    tierRow
-                    spectrumCard
-                    intensityCard
+    // MARK: - GlassEffectContainer namespace for tier row
+    @Namespace private var tierNamespace
+
+    var body: some View {
+        ZStack {
+            // ── Animated MeshGradient background ─────────────────────
+            meshGradientBackground
+                .ignoresSafeArea()
+
+            // ── Main content ─────────────────────────────────────────
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    shieldHero
+                        .padding(.top, 8)
+
+                    VStack(spacing: 14) {
+                        tierRow
+                        spectrumCard
+                        intensityCard
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 36)
                 }
-                .padding(.horizontal, 18)
-                .padding(.bottom, 36)
             }
+            .safeAreaInset(edge: .bottom) { statusStrip }
+            .overlay(alignment: .top) { sessionResultBanner }
+            .overlay(alignment: .bottom) { asrPermissionNudge }
         }
-        .background(NexusColor.background.ignoresSafeArea())
-        .safeAreaInset(edge: .bottom) { statusStrip }
-        .overlay(alignment: .top) { sessionResultBanner }
-        .overlay(alignment: .bottom) { asrPermissionNudge }
         .onChange(of: state.isShieldActive) { _, isActive in
+            // Re-start mesh animation with new timing whenever active state changes.
+            // Wrap in withAnimation so color/point changes are interpolated smoothly.
+            withAnimation(
+                isActive
+                    ? .easeInOut(duration: 2).repeatForever(autoreverses: true)
+                    : .easeInOut(duration: 4).repeatForever(autoreverses: true)
+            ) {
+                meshPhase.toggle()
+            }
+
             if isActive {
                 sessionStartTime = .now
                 // Show ASR nudge once if mic permission was skipped during onboarding
@@ -64,6 +89,66 @@ struct MainControlView: View {
                 }
             }
         }
+        .onAppear {
+            // Start initial slow drift on appearance
+            withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
+                meshPhase = true
+            }
+        }
+    }
+
+    // MARK: - Animated MeshGradient background (iOS 18+)
+
+    @available(iOS 18, *)
+    private var meshGradientBackground: some View {
+        // Points drift slightly between two phases.
+        // meshPhase=false: canonical grid; meshPhase=true: subtle node displacement.
+        let points: [SIMD2<Float>] = meshPhase
+            ? [
+                [0,    0   ], [0.5,  0   ], [1,    0   ],
+                [0.02, 0.48], [0.52, 0.52], [0.98, 0.48],
+                [0,    1   ], [0.5,  1   ], [1,    1   ]
+              ]
+            : [
+                [0,   0  ], [0.5, 0  ], [1,   0  ],
+                [0,   0.5], [0.5, 0.5], [1,   0.5],
+                [0,   1  ], [0.5, 1  ], [1,   1  ]
+              ]
+
+        // Inactive: barely-perceptible drift, very dark navy/indigo variations.
+        let inactiveColors: [Color] = [
+            Color(hex: "#0A0A0F"),
+            Color(hex: "#0D0D1A"),
+            Color(hex: "#0A0A0F"),
+            Color(hex: "#0A0F1E"),
+            Color(hex: "#111118"),
+            Color(hex: "#0F0A1E"),
+            Color(hex: "#070710"),
+            Color(hex: "#0D0D1A"),
+            Color(hex: "#0A0A0F"),
+        ]
+
+        // Active: near-black tones with tiny emerald/indigo casts baked in as hex.
+        // #0A0F12 = near-black + trace emerald-green channel
+        // #0E1116 = near-black + faint emerald-indigo blend
+        // #07100F = near-black + trace emerald at bottom-left
+        let activeColors: [Color] = [
+            Color(hex: "#0A0A0F"),
+            Color(hex: "#0D0D1A"),
+            Color(hex: "#0A0F12"),
+            Color(hex: "#0A0F1E"),
+            Color(hex: "#0E1116"),
+            Color(hex: "#0F0A1E"),
+            Color(hex: "#07100F"),
+            Color(hex: "#0D0F1A"),
+            Color(hex: "#0A0A0F"),
+        ]
+
+        return MeshGradient(
+            width: 3, height: 3,
+            points: points,
+            colors: state.isShieldActive ? activeColors : inactiveColors
+        )
     }
 
     // MARK: - Session result banner (post-shield flash)
@@ -208,6 +293,15 @@ struct MainControlView: View {
                             .frame(width: 148, height: 148)
                             .rotationEffect(.degrees(-90))
                             .animation(NexusAnimation.arcFill, value: asrService.effectivenessScore)
+
+                        // Liquid glass ring — refractive overlay around the outermost
+                        // breathing circle; gives the shield a physical glass quality
+                        // when active and the mesh gradient is visible behind it.
+                        Circle()
+                            .frame(width: 226, height: 226)
+                            .glassEffect(.clear)
+                            .scaleEffect(audioScale * 1.1)
+                            .animation(NexusAnimation.audioPulse, value: audioScale)
                     }
 
                     // Core circle — recessed when inactive, glowing when active

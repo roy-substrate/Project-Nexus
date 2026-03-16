@@ -19,26 +19,36 @@ struct ProjectNexusApp: App {
     var body: some Scene {
         WindowGroup {
             if onboardingCompleted {
-                ContentView(
-                    state: appState,
-                    metricsService: metricsService,
-                    asrService: asrService,
-                    analyticsService: analyticsService,
-                    subscriptionManager: subscriptionManager,
-                    onToggleShield: toggleShield,
-                    onConfigUpdate: applyConfigUpdate
-                )
-                .onAppear { setupServices() }
-                .alert("Shield Unavailable", isPresented: Binding(
-                    get: { appState.errorMessage != nil },
-                    set: { if !$0 { appState.errorMessage = nil } }
-                )) {
-                    Button("OK", role: .cancel) { appState.errorMessage = nil }
-                } message: {
-                    Text(appState.errorMessage ?? "")
+                if #available(iOS 26, *) {
+                    ContentView(
+                        state: appState,
+                        metricsService: metricsService,
+                        asrService: asrService,
+                        analyticsService: analyticsService,
+                        subscriptionManager: subscriptionManager,
+                        onToggleShield: toggleShield,
+                        onConfigUpdate: applyConfigUpdate
+                    )
+                    .onAppear { setupServices() }
+                    .alert("Shield Unavailable", isPresented: Binding(
+                        get: { appState.errorMessage != nil },
+                        set: { if !$0 { appState.errorMessage = nil } }
+                    )) {
+                        Button("OK", role: .cancel) { appState.errorMessage = nil }
+                    } message: {
+                        Text(appState.errorMessage ?? "")
+                    }
+                } else {
+                    Text("iOS 26 or later is required.")
+                        .foregroundStyle(NexusColor.textSecondary)
                 }
             } else {
-                OnboardingView()
+                if #available(iOS 26, *) {
+                    OnboardingView()
+                } else {
+                    Text("iOS 26 or later is required.")
+                        .foregroundStyle(NexusColor.textSecondary)
+                }
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -142,6 +152,7 @@ struct ProjectNexusApp: App {
 
 // MARK: - ContentView
 
+@available(iOS 26, *)
 struct ContentView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
