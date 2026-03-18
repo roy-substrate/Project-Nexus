@@ -12,6 +12,7 @@ Defeats real-time transcription tools (Granola, Otter.ai, Fireflies) by injectin
 - Spectral notch noise: Band-passed white noise (300Hz-4kHz) with formant-aligned notches preserving human intelligibility
 - Babble noise: Multi-layer speech-like noise with randomized pitch/timing, exploiting ASR confusion with overlapping speech patterns
 - Frequency sweeps: Randomized chirp signals disrupting mel-spectrogram feature extraction across multiple filter banks
+- Psychoacoustic masker: ISO 11172-3 MPEG-1 masking model with Bark scale critical band analysis
 
 **Tier 2 — ML Adversarial Perturbations**
 - Pre-computed Universal Adversarial Perturbations (UAPs) generated against multi-model ensemble
@@ -61,14 +62,42 @@ ProjectNexus/
 │   ├── Screens/      # Main control, settings, routing, diagnostics
 │   ├── Components/   # Spectrum viz, waveform, particles, glass cards
 │   └── Design/       # Theme, glass modifiers
-├── Models/           # Data types
-├── Services/         # Perturbation orchestration, metrics
-├── Resources/        # UAPs, babble corpus, ML models
-└── Extensions/       # Buffer + DSP helpers
+├── Models/           # Data types: AudioMode, PerturbationType, PerturbationConfig, AudioMetrics
+├── Services/         # PerturbationService (orchestration), MetricsService (monitoring)
+├── Resources/        # UAPs (.bin), babble corpus, CoreML models
+└── Extensions/       # AVAudioPCMBuffer + FloatArray DSP helpers
 Scripts/
 ├── generate_uaps.py          # Offline UAP generation (PyTorch)
-└── convert_whisper_coreml.py  # Model conversion to CoreML
+└── convert_whisper_coreml.py # Model conversion to CoreML
+ProjectNexusTests/
+├── DSPUtilitiesTests.swift         # Bark scale, FFT bins, filters (19 tests)
+├── FloatArrayDSPTests.swift        # Float array DSP extensions (23 tests)
+├── PerturbationConfigTests.swift   # Config & CodecTarget (19 tests)
+├── PerturbationTypeTests.swift     # Tier & Technique enums (18 tests)
+└── AudioMetricsTests.swift         # Metrics struct (14 tests)
 ```
+
+## Submodules
+
+### autoresearch — [`karpathy/autoresearch`](https://github.com/karpathy/autoresearch)
+
+Located at `autoresearch/`. An autonomous AI research engine that runs overnight experiments on a small LLM training setup. An agent modifies `train.py`, trains for a fixed 5-minute budget, evaluates `val_bpb`, and keeps improvements. Used here as a reference implementation for autonomous optimization of UAP generation — the same agent-driven experiment loop can be applied to evolve adversarial perturbation strategies without manual tuning.
+
+Key files:
+- `train.py` — GPT model + Muon/AdamW optimizer (agent edits this)
+- `prepare.py` — fixed data prep and runtime utilities
+- `program.md` — agent instructions / "research org" specification
+
+### superpowers — [`obra/superpowers`](https://github.com/obra/superpowers)
+
+Located at `superpowers/`. A composable skill library for coding agents that enforces spec-first design, TDD, YAGNI, and subagent-driven development workflows. Integrated here to standardize the development workflow for Project Nexus contributors using Claude Code or other AI coding agents — agents automatically invoke skills for planning, implementation, and review without manual prompting.
+
+Key directories:
+- `skills/` — composable agent skill definitions
+- `commands/` — slash command implementations
+- `hooks/` — lifecycle event hooks
+- `agents/` — subagent configuration
+- `docs/` — platform-specific setup guides
 
 ## Setup
 
@@ -87,6 +116,28 @@ python Scripts/generate_uaps.py --output ProjectNexus/Resources/UAPs/
 ```bash
 pip install openai-whisper coremltools torch
 python Scripts/convert_whisper_coreml.py --output ProjectNexus/Resources/MLModels/
+```
+
+### Autonomous Research (autoresearch submodule)
+```bash
+# One-time data prep (~2 min, requires NVIDIA GPU)
+cd autoresearch
+uv sync
+uv run prepare.py
+
+# Run a single experiment (~5 min)
+uv run train.py
+
+# Autonomous overnight mode — point your agent at program.md
+```
+
+### Development Workflow (superpowers submodule)
+```bash
+# Install superpowers skills into Claude Code
+/plugin install superpowers@claude-plugins-official
+
+# Or reference the local submodule directly
+# Point your agent at superpowers/skills/ for composable workflow skills
 ```
 
 ## Research Foundation
