@@ -1,7 +1,7 @@
 import AVFoundation
 import os
 
-final class AudioSessionConfigurator {
+final class AudioSessionConfigurator: @unchecked Sendable {
     static let shared = AudioSessionConfigurator()
 
     private let logger = Logger(subsystem: "com.nexus.audio", category: "Session")
@@ -45,7 +45,7 @@ final class AudioSessionConfigurator {
         var options: AVAudioSession.CategoryOptions = [
             .defaultToSpeaker, .mixWithOthers, .allowBluetooth
         ]
-        if #available(iOS 18.0, *) {
+        if #available(iOS 26.0, *) {
             options.insert(.bluetoothHighQualityRecording)
         }
         try session.setCategory(.playAndRecord, mode: .default, options: options)

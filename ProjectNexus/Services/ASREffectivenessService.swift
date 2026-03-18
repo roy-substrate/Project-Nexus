@@ -33,7 +33,7 @@ struct ASRMeasurement: Sendable {
 /// asr.startMeasuring(isShieldActive: binding)
 /// // Read asr.latestMeasurement or asr.effectivenessScore
 /// ```
-@Observable
+@Observable @MainActor
 final class ASREffectivenessService: NSObject {
 
     // MARK: - Public State
@@ -83,7 +83,11 @@ final class ASREffectivenessService: NSObject {
     // MARK: - Init
 
     override init() {
+        #if targetEnvironment(simulator)
+        recognizer = nil
+        #else
         recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+        #endif
         super.init()
         recognizer?.delegate = self
     }
@@ -249,7 +253,7 @@ final class ASREffectivenessService: NSObject {
 
 // MARK: - SFSpeechRecognizerDelegate
 
-extension ASREffectivenessService: SFSpeechRecognizerDelegate {
+extension ASREffectivenessService: @preconcurrency SFSpeechRecognizerDelegate {
     func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer,
                           availabilityDidChange available: Bool) {
         logger.info("SFSpeechRecognizer availability changed: \(available)")

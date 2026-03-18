@@ -23,14 +23,14 @@ extension Array where Element == Float {
     }
 
     func added(to other: [Float]) -> [Float] {
-        let n = min(count, other.count)
+        let n = Swift.min(count, other.count)
         var result = [Float](repeating: 0, count: n)
         vDSP_vadd(self, 1, other, 1, &result, 1, vDSP_Length(n))
         return result
     }
 
     func multiplied(by other: [Float]) -> [Float] {
-        let n = min(count, other.count)
+        let n = Swift.min(count, other.count)
         var result = [Float](repeating: 0, count: n)
         vDSP_vmul(self, 1, other, 1, &result, 1, vDSP_Length(n))
         return result
