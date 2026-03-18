@@ -1,0 +1,9 @@
+# Maestro Configuration for Project Nexus
+# Tests the core hypothesis: Shield activation blocks AI transcription
+
+appId: com.nexus.shield
+name: Project Nexus Shield
+tags:
+  - ios
+  - privacy
+  - audio

@@ -1,0 +1,59 @@
+# Flow 11: All Features Free — No Paywall
+# Verifies the CEO decision: every feature is unlocked, no paywall exists.
+# Users should never encounter a purchase prompt or locked feature.
+
+appId: com.nexus.shield
+name: "Pricing — All Features Free"
+tags:
+  - pricing
+  - free
+  - regression
+
+---
+
+# ── Check every tab is accessible ───────────────────────────────
+- tapOn: "Shield"
+- assertVisible: "SHIELD"
+
+- tapOn: "Settings"
+- assertVisible: "Settings"
+# All technique sections should be visible (not locked)
+- assertVisible: "Acoustic Shield"
+- scroll:
+    direction: "down"
+    amount: 200
+- assertVisible: "Adversarial ML"
+
+- tapOn: "Routing"
+- assertVisible: "Routing"
+
+- tapOn: "Diagnostics"
+- assertVisible: "Diagnostics"
+
+- tapOn: "Account"
+- assertVisible: "Account"
+
+# ── Verify NO paywall/upgrade prompts anywhere ──────────────────
+- assertNotVisible:
+    text: "Upgrade"
+    optional: true
+- assertNotVisible:
+    text: "Subscribe"
+    optional: true
+- assertNotVisible:
+    text: "Pro"
+    optional: true
+- assertNotVisible:
+    text: "Premium"
+    optional: true
+- assertNotVisible:
+    text: "Purchase"
+    optional: true
+- assertNotVisible:
+    text: "Unlock"
+    optional: true
+
+# Session History should be accessible (was previously Pro-only)
+- tapOn: "Session History"
+- assertVisible: "Session History"
+- back

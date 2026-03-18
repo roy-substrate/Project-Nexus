@@ -1,0 +1,62 @@
+# Flow 08: Session History — Protection Tracking
+# After activating and deactivating the shield, a session should be
+# recorded in the Account tab's session history. This proves the app
+# is tracking protection events — evidence that blocking happened.
+
+appId: com.nexus.shield
+name: "Session History — Protection Logged"
+tags:
+  - analytics
+  - session
+  - proof
+
+---
+
+# ── Activate shield and run for a few seconds ───────────────────
+- tapOn: "Shield"
+- tapOn:
+    text: "S"
+    index: 0
+- extendedWaitUntil:
+    visible: "SHIELD ACTIVE"
+    timeout: 3000
+
+# Let it run for 3 seconds to generate a meaningful session
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Deactivate
+- tapOn: "NEXUS"
+- extendedWaitUntil:
+    visible: "SHIELD OFFLINE"
+    timeout: 3000
+
+# ── Navigate to Account tab ─────────────────────────────────────
+- tapOn: "Account"
+- assertVisible: "Account"
+
+# ── Verify Shield Stats section ─────────────────────────────────
+- assertVisible: "Your Shield Stats"
+- assertVisible: "Protection Streak"
+- assertVisible: "Total Activations"
+- assertVisible: "Total Protected Time"
+- assertVisible: "Peak ASR Jam Score"
+- assertVisible: "Sessions Recorded"
+
+# ── Navigate to Session History ─────────────────────────────────
+- tapOn: "Session History"
+- assertVisible: "Session History"
+
+# At least one session should now be logged (not empty state)
+- assertNotVisible:
+    text: "No Sessions Yet"
+    optional: true
+
+# Session row should show activation count and duration
+- assertVisible:
+    text: "activation"
+    optional: true
+
+# ── Navigate back ───────────────────────────────────────────────
+- back

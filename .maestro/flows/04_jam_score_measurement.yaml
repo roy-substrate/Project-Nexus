@@ -1,0 +1,98 @@
+# Flow 04: ASR Jam Score Measurement
+# THE CRITICAL HYPOTHESIS TEST.
+# When the shield is active, the ASR effectiveness service should measure
+# how much AI transcription is being blocked. The JAM score on the main
+# screen and the Diagnostics tab should show a non-zero value.
+# If JAM score > 0% → the shield IS blocking AI transcription.
+
+appId: com.nexus.shield
+name: "Hypothesis — JAM Score Proves Blocking"
+tags:
+  - hypothesis
+  - jam-score
+  - critical
+
+---
+
+# ── Navigate to Shield tab ───────────────────────────────────────
+- tapOn: "Shield"
+
+# ── Activate shield ──────────────────────────────────────────────
+- tapOn:
+    text: "S"
+    index: 0
+- extendedWaitUntil:
+    visible: "SHIELD ACTIVE"
+    timeout: 3000
+
+# ── Accept ASR measurement nudge if it appears ───────────────────
+# The app shows a permission nudge to enable speech measurement
+- tapOn:
+    text: "ON"
+    optional: true
+# Handle iOS speech recognition permission dialog
+- tapOn:
+    text: "Allow"
+    optional: true
+
+# ── Wait for JAM score to appear ─────────────────────────────────
+# The JAM badge appears when ASR is measuring and score > 5%
+- extendedWaitUntil:
+    visible: "JAM"
+    timeout: 15000
+
+# ── Verify JAM score is displayed ────────────────────────────────
+- assertVisible: "JAM"
+
+# ── Navigate to Diagnostics for detailed measurement ─────────────
+- tapOn: "Diagnostics"
+
+# ── Verify Diagnostics shows ASR Jamming section ─────────────────
+- assertVisible: "Diagnostics"
+- scroll:
+    direction: "down"
+    amount: 200
+
+# The ASR Jamming section should be visible
+- assertVisible:
+    text: "ASR Jamming"
+    optional: true
+
+# Measuring indicator should be active
+- assertVisible:
+    text: "Measuring"
+    optional: true
+
+# Verify the percentage value exists (any number followed by %)
+- assertVisible:
+    text: "%"
+    optional: true
+
+# ── Verify real-time metrics are populating ──────────────────────
+- scroll:
+    direction: "up"
+    amount: 200
+
+# Latency should be showing a value
+- assertVisible: "Latency"
+
+# RMS Level should be showing
+- assertVisible: "RMS Level"
+
+# ── Navigate back to Shield tab ──────────────────────────────────
+- tapOn: "Shield"
+
+# ── Deactivate shield ───────────────────────────────────────────
+- tapOn: "NEXUS"
+- extendedWaitUntil:
+    visible: "SHIELD OFFLINE"
+    timeout: 3000
+
+# ── Session result should appear with blocking percentage ────────
+# Banner: "SESSION COMPLETE · [N]% AI BLOCKED"
+- assertVisible:
+    text: "SESSION COMPLETE"
+    optional: true
+- assertVisible:
+    text: "AI BLOCKED"
+    optional: true

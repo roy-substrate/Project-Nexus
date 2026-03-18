@@ -1,0 +1,45 @@
+# Flow 01: Complete Onboarding
+# Verifies the first-run experience works end-to-end.
+# A user who can't finish onboarding can never activate the shield.
+
+appId: com.nexus.shield
+name: "Onboarding — Full Flow"
+tags:
+  - onboarding
+  - smoke
+
+---
+
+# ── Page 0: Welcome ──────────────────────────────────────────────
+- assertVisible: "YOUR VOICE"
+- assertVisible: "YOUR RULES"
+- assertVisible: "NEXUS SHIELD"
+- tapOn: "GET STARTED"
+
+# ── Page 1: How It Works ─────────────────────────────────────────
+- assertVisible: "HOW IT WORKS"
+- assertVisible: "ACOUSTIC MASKING"
+- assertVisible: "ADVERSARIAL AI"
+- assertVisible: "ON-DEVICE ONLY"
+- tapOn: "CONTINUE"
+
+# ── Page 2: Microphone Permission ────────────────────────────────
+- assertVisible: "MICROPHONE"
+# Grant mic permission via Maestro's permission handling
+- tapOn: "ALLOW ACCESS"
+# iOS system dialog appears — allow it
+- tapOn:
+    text: "Allow While Using App"
+    optional: true
+# If already granted, the page auto-advances — wait for either
+- extendedWaitUntil:
+    visible: "SYSTEM READY"
+    timeout: 5000
+
+# ── Page 3: Ready ────────────────────────────────────────────────
+- assertVisible: "SYSTEM READY"
+- assertVisible: "ALL SYSTEMS NOMINAL"
+- tapOn: "START NEXUS SHIELD"
+
+# ── Verify: Landed on Main Shield screen ─────────────────────────
+- assertVisible: "SHIELD OFFLINE"

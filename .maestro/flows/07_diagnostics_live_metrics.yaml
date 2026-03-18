@@ -1,0 +1,77 @@
+# Flow 07: Diagnostics — Live Metrics During Protection
+# Verifies that when the shield is active, real-time audio metrics
+# are being computed and displayed. This proves the DSP pipeline is
+# actually processing audio — not just showing a fake "active" state.
+
+appId: com.nexus.shield
+name: "Diagnostics — Live Metrics Proof"
+tags:
+  - diagnostics
+  - metrics
+  - proof
+
+---
+
+# ── Activate shield first ───────────────────────────────────────
+- tapOn: "Shield"
+- tapOn:
+    text: "S"
+    index: 0
+- extendedWaitUntil:
+    visible: "SHIELD ACTIVE"
+    timeout: 3000
+
+# ── Navigate to Diagnostics ─────────────────────────────────────
+- tapOn: "Diagnostics"
+- assertVisible: "Diagnostics"
+
+# ── Verify "Live" toolbar indicator ─────────────────────────────
+- assertVisible:
+    text: "Live"
+    optional: true
+
+# ── Section: Spectrum ───────────────────────────────────────────
+- assertVisible: "Spectrum"
+- assertVisible: "Input"
+- assertVisible: "Perturbation"
+- assertVisible: "Masking"
+
+# Frequency labels should be visible
+- assertVisible:
+    text: "Hz"
+
+# ── Section: Metric Tiles ───────────────────────────────────────
+- assertVisible: "Latency"
+- assertVisible: "ms"
+
+- assertVisible: "RMS Level"
+- assertVisible: "dB"
+
+- scroll:
+    direction: "down"
+    amount: 150
+
+- assertVisible: "Peak Level"
+- assertVisible: "Underruns"
+
+- assertVisible:
+    text: "CPU Usage"
+    optional: true
+
+# ── Section: Engine Status ──────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+
+- assertVisible: "Engine"
+- assertVisible: "Running"
+- assertVisible:
+    text: "Hz"
+- assertVisible: "Float32 Mono"
+
+# ── Navigate back and deactivate ────────────────────────────────
+- tapOn: "Shield"
+- tapOn: "NEXUS"
+- extendedWaitUntil:
+    visible: "SHIELD OFFLINE"
+    timeout: 3000

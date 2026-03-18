@@ -50,7 +50,45 @@ Verify analytics events fire correctly:
 - Data persists across app launches ✓/✗
 - `deleteAllData()` clears everything ✓/✗
 
-### Phase 5: E2E Test Suite Review
+### Phase 5: Maestro UI Test Suite
+Run the Maestro automated UI test suite against the app. Maestro flows live in `.maestro/flows/` and test the core hypothesis that the shield blocks AI transcription.
+
+```bash
+# List all Maestro test flows
+ls -la .maestro/flows/
+
+# Run all 12 Maestro flows (requires simulator with app installed)
+.maestro/run_tests.sh
+
+# Or run only the hypothesis-critical tests
+.maestro/run_tests.sh --hypothesis
+
+# Or run the full E2E call-blocking test
+.maestro/run_tests.sh --e2e
+```
+
+**Maestro flows to verify:**
+| Flow | Name | Tests |
+|------|------|-------|
+| 01 | Onboarding Complete | First-run UX, mic permission |
+| 02 | Shield Activation | Core on/off, ACTIVE state, uptime |
+| 03 | Tier Toggles | Tier 1/2 independent control |
+| 04 | JAM Score Measurement | **ASR blocking proof** (critical) |
+| 05 | Settings Techniques | All 6 perturbation techniques |
+| 06 | Routing Speaker Mode | Audio output route verification |
+| 07 | Diagnostics Live Metrics | Engine running, live data |
+| 08 | Session History | Protection event logging |
+| 09 | Privacy Verification | On-device claims |
+| 10 | Full E2E Call Blocking | **Master hypothesis test** |
+| 11 | All Features Free | No paywall regression |
+| 12 | Data Deletion & Reset | Destructive ops safety |
+
+Review each flow YAML for correctness and check for:
+- Missing assertions that should catch regressions
+- Timing-sensitive waits that could cause flaky results
+- UI element selectors that don't match actual app labels
+
+### Phase 5b: E2E Code Test Suite Review
 Read `ProjectNexusTests/NexusE2ETestAgent.swift`:
 - Count total scenarios
 - Identify which flows have no test coverage

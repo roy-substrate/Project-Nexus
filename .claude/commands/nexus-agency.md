@@ -81,7 +81,25 @@ grep -rn "try!" ProjectNexus/ --include="*.swift" | grep -v Test
 grep -rn "fatalError\|preconditionFailure" ProjectNexus/ --include="*.swift"
 grep -rn "TODO\|FIXME" ProjectNexus/ --include="*.swift"
 ```
-**Gate result must be PASS before Phase 5.**
+
+Run Maestro automated UI tests (12 flows testing the core hypothesis):
+```bash
+# List all Maestro flows
+ls .maestro/flows/
+
+# Run full test suite (requires simulator with app)
+.maestro/run_tests.sh
+
+# Run hypothesis-critical tests only
+.maestro/run_tests.sh --hypothesis
+
+# Run the master E2E call-blocking test
+.maestro/run_tests.sh --e2e
+```
+
+Maestro tests verify: onboarding, shield activation, tier toggles, JAM score measurement, settings, routing, diagnostics, session history, privacy claims, full E2E call blocking, all-features-free, and data deletion.
+
+**Gate result must be PASS (static analysis + Maestro flows) before Phase 5.**
 
 ### Phase 3: CTO + Engineering Review (tech track)
 Run in sequence (CTO sets the standard, Eng Manager gates execution):
