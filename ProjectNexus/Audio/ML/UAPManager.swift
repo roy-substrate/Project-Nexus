@@ -58,23 +58,43 @@ final class UAPManager {
 
         var pos = readPositions[currentVariant] ?? 0
         let uapLength = uap.count
+        var written = 0
 
-        for i in 0..<frameCount {
-            var sample = uap[pos]
+        uap.withUnsafeBufferPointer { uapPtr in
+            guard let uapBase = uapPtr.baseAddress else { return }
 
-            // Crossfade near loop boundary
-            let distanceToEnd = uapLength - pos
-            if distanceToEnd < crossfadeSamples {
+            // Bulk vectorized copy for the non-crossfade region (the common case).
+            // Only fall through to the scalar crossfade loop when near the loop boundary.
+            while written < frameCount {
+                let distanceToEnd = uapLength - pos
+                let remaining = frameCount - written
+
+                if distanceToEnd >= crossfadeSamples {
+                    // Safe bulk region: copy min(remaining, distanceToEnd - crossfadeSamples) samples
+                    let bulkCount = min(remaining, distanceToEnd - crossfadeSamples)
+                    if bulkCount > 0 {
+                        var g = gain
+                        vDSP_vsmul(uapBase + pos, 1, &g, buffer + written, 1, vDSP_Length(bulkCount))
+                        pos += bulkCount
+                        written += bulkCount
+                        continue
+                    }
+                }
+
+                // Scalar crossfade path — only active within crossfadeSamples of the loop boundary.
                 let fadeOut = Float(distanceToEnd) / Float(crossfadeSamples)
                 let fadeIn = 1.0 - fadeOut
                 let wrapPos = crossfadeSamples - distanceToEnd
-                if wrapPos < uap.count {
-                    sample = sample * fadeOut + uap[wrapPos] * fadeIn
+                let sample: Float
+                if wrapPos < uapLength {
+                    sample = uap[pos] * fadeOut + uap[wrapPos] * fadeIn
+                } else {
+                    sample = uap[pos] * fadeOut
                 }
+                buffer[written] = sample * gain
+                pos = (pos + 1) % uapLength
+                written += 1
             }
-
-            buffer[i] = sample * gain
-            pos = (pos + 1) % uapLength
         }
 
         readPositions[currentVariant] = pos

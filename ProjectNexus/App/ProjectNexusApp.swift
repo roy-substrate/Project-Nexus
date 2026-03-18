@@ -113,7 +113,7 @@ struct ProjectNexusApp: App {
 
     // MARK: - Shield toggle
 
-    private var shieldActivationTime: Date? = nil
+    @State private var shieldActivationTime: Date? = nil
 
     private func toggleShield() {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

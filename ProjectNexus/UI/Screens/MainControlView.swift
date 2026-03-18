@@ -130,7 +130,8 @@ struct MainControlView: View {
                 .phosphorGlow()
 
                 Button("[ X ]") {
-                    nudgeShown = true
+                    // Do not set nudgeShown — dismisses for this session only so the
+                    // nudge can reappear on future sessions until the user grants access.
                     withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                 }
                 .font(PixelFont.terminal(11))
