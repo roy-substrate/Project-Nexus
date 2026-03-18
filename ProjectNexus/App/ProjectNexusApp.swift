@@ -78,7 +78,8 @@ struct ProjectNexusApp: App {
             return
         }
 
-        // Start ASR effectiveness measurement
+        // Start ASR effectiveness measurement (skip on simulator — no speech hardware)
+        #if !targetEnvironment(simulator)
         Task {
             let granted = await asrService.requestAuthorization()
             if granted {
@@ -87,6 +88,7 @@ struct ProjectNexusApp: App {
                 })
             }
         }
+        #endif
 
         // Track ASR score updates to analytics (drives peakJamScore in Account tab).
         // Also trigger a one-time App Store review request when the user first sees
