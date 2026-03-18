@@ -135,7 +135,7 @@ private struct WelcomePage: View {
                         .animation(PixelAnimation.appear.delay(0.2), value: appeared)
 
                     // Subhead — dim monospaced
-                    Text("REAL-TIME ACOUSTIC PROTECTION.\nDEFEATS AI TRANSCRIPTION.\nINVISIBLY. LOCALLY. INSTANTLY.")
+                    Text("REAL-TIME ACOUSTIC PROTECTION.\nREDUCES UNWANTED TRANSCRIPTION.\nINVISIBLY. LOCALLY. INSTANTLY.")
                         .font(PixelFont.terminal(13))
                         .foregroundStyle(PixelColor.textSecondary)
                         .lineSpacing(6)
@@ -171,10 +171,10 @@ private struct HowItWorksPage: View {
     private let steps: [Step] = [
         Step(number: "01",
              title: "ACOUSTIC MASKING",
-             body: "Psychoacoustic noise below hearing\nthreshold disrupts ASR systems."),
+             body: "Psychoacoustic masking below hearing\nthreshold helps protect spoken privacy."),
         Step(number: "02",
              title: "ADVERSARIAL AI",
-             body: "ML-crafted perturbations cause\nWhisper and DeepSpeech to fail."),
+             body: "Adaptive perturbations can reduce\ntranscription accuracy in many models."),
         Step(number: "03",
              title: "ON-DEVICE ONLY",
              body: "Under 10ms. Zero data leaves phone.\nNo cloud. No accounts."),
