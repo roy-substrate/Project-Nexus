@@ -124,7 +124,7 @@ final class SubscriptionManager {
             for await result in Transaction.updates {
                 do {
                     let transaction = try self.checkVerified(result)
-                    await MainActor.run { Task { await self.refreshEntitlement() } }
+                    await self.refreshEntitlement()
                     await transaction.finish()
                 } catch {
                     self.logger.error("Transaction verification failed: \(error.localizedDescription)")
