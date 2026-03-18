@@ -2,6 +2,9 @@ import Foundation
 import os
 import Synchronization
 
+#if canImport(AVFoundation)
+import AVFoundation
+
 final class PerturbationService {
     private let logger = Logger(subsystem: "com.nexus", category: "PertService")
 
@@ -126,3 +129,34 @@ private final class UAPGenerator: PerturbationGenerator {
 
     func updateMaskingThreshold(_ threshold: [Float]) {}
 }
+#else
+
+#if !canImport(AVFoundation)
+final class AVAudioPCMBuffer {}
+#endif
+
+enum PerturbationServiceError: Error {
+    case unsupportedPlatform
+}
+
+/// Linux/test fallback that preserves the API surface while making platform
+/// limitations explicit.
+final class PerturbationService {
+    var onMetricsUpdate: ((AudioMetrics) -> Void)?
+    var onMicBuffer: ((AVAudioPCMBuffer) -> Void)?
+
+    init() throws {
+        throw PerturbationServiceError.unsupportedPlatform
+    }
+
+    func start(with config: PerturbationConfig) throws {
+        throw PerturbationServiceError.unsupportedPlatform
+    }
+
+    func stop() {}
+
+    func updateConfig(_ config: PerturbationConfig) {}
+
+    var isRunning: Bool { false }
+}
+#endif

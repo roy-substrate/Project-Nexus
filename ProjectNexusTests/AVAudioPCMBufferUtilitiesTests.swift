@@ -1,4 +1,5 @@
 import XCTest
+#if canImport(AVFoundation)
 import AVFoundation
 @testable import ProjectNexus
 
@@ -136,3 +137,4 @@ final class AVAudioPCMBufferUtilitiesTests: XCTestCase {
         for i in 0..<64 { XCTAssertEqual(aData[i], 1.0, accuracy: 1e-5) }
     }
 }
+#endif
