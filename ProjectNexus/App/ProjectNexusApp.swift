@@ -78,6 +78,8 @@ struct ProjectNexusApp: App {
             return
         }
 
+        activateShieldOnLaunch()
+
         // Start ASR effectiveness measurement
         Task {
             let granted = await asrService.requestAuthorization()
@@ -108,6 +110,20 @@ struct ProjectNexusApp: App {
         ) { [weak perturbationService, weak appState = appState] _ in
             guard appState?.isShieldActive == true else { return }
             perturbationService?.updateConfig(appState?.config ?? PerturbationConfig())
+        }
+    }
+
+    /// Auto-activates blocking on launch so premium/adversarial protection is loaded immediately.
+    private func activateShieldOnLaunch() {
+        guard appState.isShieldActive == false else { return }
+        do {
+            try perturbationService?.start(with: appState.config)
+            appState.isShieldActive = true
+            shieldActivationTime = Date()
+            analyticsService.track(.shieldActivated)
+        } catch {
+            appState.isShieldActive = false
+            appState.errorMessage = error.localizedDescription
         }
     }
 

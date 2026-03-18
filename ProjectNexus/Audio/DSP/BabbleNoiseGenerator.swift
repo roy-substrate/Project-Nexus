@@ -16,16 +16,24 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     private var layerGains: [Float] = []
     private var intensity: Float = 0.8
 
-    private let lowFreq: Float = 300
-    private let highFreq: Float = 4000
+    private var lowFreq: Float
+    private var highFreq: Float
 
-    init(intensity: Float = 0.8) {
+    init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
         self.intensity = intensity
+        self.lowFreq = lowFreq
+        self.highFreq = highFreq
         generateBabbleLayers()
     }
 
     func setIntensity(_ value: Float) {
         intensity = max(0, min(1, value))
+    }
+
+    func setFrequencyRange(low: Float, high: Float) {
+        lowFreq = low
+        highFreq = high
+        generateBabbleLayers()
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {

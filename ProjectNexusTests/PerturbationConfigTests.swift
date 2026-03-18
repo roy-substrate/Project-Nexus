@@ -12,12 +12,12 @@ final class PerturbationConfigTests: XCTestCase {
 
     func test_defaultConfig_frequencyRangeLow() {
         let config = PerturbationConfig()
-        XCTAssertEqual(config.frequencyRangeLow, 300.0, accuracy: 1e-6)
+        XCTAssertEqual(config.frequencyRangeLow, 17_000.0, accuracy: 1e-6)
     }
 
     func test_defaultConfig_frequencyRangeHigh() {
         let config = PerturbationConfig()
-        XCTAssertEqual(config.frequencyRangeHigh, 4000.0, accuracy: 1e-6)
+        XCTAssertEqual(config.frequencyRangeHigh, 20_000.0, accuracy: 1e-6)
     }
 
     func test_defaultConfig_bothTiersEnabled() {
@@ -76,8 +76,8 @@ final class PerturbationConfigTests: XCTestCase {
     func test_config_canBeEncodedAndDecoded() throws {
         var config = PerturbationConfig()
         config.intensity = 0.5
-        config.frequencyRangeLow = 500.0
-        config.frequencyRangeHigh = 8000.0
+        config.frequencyRangeLow = 17_200.0
+        config.frequencyRangeHigh = 21_000.0
         config.tier1Enabled = false
         config.toggleTechnique(.uapWhisper)
 

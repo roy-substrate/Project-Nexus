@@ -16,16 +16,18 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     private var readPosition: Int = 0
     private var currentMaskingThreshold: [Float] = []
 
-    private let formantFrequencies: [Float] = [500, 1500, 2500]
+    private let formantFrequencies: [Float] = [17_500, 18_500, 19_500]
     private let notchWidth: Float = 80
-    private let lowFreq: Float = 300
-    private let highFreq: Float = 4000
+    private var lowFreq: Float
+    private var highFreq: Float
     private var intensity: Float = 0.8
 
     private let lock = os_unfair_lock_t.allocate(capacity: 1)
 
-    init(intensity: Float = 0.8) {
+    init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
         self.intensity = intensity
+        self.lowFreq = lowFreq
+        self.highFreq = highFreq
         self.noiseTable = DSPUtilities.generateWhiteNoise(count: noiseTableSize)
         lock.initialize(to: os_unfair_lock())
         prepareNoiseTable()
@@ -37,6 +39,12 @@ final class SpectralNotchGenerator: PerturbationGenerator {
 
     func setIntensity(_ value: Float) {
         intensity = max(0, min(1, value))
+    }
+
+    func setFrequencyRange(low: Float, high: Float) {
+        lowFreq = low
+        highFreq = high
+        prepareNoiseTable()
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
