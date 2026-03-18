@@ -290,7 +290,9 @@ private struct SessionHistoryView: View {
     private func shareText(for session: SessionSummary) -> String {
         let jam = Int(session.peakASRJamScore * 100)
         let duration = formattedDuration(session.totalShieldSeconds)
-        return "I blocked \(jam)% of AI transcription for \(duration) with Nexus Shield 🛡️\n\nYour voice. Your rules. — nexusshield.app"
+        // Platform-optimized: concise enough for Twitter (< 280 chars),
+        // includes hook + brand + URL for all platforms.
+        return "Blocked \(jam)% of AI transcription for \(duration) with Nexus Shield — free, on-device voice protection.\n\nYour voice. Your rules.\nnexusshield.app"
     }
 
     private func formattedDuration(_ seconds: Double) -> String {

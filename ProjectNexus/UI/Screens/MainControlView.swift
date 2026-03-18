@@ -63,7 +63,7 @@ struct MainControlView: View {
             } else {
                 sessionStartTime = nil
                 let score = asrService.effectivenessScore
-                if score > 0.5 {
+                if score > 0.25 {
                     sessionResultScore = score
                     withAnimation(PixelAnimation.appear) {
                         showSessionResult = true

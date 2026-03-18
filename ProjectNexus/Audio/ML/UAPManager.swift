@@ -1,6 +1,7 @@
 import Foundation
 import Accelerate
 import os
+import Synchronization
 
 enum UAPVariant: String, CaseIterable, Identifiable, Codable {
     case whisperOptimized = "Whisper"
@@ -25,7 +26,10 @@ final class UAPManager {
     private var readPositions: [UAPVariant: Int] = [:]
     private let crossfadeSamples = 2400  // 50ms at 48kHz
 
-    private(set) var currentVariant: UAPVariant = .ensemble
+    // Atomic so selectVariant() on the main thread and fillBuffer() on the
+    // CoreAudio render thread never race on the variant value.
+    private let _currentVariant = Mutex<UAPVariant>(.ensemble)
+    var currentVariant: UAPVariant { _currentVariant.withLock { $0 } }
     private(set) var isLoaded = false
 
     func loadUAPs() {
@@ -46,17 +50,18 @@ final class UAPManager {
     }
 
     func selectVariant(_ variant: UAPVariant) {
-        currentVariant = variant
+        _currentVariant.withLock { $0 = variant }
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, gain: Float = 1.0) {
-        guard let uap = uapBuffers[currentVariant],
+        let variant = _currentVariant.withLock { $0 }
+        guard let uap = uapBuffers[variant],
               !uap.isEmpty else {
             memset(buffer, 0, frameCount * MemoryLayout<Float>.size)
             return
         }
 
-        var pos = readPositions[currentVariant] ?? 0
+        var pos = readPositions[variant] ?? 0
         let uapLength = uap.count
         var written = 0
 
@@ -97,7 +102,7 @@ final class UAPManager {
             }
         }
 
-        readPositions[currentVariant] = pos
+        readPositions[variant] = pos
     }
 
     private func loadUAPFromBundle(_ variant: UAPVariant) -> [Float]? {
