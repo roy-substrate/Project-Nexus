@@ -10,6 +10,14 @@ tags:
 
 ---
 
+# Launch fresh with mic permission pre-granted to avoid OS dialog flakiness
+- launchApp:
+    appId: com.nexus.shield
+    clearState: true
+    permissions:
+      microphone: allow
+      speech_recognition: allow
+
 # ── Page 0: Welcome ──────────────────────────────────────────────
 - assertVisible: "YOUR VOICE"
 - assertVisible: "YOUR RULES"

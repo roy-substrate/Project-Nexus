@@ -14,6 +14,13 @@ tags:
 
 ---
 
+# Pre-grant speech recognition so ASR measurement can start immediately
+- launchApp:
+    appId: com.nexus.shield
+    permissions:
+      microphone: allow
+      speech_recognition: allow
+
 # ── Navigate to Shield tab ───────────────────────────────────────
 - tapOn: "Shield"
 

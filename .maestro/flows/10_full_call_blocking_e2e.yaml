@@ -27,6 +27,13 @@ tags:
 
 ---
 
+# Pre-grant all permissions to avoid OS dialogs during E2E
+- launchApp:
+    appId: com.nexus.shield
+    permissions:
+      microphone: allow
+      speech_recognition: allow
+
 # ═══════════════════════════════════════════════════════════════════
 # STEP 1: Configure Maximum Protection
 # ═══════════════════════════════════════════════════════════════════
