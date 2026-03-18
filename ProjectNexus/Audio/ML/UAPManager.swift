@@ -101,7 +101,13 @@ final class UAPManager {
     }
 
     private func loadUAPFromBundle(_ variant: UAPVariant) -> [Float]? {
-        guard let url = Bundle.main.url(forResource: variant.filename, withExtension: "bin") else {
+        #if SWIFT_PACKAGE
+        let bundle = Bundle.module
+        #else
+        let bundle = Bundle.main
+        #endif
+
+        guard let url = bundle.url(forResource: variant.filename, withExtension: "bin") else {
             return nil
         }
 

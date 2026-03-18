@@ -7,20 +7,32 @@ struct PerturbationConfig: Codable {
 
     var frequencyRangeLow: Float = 300.0 {
         didSet {
-            frequencyRangeLow = frequencyRangeLow.clamped(to: 100...7800)
-            // Ensure low stays at least 200 Hz below high
-            if frequencyRangeLow >= frequencyRangeHigh - 200 {
-                frequencyRangeHigh = min(8000, frequencyRangeLow + 200)
+            let clampedLow = frequencyRangeLow.clamped(to: 100...7800)
+            if frequencyRangeLow != clampedLow {
+                frequencyRangeLow = clampedLow
+                return
+            }
+
+            // Ensure low stays at least 200 Hz below high.
+            let minHigh = frequencyRangeLow + 200
+            if frequencyRangeHigh < minHigh {
+                frequencyRangeHigh = min(8000, minHigh)
             }
         }
     }
 
     var frequencyRangeHigh: Float = 4000.0 {
         didSet {
-            frequencyRangeHigh = frequencyRangeHigh.clamped(to: 300...8000)
-            // Ensure high stays at least 200 Hz above low
-            if frequencyRangeHigh <= frequencyRangeLow + 200 {
-                frequencyRangeLow = max(100, frequencyRangeHigh - 200)
+            let clampedHigh = frequencyRangeHigh.clamped(to: 300...8000)
+            if frequencyRangeHigh != clampedHigh {
+                frequencyRangeHigh = clampedHigh
+                return
+            }
+
+            // Ensure high stays at least 200 Hz above low.
+            let maxLow = frequencyRangeHigh - 200
+            if frequencyRangeLow > maxLow {
+                frequencyRangeLow = max(100, maxLow)
             }
         }
     }
