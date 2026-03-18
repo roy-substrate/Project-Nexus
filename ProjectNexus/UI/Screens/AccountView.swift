@@ -7,7 +7,6 @@ struct AccountView: View {
 
     @State private var showDeleteConfirmation = false
     @State private var showDeleteDataConfirmation = false
-    @State private var showPaywall = false
 
     private let appVersion: String = {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -18,7 +17,6 @@ struct AccountView: View {
     var body: some View {
         NavigationStack {
             List {
-                if !subscriptionManager.isPro { upgradeSection }
                 statsSection
                 dataSection
                 dangerSection
@@ -27,9 +25,6 @@ struct AccountView: View {
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.large)
             .listStyle(.insetGrouped)
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView(subscriptionManager: subscriptionManager)
         }
         .confirmationDialog(
             "Delete Analytics Data",
@@ -54,42 +49,6 @@ struct AccountView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This clears all your settings, analytics data, and resets the app to its first-launch state.")
-        }
-    }
-
-    // MARK: - Upgrade Banner
-
-    private var upgradeSection: some View {
-        Section {
-            Button { showPaywall = true } label: {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle()
-                            .fill(NexusTheme.tier2.opacity(0.15))
-                            .frame(width: 40, height: 40)
-                        Image(systemName: "brain")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundStyle(NexusTheme.tier2)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Unlock Adversarial AI")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(.primary)
-                        Text("Tier 2 · UAP · Session History · Diagnostics")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 4)
-            }
-        } header: {
-            Text("Nexus Shield Pro")
-        } footer: {
-            Text("$3.99/month or $19.99/year · 7-day free trial · Cancel anytime")
         }
     }
 
