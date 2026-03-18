@@ -75,8 +75,8 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier1)
                 }
                 Slider(value: $state.config.frequencyRangeLow,
-                       in: 100...min(state.config.frequencyRangeHigh - 200, 2000),
-                       step: 50)
+                       in: 16_000...min(state.config.frequencyRangeHigh - 200, 21_800),
+                       step: 100)
                     .tint(NexusTheme.tier1)
             }
             .padding(.vertical, 4)
@@ -92,7 +92,7 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier2)
                 }
                 Slider(value: $state.config.frequencyRangeHigh,
-                       in: max(state.config.frequencyRangeLow + 200, 1000)...8000,
+                       in: max(state.config.frequencyRangeLow + 200, 16_200)...22_000,
                        step: 100)
                     .tint(NexusTheme.tier2)
             }
@@ -105,16 +105,16 @@ struct PerturbationSettingsView: View {
         } header: {
             Text("Frequency Range")
         } footer: {
-            Text("Defines the spectral band in which perturbations are generated. Human speech occupies roughly 300–3400 Hz.")
+            Text("Defines the ultrasonic band where perturbations are generated. The default range is above most human hearing.")
         }
     }
 
     private var frequencyBandBar: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let totalRange: Float = 8000 - 100
-            let lowNorm  = CGFloat((state.config.frequencyRangeLow  - 100) / totalRange)
-            let highNorm = CGFloat((state.config.frequencyRangeHigh - 100) / totalRange)
+            let totalRange: Float = 22_000 - 16_000
+            let lowNorm  = CGFloat((state.config.frequencyRangeLow  - 16_000) / totalRange)
+            let highNorm = CGFloat((state.config.frequencyRangeHigh - 16_000) / totalRange)
 
             ZStack(alignment: .leading) {
                 Capsule()

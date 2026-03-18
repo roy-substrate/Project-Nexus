@@ -40,17 +40,29 @@ final class PerturbationService {
         // Tier 1 generators
         if config.tier1Enabled {
             if config.isTechniqueEnabled(.spectralNotch) {
-                let gen = SpectralNotchGenerator(intensity: config.intensity)
+                let gen = SpectralNotchGenerator(
+                    intensity: config.intensity,
+                    lowFreq: config.frequencyRangeLow,
+                    highFreq: config.frequencyRangeHigh
+                )
                 spectralNotch = gen
                 pipeline.addGenerator(gen)
             }
             if config.isTechniqueEnabled(.babbleNoise) {
-                let gen = BabbleNoiseGenerator(intensity: config.intensity)
+                let gen = BabbleNoiseGenerator(
+                    intensity: config.intensity,
+                    lowFreq: config.frequencyRangeLow,
+                    highFreq: config.frequencyRangeHigh
+                )
                 babbleNoise = gen
                 pipeline.addGenerator(gen)
             }
             if config.isTechniqueEnabled(.frequencySweep) {
-                let gen = FrequencySweepGenerator(intensity: config.intensity)
+                let gen = FrequencySweepGenerator(
+                    intensity: config.intensity,
+                    lowFreq: config.frequencyRangeLow,
+                    highFreq: config.frequencyRangeHigh
+                )
                 frequencySweep = gen
                 pipeline.addGenerator(gen)
             }
@@ -98,6 +110,9 @@ final class PerturbationService {
         spectralNotch?.setIntensity(config.intensity)
         babbleNoise?.setIntensity(config.intensity)
         frequencySweep?.setIntensity(config.intensity)
+        spectralNotch?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
+        babbleNoise?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
+        frequencySweep?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
 
         spectralNotch?.isEnabled = config.tier1Enabled && config.isTechniqueEnabled(.spectralNotch)
         babbleNoise?.isEnabled = config.tier1Enabled && config.isTechniqueEnabled(.babbleNoise)

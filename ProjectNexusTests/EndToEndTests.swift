@@ -15,8 +15,8 @@ final class EndToEndTests: XCTestCase {
         var state1 = AppState()
         state1.config.intensity = 0.33
         state1.config.tier1Enabled = false
-        state1.config.frequencyRangeLow = 400
-        state1.config.frequencyRangeHigh = 3200
+        state1.config.frequencyRangeLow = 17_400
+        state1.config.frequencyRangeHigh = 20_200
         state1.config.maskingAggressiveness = 0.45
         state1.config.codecTarget = .aac64k
         state1.config.toggleTechnique(.uapWhisper)   // enable
@@ -25,8 +25,8 @@ final class EndToEndTests: XCTestCase {
         let state2 = AppState()
         XCTAssertEqual(state2.config.intensity,             0.33, accuracy: 1e-5)
         XCTAssertFalse(state2.config.tier1Enabled)
-        XCTAssertEqual(state2.config.frequencyRangeLow,    400,   accuracy: 1e-5)
-        XCTAssertEqual(state2.config.frequencyRangeHigh,   3200,  accuracy: 1e-5)
+        XCTAssertEqual(state2.config.frequencyRangeLow,    17_400,   accuracy: 1e-5)
+        XCTAssertEqual(state2.config.frequencyRangeHigh,   20_200,  accuracy: 1e-5)
         XCTAssertEqual(state2.config.maskingAggressiveness, 0.45, accuracy: 1e-5)
         XCTAssertEqual(state2.config.codecTarget, .aac64k)
         XCTAssertTrue(state2.config.isTechniqueEnabled(.uapWhisper))
