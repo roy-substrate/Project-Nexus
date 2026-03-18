@@ -1,0 +1,839 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03D3BA75BED44B43E19D4DFF /* AudioMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0C2FFEC21259EDE2D7BAA6 /* AudioMode.swift */; };
+		0477BD9FB52797E10FA95C0B /* DeepSpeechSurrogate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180E2DA36E056202D84DC00B /* DeepSpeechSurrogate.swift */; };
+		0F32439E56F93E951A82CEA2 /* FloatArray+DSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2162E174E9329F20F5BD2AF7 /* FloatArray+DSP.swift */; };
+		107080C0A1398C91B1B4AE1C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 806D3FF77B3F2D94E84DC530 /* Foundation.framework */; };
+		121092C0F8F41A0DB5746856 /* SpectralNotchGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D2A09B897D45EAF9CA0749 /* SpectralNotchGenerator.swift */; };
+		1237E1E9345E0EE0C48F84EE /* UAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7065C7E88CEC9671F3D8597C /* UAPManager.swift */; };
+		1ADA67A63489F7E56498B7F6 /* AudioPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1031100834B69865B648D3ED /* AudioPipelineManager.swift */; };
+		1E6A53C8EB1E45D256950157 /* PerturbationMixerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85392C8AD7E35F1EB2687974 /* PerturbationMixerNode.swift */; };
+		2406F09E8B3DF65300249A9F /* MainControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937414AC6B317003DBBEC545 /* MainControlView.swift */; };
+		26C5BEE65244F83DEDEDA174 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C110A540119DAD123B957F5 /* OnboardingView.swift */; };
+		297B58033B4E5BC7C65CC4E4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA4396AFEF50EB4D6A17359 /* Foundation.framework */; };
+		29992C5BF8B2A10CFE1BCD76 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDBB8F40F371A44F45D22707 /* OnboardingTests.swift */; };
+		312A9C34E980E6BC32CE9C24 /* NexusE2ETestAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ABFA0A72D873A515E103E31 /* NexusE2ETestAgent.swift */; };
+		373673D45102BCBE86323049 /* PerturbationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA0F9BC0DB3486B045ECF2 /* PerturbationService.swift */; };
+		3AC777619880230BE4476454 /* GlassModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16FBA2CA3DB77D248E7A8FF /* GlassModifiers.swift */; };
+		43E5F825EC6A17C1D6A80EA6 /* PerturbationConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC74223E509924A9297F56E /* PerturbationConfigTests.swift */; };
+		46EBBE4C1D247C465E0BEE81 /* PulseRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304983E0BE1D7DC9E6CBD70B /* PulseRingView.swift */; };
+		48DCA416EE85DCC2D147C654 /* UAPManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8B7FBAE2DC05B9159C483A /* UAPManagerTests.swift */; };
+		499526BB618ED07996F5FF84 /* SpectralNotchGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEFB5A011982FEBE4477A8E /* SpectralNotchGeneratorTests.swift */; };
+		4AC0A5893ABCE01831548485 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D4D41895B95906F784FE5AC /* PaywallView.swift */; };
+		4DC134CDB301300FC143B613 /* AudioMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DC2BE3F6E0B73815D435FD /* AudioMetrics.swift */; };
+		4ECB70219D692184BBB480B3 /* AudioRoutingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9590A85CFC53C5D576BC6A /* AudioRoutingView.swift */; };
+		5740396E882F2C17BA5DC0C6 /* ParticleFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30DFBB28400B01CFDC873B2 /* ParticleFieldView.swift */; };
+		5B7034ACFFD292F4B2764369 /* VoIPAudioRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 785679AC7B8927305779AA47 /* VoIPAudioRouter.swift */; };
+		5F0CD24700E11F8A15BF258A /* PerturbationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB79F7BC46C5C5A849EFAE1 /* PerturbationServiceTests.swift */; };
+		5FF134913899FEBCE4FC086E /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347E51C9BDD44CE820D26BC4 /* DiagnosticsView.swift */; };
+		6178EB1E8949A64CFCF03681 /* SurrogateEnsemble.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0DA6FCA17CCC47B26D538CB /* SurrogateEnsemble.swift */; };
+		62DE4D92EAF5FE89FBB603AA /* ProjectNexusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBB66AE4E31533970B5EC576 /* ProjectNexusApp.swift */; };
+		6F399BE0E784A2D3995AB862 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD057B334195E08569D90FA8 /* AVFoundation.framework */; };
+		75A73DFB2260D7B8E7815937 /* PerturbationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77CA3F38A7ED4808E48C9B61 /* PerturbationBadge.swift */; };
+		75CECE2B3EDEB7FE5190F84F /* EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909A9F92709657C788784519 /* EndToEndTests.swift */; };
+		7E476268579CD68749D3957E /* FrequencySweepGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87C8209F875B6A226177A1C /* FrequencySweepGeneratorTests.swift */; };
+		7F1DE763304D538A80B8A248 /* AVAudioPCMBuffer+Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484785F79285757A6A020B96 /* AVAudioPCMBuffer+Utilities.swift */; };
+		80B2C0C8BC5D4C2D2D82201B /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 787DECFAEF8604C67BC97071 /* WaveformView.swift */; };
+		87C0F0358DEBC4275B278294 /* PerturbationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8D44242FF3F929F40F8C33 /* PerturbationConfig.swift */; };
+		882744A8AE977BA59AB58D0A /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C2BEC94D8A06E7531ABDF3 /* AccountView.swift */; };
+		8E560D1620B755B04F4EC98D /* DSPUtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC0CA98460ABF688E877252 /* DSPUtilitiesTests.swift */; };
+		93AFB9BD6FA505DA401A35C1 /* MicCaptureNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D34884AE55DEAB9B89A9226 /* MicCaptureNode.swift */; };
+		95F6B709FAFC2D01BAA43945 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3DC3022D05E6E2686BF47F /* AnalyticsService.swift */; };
+		9622C9FAFC45FA5DA298226B /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7C63F30F00B63FADDA2AA93 /* Speech.framework */; };
+		97111ED9C3725197FDAB430C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2411C571D97DAD113653870 /* Accelerate.framework */; };
+		9A140B5CB21CDFE9BDEC017E /* WhisperSurrogate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D65AF4CDE4E101FE4569FE9 /* WhisperSurrogate.swift */; };
+		A161916750C0C459E2FA7CDD /* AudioSessionConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD623A7C0CE7D9548546F80D /* AudioSessionConfigurator.swift */; };
+		ABC027971C2F55B7B5E2DC4B /* ASREffectivenessService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29B147F02B0DFF1F3C387A4 /* ASREffectivenessService.swift */; };
+		AC3BBA7777A56F170DECE285 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC4C0356CD9147531E92680 /* AppState.swift */; };
+		AFC2567ADFC7D415ADD05DAA /* PerturbationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA51279BA1BCD7F5D3B907FA /* PerturbationSettingsView.swift */; };
+		B19B7178730B1CBB297B0805 /* NexusTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64954A557F1178DF0237E70 /* NexusTheme.swift */; };
+		B4F977552221F79C393AD93D /* MetricsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC2310DE41E6332DDF63485E /* MetricsServiceTests.swift */; };
+		B64886ECC42C41394239B38F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA4396AFEF50EB4D6A17359 /* Foundation.framework */; };
+		BF8A16E784C8C400B882766A /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA38BFFFDEA36FE8D544972 /* GlassCard.swift */; };
+		C33E3ADC85760BC778C95091 /* FloatArrayDSPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A3B6FBAFD44A7CA3C70BC6 /* FloatArrayDSPTests.swift */; };
+		C5FF95232292E51886FB107E /* CodecSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D2D0F74F19E1697AE64C00 /* CodecSimulator.swift */; };
+		C7EFDA41C2F760F00BB4A083 /* PsychoacousticMaskerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C33AC171C8E30362C55BCC2 /* PsychoacousticMaskerTests.swift */; };
+		D141E14488D9A8EEDBB80F95 /* MetricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4526A47CDDDE57E3D3AF23C /* MetricsService.swift */; };
+		D5C80D32FB95D715EC4AB92D /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FDD0E81AE1A35DBA8B22BE /* SubscriptionManager.swift */; };
+		D9380F5BA8683D2514978C2E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F181D44B00B15B2FD67EC28E /* SwiftUI.framework */; };
+		DB872F71703EA9D246553871 /* BabbleNoiseGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207C508F7BFCBA3C693169BC /* BabbleNoiseGenerator.swift */; };
+		DDBD24C2587EDCA4E69DCF09 /* BabbleNoiseGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C8134A2205D8E21962C406 /* BabbleNoiseGeneratorTests.swift */; };
+		DE9F1077B9931A85E5F4F8D3 /* PerturbationConfigValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B784AD7F5ADA5F748BB0F79F /* PerturbationConfigValidationTests.swift */; };
+		E48A66B09C9C94F1643C822F /* FrequencySweepGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36192C96265E60F94F11DCF5 /* FrequencySweepGenerator.swift */; };
+		E7EC1EB71E4D2EED22D0C782 /* SpeakerPlaybackRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2AB66B17395553EE70543C /* SpeakerPlaybackRouter.swift */; };
+		E89B3B8A3DEDF17BF7695032 /* PerturbationTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393CE181A5B8DD462E3F390E /* PerturbationTypeTests.swift */; };
+		EE63E62CEB2F1E714765B02D /* PerturbationOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCDF3D8D3C43E4A311807FF8 /* PerturbationOptimizer.swift */; };
+		F0C2319FDE5D88771667367C /* DSPUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452203C348DB09683E5C9FFC /* DSPUtilities.swift */; };
+		F6E6EFD2C1CF969DAA8C6A3C /* PerturbationType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3688CD77B3A03C20F9E993DC /* PerturbationType.swift */; };
+		FA2060892DCBCC6D3E4AF6CC /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B728EB7F314059D265028DA6 /* StoreKit.framework */; };
+		FA51ACAAF81E167122451E44 /* LevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CB6D682B7E0710AA404092 /* LevelMeterView.swift */; };
+		FAA805718463F9F8773E38BE /* PsychoacousticMasker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A56FF768BDACCAE8C3F859 /* PsychoacousticMasker.swift */; };
+		FACC2B08ED6CBB0482B69F8C /* SpectrumVisualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC8E08744405D52DAD0D52A1 /* SpectrumVisualizerView.swift */; };
+		FDC37BA1C5D566BF0FF46BFB /* NexusDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907A86158D9EB0AF21CA3F5A /* NexusDesignSystem.swift */; };
+		FFFEEB75E1408003597EE3FF /* AudioMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7960AFEEC8FAC7AB1A113BAB /* AudioMetricsTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B66ED95D28E6A90B0593CE92 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1569B22E41D4D73AF921F565 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2277AC120944EDD0A77C15F3;
+			remoteInfo = ProjectNexus;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00C8134A2205D8E21962C406 /* BabbleNoiseGeneratorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabbleNoiseGeneratorTests.swift; sourceTree = "<group>"; };
+		0D65AF4CDE4E101FE4569FE9 /* WhisperSurrogate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhisperSurrogate.swift; sourceTree = "<group>"; };
+		1031100834B69865B648D3ED /* AudioPipelineManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioPipelineManager.swift; sourceTree = "<group>"; };
+		180E2DA36E056202D84DC00B /* DeepSpeechSurrogate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepSpeechSurrogate.swift; sourceTree = "<group>"; };
+		1BC74223E509924A9297F56E /* PerturbationConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationConfigTests.swift; sourceTree = "<group>"; };
+		1E8D44242FF3F929F40F8C33 /* PerturbationConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationConfig.swift; sourceTree = "<group>"; };
+		1FA4396AFEF50EB4D6A17359 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		207C508F7BFCBA3C693169BC /* BabbleNoiseGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabbleNoiseGenerator.swift; sourceTree = "<group>"; };
+		2162E174E9329F20F5BD2AF7 /* FloatArray+DSP.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "FloatArray+DSP.swift"; sourceTree = "<group>"; };
+		2C110A540119DAD123B957F5 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		2C2AB66B17395553EE70543C /* SpeakerPlaybackRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeakerPlaybackRouter.swift; sourceTree = "<group>"; };
+		2D8B7FBAE2DC05B9159C483A /* UAPManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UAPManagerTests.swift; sourceTree = "<group>"; };
+		304983E0BE1D7DC9E6CBD70B /* PulseRingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PulseRingView.swift; sourceTree = "<group>"; };
+		347E51C9BDD44CE820D26BC4 /* DiagnosticsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
+		36192C96265E60F94F11DCF5 /* FrequencySweepGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FrequencySweepGenerator.swift; sourceTree = "<group>"; };
+		3688CD77B3A03C20F9E993DC /* PerturbationType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationType.swift; sourceTree = "<group>"; };
+		393CE181A5B8DD462E3F390E /* PerturbationTypeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationTypeTests.swift; sourceTree = "<group>"; };
+		452203C348DB09683E5C9FFC /* DSPUtilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSPUtilities.swift; sourceTree = "<group>"; };
+		484785F79285757A6A020B96 /* AVAudioPCMBuffer+Utilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+Utilities.swift"; sourceTree = "<group>"; };
+		4ABFA0A72D873A515E103E31 /* NexusE2ETestAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NexusE2ETestAgent.swift; sourceTree = "<group>"; };
+		4D4D41895B95906F784FE5AC /* PaywallView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		4E3DC3022D05E6E2686BF47F /* AnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		5D34884AE55DEAB9B89A9226 /* MicCaptureNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MicCaptureNode.swift; sourceTree = "<group>"; };
+		61CB6D682B7E0710AA404092 /* LevelMeterView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LevelMeterView.swift; sourceTree = "<group>"; };
+		673C7DCE9E73E8C83F153F81 /* ProjectNexusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjectNexusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		67D2A09B897D45EAF9CA0749 /* SpectralNotchGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpectralNotchGenerator.swift; sourceTree = "<group>"; };
+		6B9590A85CFC53C5D576BC6A /* AudioRoutingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioRoutingView.swift; sourceTree = "<group>"; };
+		7065C7E88CEC9671F3D8597C /* UAPManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UAPManager.swift; sourceTree = "<group>"; };
+		77CA3F38A7ED4808E48C9B61 /* PerturbationBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationBadge.swift; sourceTree = "<group>"; };
+		785679AC7B8927305779AA47 /* VoIPAudioRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoIPAudioRouter.swift; sourceTree = "<group>"; };
+		787DECFAEF8604C67BC97071 /* WaveformView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
+		78A3B6FBAFD44A7CA3C70BC6 /* FloatArrayDSPTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FloatArrayDSPTests.swift; sourceTree = "<group>"; };
+		7960AFEEC8FAC7AB1A113BAB /* AudioMetricsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioMetricsTests.swift; sourceTree = "<group>"; };
+		7C33AC171C8E30362C55BCC2 /* PsychoacousticMaskerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PsychoacousticMaskerTests.swift; sourceTree = "<group>"; };
+		806D3FF77B3F2D94E84DC530 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		85392C8AD7E35F1EB2687974 /* PerturbationMixerNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationMixerNode.swift; sourceTree = "<group>"; };
+		907A86158D9EB0AF21CA3F5A /* NexusDesignSystem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NexusDesignSystem.swift; sourceTree = "<group>"; };
+		909A9F92709657C788784519 /* EndToEndTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EndToEndTests.swift; sourceTree = "<group>"; };
+		937414AC6B317003DBBEC545 /* MainControlView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainControlView.swift; sourceTree = "<group>"; };
+		93AA0F9BC0DB3486B045ECF2 /* PerturbationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationService.swift; sourceTree = "<group>"; };
+		96FDD0E81AE1A35DBA8B22BE /* SubscriptionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		A29B147F02B0DFF1F3C387A4 /* ASREffectivenessService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ASREffectivenessService.swift; sourceTree = "<group>"; };
+		AC2310DE41E6332DDF63485E /* MetricsServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MetricsServiceTests.swift; sourceTree = "<group>"; };
+		B16FBA2CA3DB77D248E7A8FF /* GlassModifiers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlassModifiers.swift; sourceTree = "<group>"; };
+		B2411C571D97DAD113653870 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		B2F9A8EA933AA52C9CA4C52D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B6C2BEC94D8A06E7531ABDF3 /* AccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		B728EB7F314059D265028DA6 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B784AD7F5ADA5F748BB0F79F /* PerturbationConfigValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationConfigValidationTests.swift; sourceTree = "<group>"; };
+		BA51279BA1BCD7F5D3B907FA /* PerturbationSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationSettingsView.swift; sourceTree = "<group>"; };
+		BCDF3D8D3C43E4A311807FF8 /* PerturbationOptimizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationOptimizer.swift; sourceTree = "<group>"; };
+		BD057B334195E08569D90FA8 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		C64954A557F1178DF0237E70 /* NexusTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NexusTheme.swift; sourceTree = "<group>"; };
+		C87C8209F875B6A226177A1C /* FrequencySweepGeneratorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FrequencySweepGeneratorTests.swift; sourceTree = "<group>"; };
+		D8A56FF768BDACCAE8C3F859 /* PsychoacousticMasker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PsychoacousticMasker.swift; sourceTree = "<group>"; };
+		D99B609EF999D3216B9DB055 /* ProjectNexus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProjectNexus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAC0CA98460ABF688E877252 /* DSPUtilitiesTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSPUtilitiesTests.swift; sourceTree = "<group>"; };
+		E0DA6FCA17CCC47B26D538CB /* SurrogateEnsemble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurrogateEnsemble.swift; sourceTree = "<group>"; };
+		E1DC2BE3F6E0B73815D435FD /* AudioMetrics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioMetrics.swift; sourceTree = "<group>"; };
+		E30DFBB28400B01CFDC873B2 /* ParticleFieldView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ParticleFieldView.swift; sourceTree = "<group>"; };
+		E4D2D0F74F19E1697AE64C00 /* CodecSimulator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodecSimulator.swift; sourceTree = "<group>"; };
+		E7C63F30F00B63FADDA2AA93 /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = SDKROOT; };
+		EBB66AE4E31533970B5EC576 /* ProjectNexusApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProjectNexusApp.swift; sourceTree = "<group>"; };
+		EDB79F7BC46C5C5A849EFAE1 /* PerturbationServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PerturbationServiceTests.swift; sourceTree = "<group>"; };
+		F181D44B00B15B2FD67EC28E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		F4526A47CDDDE57E3D3AF23C /* MetricsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MetricsService.swift; sourceTree = "<group>"; };
+		FC8E08744405D52DAD0D52A1 /* SpectrumVisualizerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpectrumVisualizerView.swift; sourceTree = "<group>"; };
+		FD0C2FFEC21259EDE2D7BAA6 /* AudioMode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioMode.swift; sourceTree = "<group>"; };
+		FD623A7C0CE7D9548546F80D /* AudioSessionConfigurator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioSessionConfigurator.swift; sourceTree = "<group>"; };
+		FDBB8F40F371A44F45D22707 /* OnboardingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
+		FEEFB5A011982FEBE4477A8E /* SpectralNotchGeneratorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpectralNotchGeneratorTests.swift; sourceTree = "<group>"; };
+		FFA38BFFFDEA36FE8D544972 /* GlassCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		FFC4C0356CD9147531E92680 /* AppState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		87B536CEA5AC8FD5C0B6F52F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B64886ECC42C41394239B38F /* Foundation.framework in Frameworks */,
+				6F399BE0E784A2D3995AB862 /* AVFoundation.framework in Frameworks */,
+				97111ED9C3725197FDAB430C /* Accelerate.framework in Frameworks */,
+				9622C9FAFC45FA5DA298226B /* Speech.framework in Frameworks */,
+				FA2060892DCBCC6D3E4AF6CC /* StoreKit.framework in Frameworks */,
+				D9380F5BA8683D2514978C2E /* SwiftUI.framework in Frameworks */,
+				107080C0A1398C91B1B4AE1C /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E23011C091A5B0BA9533CB03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				297B58033B4E5BC7C65CC4E4 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0DAD25FC62C5A9F0A13C68E1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D99B609EF999D3216B9DB055 /* ProjectNexus.app */,
+				673C7DCE9E73E8C83F153F81 /* ProjectNexusTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0EB290F9A6DD62480E6C2545 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				B6C2BEC94D8A06E7531ABDF3 /* AccountView.swift */,
+				6B9590A85CFC53C5D576BC6A /* AudioRoutingView.swift */,
+				347E51C9BDD44CE820D26BC4 /* DiagnosticsView.swift */,
+				937414AC6B317003DBBEC545 /* MainControlView.swift */,
+				4D4D41895B95906F784FE5AC /* PaywallView.swift */,
+				BA51279BA1BCD7F5D3B907FA /* PerturbationSettingsView.swift */,
+			);
+			name = Screens;
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		2897D51983E474EC6C44715E /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				2C110A540119DAD123B957F5 /* OnboardingView.swift */,
+			);
+			name = Onboarding;
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		2A31FE84FB98BF3EF7171CC8 /* ProjectNexusTests */ = {
+			isa = PBXGroup;
+			children = (
+				7960AFEEC8FAC7AB1A113BAB /* AudioMetricsTests.swift */,
+				00C8134A2205D8E21962C406 /* BabbleNoiseGeneratorTests.swift */,
+				DAC0CA98460ABF688E877252 /* DSPUtilitiesTests.swift */,
+				909A9F92709657C788784519 /* EndToEndTests.swift */,
+				78A3B6FBAFD44A7CA3C70BC6 /* FloatArrayDSPTests.swift */,
+				C87C8209F875B6A226177A1C /* FrequencySweepGeneratorTests.swift */,
+				AC2310DE41E6332DDF63485E /* MetricsServiceTests.swift */,
+				4ABFA0A72D873A515E103E31 /* NexusE2ETestAgent.swift */,
+				FDBB8F40F371A44F45D22707 /* OnboardingTests.swift */,
+				1BC74223E509924A9297F56E /* PerturbationConfigTests.swift */,
+				B784AD7F5ADA5F748BB0F79F /* PerturbationConfigValidationTests.swift */,
+				EDB79F7BC46C5C5A849EFAE1 /* PerturbationServiceTests.swift */,
+				393CE181A5B8DD462E3F390E /* PerturbationTypeTests.swift */,
+				7C33AC171C8E30362C55BCC2 /* PsychoacousticMaskerTests.swift */,
+				FEEFB5A011982FEBE4477A8E /* SpectralNotchGeneratorTests.swift */,
+				2D8B7FBAE2DC05B9159C483A /* UAPManagerTests.swift */,
+			);
+			name = ProjectNexusTests;
+			path = ProjectNexusTests;
+			sourceTree = "<group>";
+		};
+		4C65AD84EAA0318DC4B4560F /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				BCB3F88D74A03DD3064AA801 /* DSP */,
+				F74008CE7A02D3148A17231B /* Engine */,
+				E8D0BF73A07EA19046527543 /* ML */,
+				E1FF1C87D777E69133B2E2A5 /* Routing */,
+			);
+			name = Audio;
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		520EE83A9B516DDE978A0B66 = {
+			isa = PBXGroup;
+			children = (
+				0DAD25FC62C5A9F0A13C68E1 /* Products */,
+				FC23DDA1FAB40472D6198EAA /* Frameworks */,
+				9C3ADD568547E1A334FA0B28 /* ProjectNexus */,
+				2A31FE84FB98BF3EF7171CC8 /* ProjectNexusTests */,
+			);
+			sourceTree = "<group>";
+		};
+		75DFC6FD3126DAF132A00F89 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				484785F79285757A6A020B96 /* AVAudioPCMBuffer+Utilities.swift */,
+				2162E174E9329F20F5BD2AF7 /* FloatArray+DSP.swift */,
+			);
+			name = Extensions;
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		9C3ADD568547E1A334FA0B28 /* ProjectNexus */ = {
+			isa = PBXGroup;
+			children = (
+				C46BDB5CA5E8CC0D8E28E33E /* App */,
+				4C65AD84EAA0318DC4B4560F /* Audio */,
+				75DFC6FD3126DAF132A00F89 /* Extensions */,
+				C3940A7BA112F078106EDC27 /* Models */,
+				EB5A21BDC48992EBAFC688F5 /* Services */,
+				C52C92C04572AA81BD3105F1 /* UI */,
+			);
+			name = ProjectNexus;
+			path = ProjectNexus;
+			sourceTree = "<group>";
+		};
+		BCB3F88D74A03DD3064AA801 /* DSP */ = {
+			isa = PBXGroup;
+			children = (
+				207C508F7BFCBA3C693169BC /* BabbleNoiseGenerator.swift */,
+				E4D2D0F74F19E1697AE64C00 /* CodecSimulator.swift */,
+				452203C348DB09683E5C9FFC /* DSPUtilities.swift */,
+				36192C96265E60F94F11DCF5 /* FrequencySweepGenerator.swift */,
+				D8A56FF768BDACCAE8C3F859 /* PsychoacousticMasker.swift */,
+				67D2A09B897D45EAF9CA0749 /* SpectralNotchGenerator.swift */,
+			);
+			name = DSP;
+			path = DSP;
+			sourceTree = "<group>";
+		};
+		C3940A7BA112F078106EDC27 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E1DC2BE3F6E0B73815D435FD /* AudioMetrics.swift */,
+				FD0C2FFEC21259EDE2D7BAA6 /* AudioMode.swift */,
+				1E8D44242FF3F929F40F8C33 /* PerturbationConfig.swift */,
+				3688CD77B3A03C20F9E993DC /* PerturbationType.swift */,
+			);
+			name = Models;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C46BDB5CA5E8CC0D8E28E33E /* App */ = {
+			isa = PBXGroup;
+			children = (
+				FFC4C0356CD9147531E92680 /* AppState.swift */,
+				B2F9A8EA933AA52C9CA4C52D /* Info.plist */,
+				EBB66AE4E31533970B5EC576 /* ProjectNexusApp.swift */,
+			);
+			name = App;
+			path = App;
+			sourceTree = "<group>";
+		};
+		C52C92C04572AA81BD3105F1 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				D6E867984A759B720C661CA1 /* Components */,
+				D987EE145ADAA7546556733D /* Design */,
+				2897D51983E474EC6C44715E /* Onboarding */,
+				0EB290F9A6DD62480E6C2545 /* Screens */,
+			);
+			name = UI;
+			path = UI;
+			sourceTree = "<group>";
+		};
+		C715C9D7ACBC129DE115B496 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				1FA4396AFEF50EB4D6A17359 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		D6E867984A759B720C661CA1 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				FFA38BFFFDEA36FE8D544972 /* GlassCard.swift */,
+				61CB6D682B7E0710AA404092 /* LevelMeterView.swift */,
+				E30DFBB28400B01CFDC873B2 /* ParticleFieldView.swift */,
+				77CA3F38A7ED4808E48C9B61 /* PerturbationBadge.swift */,
+				304983E0BE1D7DC9E6CBD70B /* PulseRingView.swift */,
+				FC8E08744405D52DAD0D52A1 /* SpectrumVisualizerView.swift */,
+				787DECFAEF8604C67BC97071 /* WaveformView.swift */,
+			);
+			name = Components;
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D987EE145ADAA7546556733D /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				B16FBA2CA3DB77D248E7A8FF /* GlassModifiers.swift */,
+				907A86158D9EB0AF21CA3F5A /* NexusDesignSystem.swift */,
+				C64954A557F1178DF0237E70 /* NexusTheme.swift */,
+			);
+			name = Design;
+			path = Design;
+			sourceTree = "<group>";
+		};
+		E1FF1C87D777E69133B2E2A5 /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				2C2AB66B17395553EE70543C /* SpeakerPlaybackRouter.swift */,
+				785679AC7B8927305779AA47 /* VoIPAudioRouter.swift */,
+			);
+			name = Routing;
+			path = Routing;
+			sourceTree = "<group>";
+		};
+		E8D0BF73A07EA19046527543 /* ML */ = {
+			isa = PBXGroup;
+			children = (
+				180E2DA36E056202D84DC00B /* DeepSpeechSurrogate.swift */,
+				BCDF3D8D3C43E4A311807FF8 /* PerturbationOptimizer.swift */,
+				E0DA6FCA17CCC47B26D538CB /* SurrogateEnsemble.swift */,
+				7065C7E88CEC9671F3D8597C /* UAPManager.swift */,
+				0D65AF4CDE4E101FE4569FE9 /* WhisperSurrogate.swift */,
+			);
+			name = ML;
+			path = ML;
+			sourceTree = "<group>";
+		};
+		EB5A21BDC48992EBAFC688F5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A29B147F02B0DFF1F3C387A4 /* ASREffectivenessService.swift */,
+				4E3DC3022D05E6E2686BF47F /* AnalyticsService.swift */,
+				F4526A47CDDDE57E3D3AF23C /* MetricsService.swift */,
+				93AA0F9BC0DB3486B045ECF2 /* PerturbationService.swift */,
+				96FDD0E81AE1A35DBA8B22BE /* SubscriptionManager.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F74008CE7A02D3148A17231B /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				1031100834B69865B648D3ED /* AudioPipelineManager.swift */,
+				FD623A7C0CE7D9548546F80D /* AudioSessionConfigurator.swift */,
+				5D34884AE55DEAB9B89A9226 /* MicCaptureNode.swift */,
+				85392C8AD7E35F1EB2687974 /* PerturbationMixerNode.swift */,
+			);
+			name = Engine;
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		FC23DDA1FAB40472D6198EAA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C715C9D7ACBC129DE115B496 /* iOS */,
+				BD057B334195E08569D90FA8 /* AVFoundation.framework */,
+				B2411C571D97DAD113653870 /* Accelerate.framework */,
+				E7C63F30F00B63FADDA2AA93 /* Speech.framework */,
+				B728EB7F314059D265028DA6 /* StoreKit.framework */,
+				F181D44B00B15B2FD67EC28E /* SwiftUI.framework */,
+				806D3FF77B3F2D94E84DC530 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1EE4E3DC66BD919E99869B65 /* ProjectNexusTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 39CA4DE4FFAF1BC626A2BB72 /* Build configuration list for PBXNativeTarget "ProjectNexusTests" */;
+			buildPhases = (
+				292B33DDC39EC9781015CEF4 /* Sources */,
+				E23011C091A5B0BA9533CB03 /* Frameworks */,
+				86BC5237DC4A01C90E3262A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				56BBE97021B61A9092439A86 /* PBXTargetDependency */,
+			);
+			name = ProjectNexusTests;
+			productName = ProjectNexusTests;
+			productReference = 673C7DCE9E73E8C83F153F81 /* ProjectNexusTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2277AC120944EDD0A77C15F3 /* ProjectNexus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51EB5352F545FCA69446DD38 /* Build configuration list for PBXNativeTarget "ProjectNexus" */;
+			buildPhases = (
+				3B6B545B27ABDAF6E8EC072A /* Sources */,
+				87B536CEA5AC8FD5C0B6F52F /* Frameworks */,
+				4F10E8C593EBCEC5CFEDFB08 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ProjectNexus;
+			productName = ProjectNexus;
+			productReference = D99B609EF999D3216B9DB055 /* ProjectNexus.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1569B22E41D4D73AF921F565 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = BB0E512B5A5E988ED9D308E0 /* Build configuration list for PBXProject "ProjectNexus" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 520EE83A9B516DDE978A0B66;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0DAD25FC62C5A9F0A13C68E1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2277AC120944EDD0A77C15F3 /* ProjectNexus */,
+				1EE4E3DC66BD919E99869B65 /* ProjectNexusTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4F10E8C593EBCEC5CFEDFB08 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86BC5237DC4A01C90E3262A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		292B33DDC39EC9781015CEF4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FFFEEB75E1408003597EE3FF /* AudioMetricsTests.swift in Sources */,
+				DDBD24C2587EDCA4E69DCF09 /* BabbleNoiseGeneratorTests.swift in Sources */,
+				8E560D1620B755B04F4EC98D /* DSPUtilitiesTests.swift in Sources */,
+				75CECE2B3EDEB7FE5190F84F /* EndToEndTests.swift in Sources */,
+				C33E3ADC85760BC778C95091 /* FloatArrayDSPTests.swift in Sources */,
+				7E476268579CD68749D3957E /* FrequencySweepGeneratorTests.swift in Sources */,
+				B4F977552221F79C393AD93D /* MetricsServiceTests.swift in Sources */,
+				312A9C34E980E6BC32CE9C24 /* NexusE2ETestAgent.swift in Sources */,
+				29992C5BF8B2A10CFE1BCD76 /* OnboardingTests.swift in Sources */,
+				43E5F825EC6A17C1D6A80EA6 /* PerturbationConfigTests.swift in Sources */,
+				DE9F1077B9931A85E5F4F8D3 /* PerturbationConfigValidationTests.swift in Sources */,
+				5F0CD24700E11F8A15BF258A /* PerturbationServiceTests.swift in Sources */,
+				E89B3B8A3DEDF17BF7695032 /* PerturbationTypeTests.swift in Sources */,
+				C7EFDA41C2F760F00BB4A083 /* PsychoacousticMaskerTests.swift in Sources */,
+				499526BB618ED07996F5FF84 /* SpectralNotchGeneratorTests.swift in Sources */,
+				48DCA416EE85DCC2D147C654 /* UAPManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B6B545B27ABDAF6E8EC072A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC3BBA7777A56F170DECE285 /* AppState.swift in Sources */,
+				62DE4D92EAF5FE89FBB603AA /* ProjectNexusApp.swift in Sources */,
+				DB872F71703EA9D246553871 /* BabbleNoiseGenerator.swift in Sources */,
+				C5FF95232292E51886FB107E /* CodecSimulator.swift in Sources */,
+				F0C2319FDE5D88771667367C /* DSPUtilities.swift in Sources */,
+				E48A66B09C9C94F1643C822F /* FrequencySweepGenerator.swift in Sources */,
+				FAA805718463F9F8773E38BE /* PsychoacousticMasker.swift in Sources */,
+				121092C0F8F41A0DB5746856 /* SpectralNotchGenerator.swift in Sources */,
+				1ADA67A63489F7E56498B7F6 /* AudioPipelineManager.swift in Sources */,
+				A161916750C0C459E2FA7CDD /* AudioSessionConfigurator.swift in Sources */,
+				93AFB9BD6FA505DA401A35C1 /* MicCaptureNode.swift in Sources */,
+				1E6A53C8EB1E45D256950157 /* PerturbationMixerNode.swift in Sources */,
+				0477BD9FB52797E10FA95C0B /* DeepSpeechSurrogate.swift in Sources */,
+				EE63E62CEB2F1E714765B02D /* PerturbationOptimizer.swift in Sources */,
+				6178EB1E8949A64CFCF03681 /* SurrogateEnsemble.swift in Sources */,
+				1237E1E9345E0EE0C48F84EE /* UAPManager.swift in Sources */,
+				9A140B5CB21CDFE9BDEC017E /* WhisperSurrogate.swift in Sources */,
+				E7EC1EB71E4D2EED22D0C782 /* SpeakerPlaybackRouter.swift in Sources */,
+				5B7034ACFFD292F4B2764369 /* VoIPAudioRouter.swift in Sources */,
+				7F1DE763304D538A80B8A248 /* AVAudioPCMBuffer+Utilities.swift in Sources */,
+				0F32439E56F93E951A82CEA2 /* FloatArray+DSP.swift in Sources */,
+				4DC134CDB301300FC143B613 /* AudioMetrics.swift in Sources */,
+				03D3BA75BED44B43E19D4DFF /* AudioMode.swift in Sources */,
+				87C0F0358DEBC4275B278294 /* PerturbationConfig.swift in Sources */,
+				F6E6EFD2C1CF969DAA8C6A3C /* PerturbationType.swift in Sources */,
+				ABC027971C2F55B7B5E2DC4B /* ASREffectivenessService.swift in Sources */,
+				95F6B709FAFC2D01BAA43945 /* AnalyticsService.swift in Sources */,
+				D141E14488D9A8EEDBB80F95 /* MetricsService.swift in Sources */,
+				373673D45102BCBE86323049 /* PerturbationService.swift in Sources */,
+				D5C80D32FB95D715EC4AB92D /* SubscriptionManager.swift in Sources */,
+				BF8A16E784C8C400B882766A /* GlassCard.swift in Sources */,
+				FA51ACAAF81E167122451E44 /* LevelMeterView.swift in Sources */,
+				5740396E882F2C17BA5DC0C6 /* ParticleFieldView.swift in Sources */,
+				75A73DFB2260D7B8E7815937 /* PerturbationBadge.swift in Sources */,
+				46EBBE4C1D247C465E0BEE81 /* PulseRingView.swift in Sources */,
+				FACC2B08ED6CBB0482B69F8C /* SpectrumVisualizerView.swift in Sources */,
+				80B2C0C8BC5D4C2D2D82201B /* WaveformView.swift in Sources */,
+				3AC777619880230BE4476454 /* GlassModifiers.swift in Sources */,
+				FDC37BA1C5D566BF0FF46BFB /* NexusDesignSystem.swift in Sources */,
+				B19B7178730B1CBB297B0805 /* NexusTheme.swift in Sources */,
+				26C5BEE65244F83DEDEDA174 /* OnboardingView.swift in Sources */,
+				882744A8AE977BA59AB58D0A /* AccountView.swift in Sources */,
+				4ECB70219D692184BBB480B3 /* AudioRoutingView.swift in Sources */,
+				5FF134913899FEBCE4FC086E /* DiagnosticsView.swift in Sources */,
+				2406F09E8B3DF65300249A9F /* MainControlView.swift in Sources */,
+				4AC0A5893ABCE01831548485 /* PaywallView.swift in Sources */,
+				AFC2567ADFC7D415ADD05DAA /* PerturbationSettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		56BBE97021B61A9092439A86 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ProjectNexus;
+			target = 2277AC120944EDD0A77C15F3 /* ProjectNexus */;
+			targetProxy = B66ED95D28E6A90B0593CE92 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17B825A1FCC08B8E402240BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = ProjectNexus/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexus.projectnexus;
+				PRODUCT_NAME = ProjectNexus;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		594BF76E5C7642F0471B6BDE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexus.projectnexustests;
+				PRODUCT_NAME = ProjectNexusTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProjectNexus.app/ProjectNexus";
+			};
+			name = Debug;
+		};
+		5F1783FC623C659C764F1B92 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		6926311D204D71E8B70679E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexus.projectnexustests;
+				PRODUCT_NAME = ProjectNexusTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProjectNexus.app/ProjectNexus";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9B14C3FF733B7FEE1D1EDD8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F105119842F7073710B78012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = ProjectNexus/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexus.projectnexus;
+				PRODUCT_NAME = ProjectNexus;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		39CA4DE4FFAF1BC626A2BB72 /* Build configuration list for PBXNativeTarget "ProjectNexusTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6926311D204D71E8B70679E1 /* Release */,
+				594BF76E5C7642F0471B6BDE /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51EB5352F545FCA69446DD38 /* Build configuration list for PBXNativeTarget "ProjectNexus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17B825A1FCC08B8E402240BD /* Release */,
+				F105119842F7073710B78012 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB0E512B5A5E988ED9D308E0 /* Build configuration list for PBXProject "ProjectNexus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B14C3FF733B7FEE1D1EDD8F /* Debug */,
+				5F1783FC623C659C764F1B92 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1569B22E41D4D73AF921F565 /* Project object */;
+}

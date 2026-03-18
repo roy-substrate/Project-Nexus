@@ -1,7 +1,12 @@
 import Foundation
+import Synchronization
 
 final class FrequencySweepGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let maxConcurrentSweeps = 4
     private var sweeps: [Sweep] = []

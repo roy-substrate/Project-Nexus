@@ -19,7 +19,9 @@ build/
 Packages/
 Package.pins
 Package.resolved
-*.xcodeproj
+
+# Generator script (not needed after project creation)
+generate_xcodeproj.rb
 
 # CocoaPods
 Pods/
@@ -51,3 +53,11 @@ venv/
 .idea/
 .vscode/
 *.sublime-*
+
+# App Store Screenshots tool (cloned skill repo — not project source)
+app-store-screenshots/
+
+# Screenshots Next.js build artifacts
+screenshots/.next/
+screenshots/node_modules/
+# Generated screenshot PNGs are committed deliberately (screenshots-output/ is tracked)

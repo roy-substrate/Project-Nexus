@@ -1,51 +1,45 @@
 import SwiftUI
 
+/// Segmented horizontal level meter showing RMS level and peak hold.
+/// Transitions from green → orange → red with adaptive opacity.
 struct LevelMeterView: View {
-    let level: Float
-    let peak: Float
+    let level: Float   // dB, -60...0
+    let peak: Float    // dB, -60...0
 
     private let segmentCount = 20
     private let minDB: Float = -60
     private let maxDB: Float = 0
 
     var body: some View {
-        GeometryReader { geometry in
-            let normalizedLevel = CGFloat((level - minDB) / (maxDB - minDB))
-            let normalizedPeak = CGFloat((peak - minDB) / (maxDB - minDB))
-            let segmentWidth = geometry.size.width / CGFloat(segmentCount)
-
+        GeometryReader { _ in
             HStack(spacing: 2) {
                 ForEach(0..<segmentCount, id: \.self) { i in
-                    let threshold = CGFloat(i) / CGFloat(segmentCount)
-                    let isLit = normalizedLevel > threshold
-                    let isPeak = abs(normalizedPeak - threshold) < (1.0 / CGFloat(segmentCount))
+                    let threshold = Float(i) / Float(segmentCount)
+                    let normLevel = (level - minDB) / (maxDB - minDB)
+                    let normPeak  = (peak  - minDB) / (maxDB - minDB)
+                    let isLit  = normLevel > threshold
+                    let isPeak = abs(normPeak - threshold) < (1.0 / Float(segmentCount))
 
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(segmentColor(for: i, isLit: isLit, isPeak: isPeak))
-                        .frame(height: geometry.size.height)
+                        .fill(segmentColor(position: threshold, isLit: isLit, isPeak: isPeak))
                 }
             }
         }
         .frame(height: 6)
     }
 
-    private func segmentColor(for index: Int, isLit: Bool, isPeak: Bool) -> Color {
-        let position = Float(index) / Float(segmentCount)
-        let baseColor: Color
-        if position < 0.6 {
-            baseColor = NexusTheme.accentCyan
-        } else if position < 0.8 {
-            baseColor = NexusTheme.accentOrange
+    private func segmentColor(position: Float, isLit: Bool, isPeak: Bool) -> Color {
+        let base: Color
+        if position < 0.60 {
+            base = .green
+        } else if position < 0.80 {
+            base = .orange
         } else {
-            baseColor = NexusTheme.accentRed
+            base = .red
         }
 
-        if isPeak {
-            return baseColor
-        } else if isLit {
-            return baseColor.opacity(0.7)
-        } else {
-            return baseColor.opacity(0.1)
-        }
+        if isPeak  { return base }
+        if isLit   { return base.opacity(0.75) }
+        return base.opacity(0.12)
     }
 }

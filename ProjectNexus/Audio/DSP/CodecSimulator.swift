@@ -7,13 +7,27 @@ final class CodecSimulator {
     private var codecEnvelope: [Float]
     private let fftSize: Int
     private let sampleRate: Float
+    // Reused across every applyCodecToBlock call — creating/destroying FFTSetup
+    // is expensive and was previously happening once per OLA block.
+    private let fftSetup: FFTSetup
+    private let hannWindow: [Float]
 
     init(codecTarget: CodecTarget = .opus64k, fftSize: Int = 1024, sampleRate: Float = 48000) {
         self.codecTarget = codecTarget
         self.fftSize = fftSize
         self.sampleRate = sampleRate
         self.codecEnvelope = [Float](repeating: 1, count: fftSize / 2)
+        let log2n = vDSP_Length(log2(Float(fftSize)))
+        guard let setup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
+            preconditionFailure("CodecSimulator: vDSP_create_fftsetup failed for fftSize=\(fftSize)")
+        }
+        self.fftSetup = setup
+        self.hannWindow = DSPUtilities.generateHannWindow(size: fftSize)
         computeEnvelope()
+    }
+
+    deinit {
+        vDSP_destroy_fftsetup(fftSetup)
     }
 
     func applyToSpectrum(_ spectrum: inout [Float]) {
@@ -30,8 +44,6 @@ final class CodecSimulator {
         // Process in overlapping blocks
         let hopSize = fftSize / 2
         var outputAccumulator = [Float](repeating: 0, count: n + fftSize)
-        var window = DSPUtilities.generateHannWindow(size: fftSize)
-
         var block = [Float](repeating: 0, count: fftSize)
         var position = 0
 
@@ -62,11 +74,7 @@ final class CodecSimulator {
         let halfN = fftSize / 2
         let log2n = vDSP_Length(log2(Float(fftSize)))
 
-        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else { return }
-        defer { vDSP_destroy_fftsetup(fftSetup) }
-
-        var window = DSPUtilities.generateHannWindow(size: fftSize)
-        vDSP_vmul(block, 1, window, 1, &block, 1, vDSP_Length(fftSize))
+        vDSP_vmul(block, 1, hannWindow, 1, &block, 1, vDSP_Length(fftSize))
 
         var realPart = [Float](repeating: 0, count: halfN)
         var imagPart = [Float](repeating: 0, count: halfN)

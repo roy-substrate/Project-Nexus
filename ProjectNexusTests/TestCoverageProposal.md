@@ -2,7 +2,41 @@
 
 ## Current State
 
-**Coverage: 0% → Initial tests added for ~20% coverage of testable units**
+**Coverage: Sprint 5 Agency Run — ~62% coverage of testable units**
+
+**Total tests: ~303** (267 existing + ~36 new in Sprint 5 Agency Run)
+
+| Sprint | Tests Added | Files | Coverage Δ |
+|--------|------------|-------|-----------|
+| Initial | 93 | 5 | 0% → ~20% |
+| Sprint 4 P3 | 114 | 6 | ~20% → ~55% |
+| Sprint 5 Agency | ~36 | 2 | ~55% → ~62% |
+
+### Sprint 5 Agency Run — Newly Added
+
+| File | Component | Tests |
+|------|-----------|-------|
+| `CodecSimulatorTests.swift` | `CodecSimulator` (lifecycle, applyToSpectrum, applyToSignal) | ~14 |
+| `AVAudioPCMBufferUtilitiesTests.swift` | `AVAudioPCMBuffer+Utilities` (rms, peak, clear, gain, copy, mix) | ~12 |
+
+**CodecSimulator bug fixed this run:** `applyCodecToBlock` was creating a new `FFTSetup` and
+Hann window on every OLA block invocation. Both are now cached as instance variables and
+destroyed in `deinit`, matching the `MicCaptureNode` pattern.
+
+### Sprint 4 P3 — Newly Added
+
+| File | Component | Tests |
+|------|-----------|-------|
+| `BabbleNoiseGeneratorTests.swift` | `BabbleNoiseGenerator` | 15 |
+| `SpectralNotchGeneratorTests.swift` | `SpectralNotchGenerator` | 17 |
+| `FrequencySweepGeneratorTests.swift` | `FrequencySweepGenerator` | 18 |
+| `PsychoacousticMaskerTests.swift` | `PsychoacousticMasker` | 20 |
+| `UAPManagerTests.swift` | `UAPManager`, `UAPVariant` | 27 |
+| `PerturbationServiceTests.swift` | `PerturbationService` | 17 |
+
+**PerturbationServiceTests note:** Tests that call `service.start()` are guarded
+with `XCTSkip` for environments without audio hardware (CI). Tests of init,
+stop-without-start, and callback assignment run unconditionally.
 
 The project had zero tests. This document outlines what has been added and what
 remains to be addressed.
@@ -129,13 +163,19 @@ layout and state-driven rendering.
 
 ## Suggested Code Coverage Target
 
-| Area | Current | Target |
-|------|---------|--------|
-| Models | 0% | 90% |
-| Extensions | 0% | 90% |
-| DSP Utilities | 0% | 80% |
-| DSP Generators | 0% | 70% |
-| ML Components | 0% | 60% |
-| Services | 0% | 70% |
-| Audio Engine | 0% | 50% |
-| UI Views | 0% | 30% |
+| Area | Sprint 4 P3 | Sprint 5 | Target |
+|------|-------------|----------|--------|
+| Models | ~60% | ~60% | 90% |
+| Extensions | ~80% | **~90%** ✅ | 90% |
+| DSP Utilities | ~70% | ~70% | 80% |
+| DSP Generators | **~70%** ✅ | **~75%** ✅ | 70% |
+| ML Components | **~65%** ✅ | **~65%** ✅ | 60% |
+| Services | **~45%** | **~45%** | 70% |
+| Audio Engine | 0% | 0% | 50% |
+| UI Views | 0% | 0% | 30% |
+
+### Remaining Gaps (Sprint 6)
+- `AudioPipelineManager` — requires mock AVAudioEngine protocol (CTO escalation pending)
+- `MicCaptureNode`, `SpeakerPlaybackRouter` — require audio session mocking
+- `PerturbationOptimizer` — random-search convergence and iteration-cap tests
+- SwiftUI views — ViewInspector or snapshot tests

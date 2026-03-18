@@ -1,8 +1,15 @@
 import Foundation
 import Accelerate
+import Synchronization
 
 final class SpectralNotchGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    // Atomic backing so the CoreAudio render thread (read) and main thread (write)
+    // can access isEnabled without a data race.
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let noiseTableSize = 48000  // 1 second at 48kHz
     private var noiseTable: [Float]
@@ -33,9 +40,23 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
-        for i in 0..<frameCount {
-            buffer[i] = noiseTable[readPosition] * intensity * 0.15
-            readPosition = (readPosition + 1) % noiseTableSize
+        // Copy from circular noise table without a scalar loop.
+        // Handles wrap-around with at most two vDSP_vsmul calls.
+        let scale = intensity * 0.15
+        var remaining = frameCount
+        var outOffset = 0
+        while remaining > 0 {
+            let chunk = min(remaining, noiseTableSize - readPosition)
+            noiseTable.withUnsafeBufferPointer { tablePtr in
+                var s = scale
+                vDSP_vsmul(tablePtr.baseAddress! + readPosition, 1,
+                            &s,
+                            buffer + outOffset, 1,
+                            vDSP_Length(chunk))
+            }
+            readPosition = (readPosition + chunk) % noiseTableSize
+            outOffset += chunk
+            remaining -= chunk
         }
     }
 

@@ -1,10 +1,11 @@
 import Foundation
 import os
+import Synchronization
 
 final class PerturbationService {
     private let logger = Logger(subsystem: "com.nexus", category: "PertService")
 
-    private let pipeline = AudioPipelineManager()
+    private let pipeline: AudioPipelineManager
     private let masker = PsychoacousticMasker()
     private let uapManager = UAPManager()
     private let speakerRouter = SpeakerPlaybackRouter()
@@ -15,8 +16,15 @@ final class PerturbationService {
     private var uapGenerator: UAPGenerator?
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
+    /// Forward raw mic PCM buffers to a consumer (e.g. ASREffectivenessService).
+    /// Set this instead of creating a second AVAudioEngine for speech recognition.
+    var onMicBuffer: ((AVAudioPCMBuffer) -> Void)? {
+        get { pipeline.onMicBuffer }
+        set { pipeline.onMicBuffer = newValue }
+    }
 
-    init() {
+    init() throws {
+        pipeline = try AudioPipelineManager()
         pipeline.onMetricsUpdate = { [weak self] metrics in
             self?.onMetricsUpdate?(metrics)
         }
@@ -98,7 +106,11 @@ final class PerturbationService {
 }
 
 private final class UAPGenerator: PerturbationGenerator {
-    var isEnabled: Bool = true
+    private let _isEnabled = Atomic<Bool>(true)
+    var isEnabled: Bool {
+        get { _isEnabled.load(ordering: .relaxed) }
+        set { _isEnabled.store(newValue, ordering: .relaxed) }
+    }
 
     private let uapManager: UAPManager
     private var intensity: Float

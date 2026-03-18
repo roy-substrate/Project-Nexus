@@ -1,5 +1,7 @@
 import AVFoundation
+import Accelerate
 import os
+import Synchronization
 
 protocol PerturbationGenerator: AnyObject {
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double)
@@ -12,7 +14,7 @@ final class AudioPipelineManager {
 
     private let engine = AVAudioEngine()
     private let sessionConfigurator = AudioSessionConfigurator.shared
-    private let micCapture = MicCaptureNode()
+    private let micCapture: MicCaptureNode
     private let perturbationMixer = PerturbationMixerNode()
 
     private var sourceNode: AVAudioSourceNode?
@@ -21,18 +23,32 @@ final class AudioPipelineManager {
 
     private(set) var isRunning = false
     private let format: AVAudioFormat
+    /// Counts render-callback invocations where the output buffer pointer was nil
+    /// (indicative of a buffer underrun or audio graph misconfiguration).
+    /// Atomic so it can be safely incremented on the CoreAudio render thread and
+    /// read on the main thread without a data race.
+    private let underrunCount: Atomic<Int> = Atomic(0)
 
     var onMetricsUpdate: ((AudioMetrics) -> Void)?
     var onSpectrumUpdate: (([Float]) -> Void)?
+    /// Set this to forward mic buffers into ASREffectivenessService.appendBuffer(_:)
+    /// — avoids a second AVAudioEngine competing over AVAudioSession.
+    var onMicBuffer: ((AVAudioPCMBuffer) -> Void)?
 
-    init() {
-        format = AVAudioFormat(
-            standardFormatWithSampleRate: 48_000,
-            channels: 1
-        )!
+    init() throws {
+        guard let fmt = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1) else {
+            throw AudioPipelineError.invalidFormat
+        }
+        format = fmt
+        micCapture = try MicCaptureNode()
         mixBuffer = [Float](repeating: 0, count: 1024)
         setupMicCallbacks()
         setupNotifications()
+    }
+
+    enum AudioPipelineError: LocalizedError {
+        case invalidFormat
+        var errorDescription: String? { "Could not create audio format (48 kHz mono)." }
     }
 
     func addGenerator(_ generator: PerturbationGenerator) {
@@ -56,6 +72,7 @@ final class AudioPipelineManager {
             guard let self else { return noErr }
             let ablPointer = UnsafeMutableAudioBufferListPointer(buffers)
             guard let buffer = ablPointer.first?.mData?.assumingMemoryBound(to: Float.self) else {
+                self.underrunCount.add(1, ordering: .relaxed)
                 return noErr
             }
 
@@ -75,18 +92,14 @@ final class AudioPipelineManager {
                     guard let mixBase = mixPtr.baseAddress else { return }
                     memset(mixBase, 0, count * MemoryLayout<Float>.size)
                     generator.fillBuffer(mixBase, frameCount: count, sampleRate: sampleRate)
-
-                    // Add to output
-                    for i in 0..<count {
-                        buffer[i] += mixBase[i]
-                    }
+                    // Vectorized element-wise addition — avoids scalar loop overhead
+                    vDSP_vadd(buffer, 1, mixBase, 1, buffer, 1, vDSP_Length(count))
                 }
             }
 
-            // Soft clip to prevent distortion
-            for i in 0..<count {
-                buffer[i] = tanhf(buffer[i])
-            }
+            // Soft clip via vectorized tanh (vvtanhf processes the whole buffer in one call)
+            var n = Int32(count)
+            vvtanhf(buffer, buffer, &n)
 
             return noErr
         }
@@ -124,6 +137,7 @@ final class AudioPipelineManager {
 
         sessionConfigurator.deactivate()
         isRunning = false
+        underrunCount.store(0, ordering: .relaxed)
         logger.info("Audio pipeline stopped")
     }
 
@@ -140,6 +154,7 @@ final class AudioPipelineManager {
             metrics.peakLevel = peak
             metrics.isEngineRunning = self.isRunning
             metrics.latencyMs = self.sessionConfigurator.ioBufferDuration * 1000 * 2
+            metrics.bufferUnderruns = self.underrunCount.load(ordering: .relaxed)
 
             DispatchQueue.main.async {
                 self.onMetricsUpdate?(metrics)
@@ -149,6 +164,12 @@ final class AudioPipelineManager {
             for generator in self.generators {
                 generator.updateMaskingThreshold(spectrum)
             }
+        }
+
+        // Forward raw PCM buffers to any ASR measurement consumer.
+        // Eliminates the need for ASREffectivenessService to create its own AVAudioEngine.
+        micCapture.onRawBuffer = { [weak self] buffer in
+            self?.onMicBuffer?(buffer)
         }
     }
 
@@ -166,7 +187,14 @@ final class AudioPipelineManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            try? self?.start()
+            guard let self else { return }
+            do {
+                try self.start()
+            } catch {
+                self.logger.error("Pipeline failed to restart after session resume: \(error.localizedDescription)")
+                // Post notification so callers (e.g. PerturbationService / UI) can react
+                NotificationCenter.default.post(name: .audioPipelineRestartFailed, object: error)
+            }
         }
     }
 }

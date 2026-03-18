@@ -7,8 +7,18 @@ final class AudioSessionConfigurator {
     private let logger = Logger(subsystem: "com.nexus.audio", category: "Session")
     private let session = AVAudioSession.sharedInstance()
 
+    /// Whether AirPods Bluetooth High-Quality Recording is currently active.
+    private(set) var bluetoothHQEnabled: Bool = false
+
     var sampleRate: Double { session.sampleRate }
     var ioBufferDuration: TimeInterval { session.ioBufferDuration }
+
+    /// True when a Bluetooth input (AirPods, headset) is the current input route.
+    var isBluetoothInputActive: Bool {
+        session.currentRoute.inputs.contains {
+            $0.portType == .bluetoothHFP || $0.portType == .bluetoothA2DP
+        }
+    }
 
     private init() {
         setupNotifications()
@@ -23,6 +33,38 @@ final class AudioSessionConfigurator {
         try session.setPreferredSampleRate(48_000)
         try session.setPreferredIOBufferDuration(0.005)
         logger.info("Session configured: \(self.session.sampleRate)Hz, buffer \(self.session.ioBufferDuration * 1000, format: .fixed(precision: 1))ms")
+    }
+
+    /// Enables AirPods / Bluetooth High-Quality Recording mode (iOS 18+).
+    ///
+    /// When enabled the session requests `.bluetoothHighQualityRecording`, which
+    /// switches compatible AirPods into their high-fidelity microphone mode so that
+    /// the perturbation engine receives a 24-kHz wide-band input signal.
+    func enableBluetoothHQRecording() throws {
+        guard !bluetoothHQEnabled else { return }
+        var options: AVAudioSession.CategoryOptions = [
+            .defaultToSpeaker, .mixWithOthers, .allowBluetooth
+        ]
+        if #available(iOS 18.0, *) {
+            options.insert(.bluetoothHighQualityRecording)
+        }
+        try session.setCategory(.playAndRecord, mode: .default, options: options)
+        try session.setActive(true, options: .notifyOthersOnDeactivation)
+        bluetoothHQEnabled = true
+        logger.info("Bluetooth HQ Recording enabled — route: \(self.currentRoute)")
+    }
+
+    /// Reverts to the standard Bluetooth option set.
+    func disableBluetoothHQRecording() throws {
+        guard bluetoothHQEnabled else { return }
+        try session.setCategory(
+            .playAndRecord,
+            mode: .default,
+            options: [.defaultToSpeaker, .mixWithOthers, .allowBluetooth]
+        )
+        try session.setActive(true, options: .notifyOthersOnDeactivation)
+        bluetoothHQEnabled = false
+        logger.info("Bluetooth HQ Recording disabled")
     }
 
     func activate() throws {
@@ -100,4 +142,5 @@ extension Notification.Name {
     static let audioSessionInterrupted = Notification.Name("audioSessionInterrupted")
     static let audioSessionResumed = Notification.Name("audioSessionResumed")
     static let audioRouteChanged = Notification.Name("audioRouteChanged")
+    static let audioPipelineRestartFailed = Notification.Name("audioPipelineRestartFailed")
 }
