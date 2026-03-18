@@ -1,0 +1,47 @@
+# Flow 09: Privacy Verification — 100% On-Device
+# Verifies the privacy claims: no cloud, no accounts, all local.
+# Critical for user trust and the product's core promise.
+
+appId: com.nexus.shield
+name: "Privacy — On-Device Verification"
+tags:
+  - privacy
+  - trust
+  - compliance
+
+---
+
+# ── Navigate to Account tab ─────────────────────────────────────
+- tapOn: "Account"
+- assertVisible: "Account"
+
+# ── Verify Privacy Section ──────────────────────────────────────
+# About section should confirm on-device processing
+- scroll:
+    direction: "down"
+    amount: 300
+
+- assertVisible: "About"
+- assertVisible: "Privacy"
+- assertVisible: "100% On-Device"
+
+# ── Verify Data & Privacy footer ────────────────────────────────
+- scroll:
+    direction: "up"
+    amount: 200
+- assertVisible: "Data & Privacy"
+- assertVisible:
+    text: "stored locally"
+    optional: true
+- assertVisible:
+    text: "never shared"
+    optional: true
+
+# ── Verify Version info ─────────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 300
+- assertVisible: "Version"
+- assertVisible:
+    text: "iOS 26"
+    optional: true

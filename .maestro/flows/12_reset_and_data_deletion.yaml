@@ -1,0 +1,44 @@
+# Flow 12: Data Deletion & App Reset
+# Verifies destructive operations work correctly.
+# Users must be able to delete their data and reset the app.
+
+appId: com.nexus.shield
+name: "Account — Data Deletion & Reset"
+tags:
+  - account
+  - data
+  - destructive
+
+---
+
+# ── Navigate to Account ─────────────────────────────────────────
+- tapOn: "Account"
+- assertVisible: "Account"
+
+# ── Test Delete Analytics Data ──────────────────────────────────
+- tapOn: "Delete Analytics Data"
+
+# Confirmation dialog should appear
+- assertVisible: "Delete Analytics Data"
+- assertVisible:
+    text: "permanently removes"
+    optional: true
+
+# Cancel the deletion (don't actually delete)
+- tapOn: "Cancel"
+
+# ── Test Reset App ──────────────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+
+- tapOn: "Reset App"
+
+# Confirmation dialog should appear
+- assertVisible: "Reset App"
+- assertVisible:
+    text: "clears all your settings"
+    optional: true
+
+# Cancel the reset (don't actually reset)
+- tapOn: "Cancel"

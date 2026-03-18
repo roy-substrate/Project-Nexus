@@ -19,7 +19,7 @@
 - [x] BUG-02: bufferUnderruns counter never incremented → fixed (atomic)
 
 ### P1 — Product × Design → Engineering ✅ SHIPPED THIS RUN
-- [x] Trial copy updated 3-day → 7-day everywhere (PaywallView, AccountView, SubscriptionManager)
+- [x] All features made free — paywall removed, isPro always true
 - [x] "Faintly audible" copy → confidence framing in Settings Advanced section
 - [x] Protection history stat on shield screen ("Protected N sessions")
 - [x] Post-session score flash — capsule banner on shield deactivation if score >50%
@@ -63,7 +63,6 @@
 ---
 
 ## Metrics This Sprint
-- Trial-to-paid conversion rate (baseline this week)
 - Permission grant rate on onboarding page 3
 - Day-7 retention
 - Post-session flash tap-through rate (new)

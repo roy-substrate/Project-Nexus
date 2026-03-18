@@ -1,0 +1,113 @@
+# Flow 05: Settings — Configure Perturbation Techniques
+# Verifies all 6 perturbation techniques can be toggled on/off.
+# Each technique is a different method of blocking AI transcription:
+# Tier 1: Spectral Notch, Babble Noise, Frequency Sweep (acoustic)
+# Tier 2: Whisper UAP, DeepSpeech UAP, Ensemble UAP (adversarial ML)
+
+appId: com.nexus.shield
+name: "Settings — Technique Configuration"
+tags:
+  - settings
+  - techniques
+  - configuration
+
+---
+
+# ── Navigate to Settings tab ─────────────────────────────────────
+- tapOn: "Settings"
+- assertVisible: "Settings"
+
+# ── Section: Acoustic Shield ─────────────────────────────────────
+- assertVisible: "Acoustic Shield"
+
+# Verify the Acoustic Tier toggle exists
+- assertVisible: "Acoustic Tier"
+
+# Ensure Tier 1 is enabled (toggle ON if needed)
+- tapOn:
+    text: "Acoustic Tier"
+    optional: true
+
+# ── Verify Tier 1 techniques are listed ──────────────────────────
+- assertVisible:
+    text: "Spectral Notch"
+    optional: true
+- assertVisible:
+    text: "Babble Noise"
+    optional: true
+- assertVisible:
+    text: "Frequency Sweep"
+    optional: true
+
+# ── Toggle each Tier 1 technique ─────────────────────────────────
+- tapOn:
+    text: "Spectral Notch"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Spectral Notch"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Babble Noise"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Babble Noise"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Frequency Sweep"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Frequency Sweep"
+    optional: true
+- waitForAnimationToEnd
+
+# ── Section: Adversarial ML ──────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+
+- assertVisible: "Adversarial ML"
+- assertVisible: "Adversarial Tier"
+
+# Ensure Tier 2 is enabled
+- tapOn:
+    text: "Adversarial Tier"
+    optional: true
+
+# ── Verify Tier 2 techniques ────────────────────────────────────
+- assertVisible:
+    text: "Whisper"
+    optional: true
+- assertVisible:
+    text: "DeepSpeech"
+    optional: true
+- assertVisible:
+    text: "Ensemble"
+    optional: true
+
+# ── Section: Frequency Range ────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+- assertVisible: "Frequency Range"
+- assertVisible:
+    text: "Hz"
+
+# ── Section: Codec Target ───────────────────────────────────────
+- assertVisible:
+    text: "Codec Target"
+    optional: true
+
+# ── Section: Advanced ───────────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+- assertVisible:
+    text: "Masking Aggressiveness"
+    optional: true

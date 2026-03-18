@@ -1,0 +1,48 @@
+# Flow 06: Audio Routing — Speaker Playback Mode
+# Tests the audio output routing configuration.
+# For the call-blocking hypothesis: the perturbation must actually reach
+# the recording device. Speaker playback is the default mode.
+
+appId: com.nexus.shield
+name: "Routing — Speaker Playback Verification"
+tags:
+  - routing
+  - audio
+  - hypothesis
+
+---
+
+# ── Navigate to Routing tab ──────────────────────────────────────
+- tapOn: "Routing"
+- assertVisible: "Routing"
+
+# ── Verify Output Mode section ───────────────────────────────────
+- assertVisible: "Output Mode"
+
+# Speaker Playback should be the active route
+- assertVisible: "Speaker Playback"
+- assertVisible: "No setup"
+- assertVisible: "Any app"
+
+# VoIP Mix should show as coming soon
+- assertVisible: "VoIP Mix"
+- assertVisible:
+    text: "Coming soon"
+    optional: true
+
+# ── Verify Bluetooth section ────────────────────────────────────
+- scroll:
+    direction: "down"
+    amount: 200
+- assertVisible: "Bluetooth"
+- assertVisible: "AirPods High-Quality Input"
+
+# ── Verify Current Route section ────────────────────────────────
+- assertVisible: "Current Route"
+- assertVisible: "Output"
+- assertVisible: "Microphone"
+
+# Microphone should show Available (since we granted permission)
+- assertVisible:
+    text: "Available"
+    optional: true

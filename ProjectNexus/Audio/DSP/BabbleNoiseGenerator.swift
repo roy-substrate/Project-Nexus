@@ -29,17 +29,31 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
-        for i in 0..<frameCount {
-            var sample: Float = 0
+        // Clear output buffer, then accumulate each layer with vectorized ops.
+        memset(buffer, 0, frameCount * MemoryLayout<Float>.size)
 
-            for l in 0..<layerCount {
-                guard l < layers.count else { continue }
-                let pos = layerPositions[l]
-                sample += layers[l][pos] * layerGains[l]
-                layerPositions[l] = (pos + 1) % layers[l].count
+        for l in 0..<layerCount {
+            guard l < layers.count else { continue }
+            let layer = layers[l]
+            let layerLen = layer.count
+            var pos = layerPositions[l]
+            var gain = layerGains[l] * intensity * 0.12
+
+            layer.withUnsafeBufferPointer { layerPtr in
+                guard let base = layerPtr.baseAddress else { return }
+                var remaining = frameCount
+                var outOffset = 0
+                while remaining > 0 {
+                    let chunk = min(remaining, layerLen - pos)
+                    // Vectorized scale-and-accumulate: buffer += layer[pos..] * gain
+                    vDSP_vsma(base + pos, 1, &gain, buffer + outOffset, 1,
+                              buffer + outOffset, 1, vDSP_Length(chunk))
+                    pos = (pos + chunk) % layerLen
+                    outOffset += chunk
+                    remaining -= chunk
+                }
             }
-
-            buffer[i] = sample * intensity * 0.12
+            layerPositions[l] = pos
         }
     }
 

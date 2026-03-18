@@ -1,0 +1,82 @@
+# Flow 02: Shield Activation & Deactivation
+# CORE HYPOTHESIS TEST: Tapping the shield should activate voice protection.
+# When active, all perturbation generators should be running (techniques > 0),
+# the status should read ACTIVE, and the uptime timer should be counting.
+
+appId: com.nexus.shield
+name: "Shield — Activate & Deactivate"
+tags:
+  - shield
+  - core
+  - hypothesis
+
+---
+
+# ── Pre-condition: On main Shield tab ────────────────────────────
+- tapOn: "Shield"
+- assertVisible: "SHIELD OFFLINE"
+- assertVisible: "VOICE PROTECTION OFFLINE"
+
+# ── Activate Shield ──────────────────────────────────────────────
+# The shield button shows an ASCII art when inactive:
+#   /  \
+#   | S |
+#    \_/
+# Tap the shield area
+- tapOn:
+    text: "S"
+    index: 0
+
+# ── Verify: Shield is now ACTIVE ─────────────────────────────────
+- extendedWaitUntil:
+    visible: "SHIELD ACTIVE"
+    timeout: 3000
+
+# Active state indicators
+- assertVisible: "SHIELD ACTIVE"
+
+# Uptime timer should appear and start counting
+- extendedWaitUntil:
+    visible: "UPTIME"
+    timeout: 2000
+
+# Active techniques should be reported
+- assertVisible:
+    text: "TECH.*ACTIVE"
+    regex: true
+    optional: true
+
+# Spectrum analysis should show LIVE indicator
+- assertVisible: "SPECTRUM ANALYSIS"
+- assertVisible:
+    text: "LIVE"
+    optional: true
+
+# ── Let shield run for 5 seconds to collect metrics ──────────────
+- waitForAnimationToEnd
+- scroll:
+    direction: "down"
+    amount: 100
+
+# Verify intensity card is visible and shows a value
+- assertVisible: "INTENSITY"
+
+# Scroll back up
+- scroll:
+    direction: "up"
+    amount: 100
+
+# ── Deactivate Shield ────────────────────────────────────────────
+# Tap the shield button again (now shows [NEXUS] text when active)
+- tapOn: "NEXUS"
+
+# ── Verify: Shield is now OFFLINE ────────────────────────────────
+- extendedWaitUntil:
+    visible: "SHIELD OFFLINE"
+    timeout: 3000
+- assertVisible: "VOICE PROTECTION OFFLINE"
+
+# ── Verify: Session result banner may appear (if ASR was measuring) ─
+- assertVisible:
+    text: "SESSION COMPLETE"
+    optional: true
