@@ -41,7 +41,9 @@ final class AudioPipelineManager {
         }
         format = fmt
         micCapture = try MicCaptureNode()
-        mixBuffer = [Float](repeating: 0, count: 1024)
+        // Pre-allocate to the maximum CoreAudio frame size so the render callback
+        // never performs a heap allocation on the real-time audio thread.
+        mixBuffer = [Float](repeating: 0, count: 4096)
         setupMicCallbacks()
         setupNotifications()
     }
@@ -80,11 +82,6 @@ final class AudioPipelineManager {
 
             // Clear output buffer
             memset(buffer, 0, count * MemoryLayout<Float>.size)
-
-            // Ensure mix buffer is large enough
-            if self.mixBuffer.count < count {
-                self.mixBuffer = [Float](repeating: 0, count: count)
-            }
 
             // Sum all active generators
             for generator in gensCopy where generator.isEnabled {
