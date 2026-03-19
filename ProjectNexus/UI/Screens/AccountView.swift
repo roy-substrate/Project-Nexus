@@ -144,7 +144,7 @@ struct AccountView: View {
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
                 Text(appVersion)
-                    .font(.system(.subheadline, design: .monospaced))
+                    .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(NexusTheme.textPrimary)
             }
 
@@ -153,7 +153,7 @@ struct AccountView: View {
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
                 Text("iOS 26 · Swift 6")
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(NexusTheme.textTertiary)
             }
 
@@ -180,7 +180,7 @@ struct AccountView: View {
                 .foregroundStyle(NexusTheme.textPrimary)
             Spacer()
             Text(value)
-                .font(.system(.subheadline, design: .monospaced, weight: .semibold))
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
                 .foregroundStyle(color)
         }
     }
@@ -254,7 +254,7 @@ private struct SessionHistoryView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(session.date.formatted(date: .abbreviated, time: .shortened))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
                     .foregroundStyle(NexusTheme.textPrimary)
                 Spacer()
                 Text(jammingLabel(session.peakASRJamScore))

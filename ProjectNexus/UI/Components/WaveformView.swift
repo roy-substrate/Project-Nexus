@@ -17,29 +17,29 @@ struct WaveformView: View {
 
                 let amplitude = drive * size.height * 0.36
 
-                // Primary wave — phosphor green when active, dim white when inactive
+                // Primary wave — warm orange when active, soft gray when inactive
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude, frequency: 2.5, phase: 0,
                          color: isActive
-                            ? PixelColor.phosphor.opacity(0.75)
-                            : PixelColor.text.opacity(0.25),
-                         lineWidth: 2)
+                            ? PixelColor.phosphor.opacity(0.80)
+                            : PixelColor.textSecondary.opacity(0.30),
+                         lineWidth: 2.5)
 
                 // Secondary wave — slightly offset
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude * 0.65, frequency: 3.5, phase: 0.8,
                          color: isActive
-                            ? PixelColor.phosphor.opacity(0.35)
-                            : PixelColor.text.opacity(0.12),
-                         lineWidth: 1.5)
+                            ? PixelColor.phosphor.opacity(0.40)
+                            : PixelColor.textSecondary.opacity(0.15),
+                         lineWidth: 2)
 
                 // Tertiary subtle wave
                 drawWave(context: context, size: size, time: time,
                          amplitude: amplitude * 0.45, frequency: 5.0, phase: 1.6,
                          color: isActive
-                            ? PixelColor.phosphor.opacity(0.15)
+                            ? PixelColor.warning.opacity(0.20)
                             : Color.clear,
-                         lineWidth: 1)
+                         lineWidth: 1.5)
             }
         }
     }
