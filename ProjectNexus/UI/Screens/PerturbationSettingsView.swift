@@ -75,9 +75,15 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier1)
                 }
                 Slider(value: $state.config.frequencyRangeLow,
-                       in: 16_000...min(state.config.frequencyRangeHigh - 200, 21_800),
+                       in: 16_000...21_800,
                        step: 100)
                     .tint(NexusTheme.tier1)
+                    .onChange(of: state.config.frequencyRangeLow) { _, newLow in
+                        // Ensure low doesn't exceed high minus minimum gap
+                        if newLow > state.config.frequencyRangeHigh - 200 {
+                            state.config.frequencyRangeHigh = newLow + 200
+                        }
+                    }
             }
             .padding(.vertical, 4)
 
@@ -92,9 +98,15 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier2)
                 }
                 Slider(value: $state.config.frequencyRangeHigh,
-                       in: max(state.config.frequencyRangeLow + 200, 16_200)...22_000,
+                       in: 16_200...22_000,
                        step: 100)
                     .tint(NexusTheme.tier2)
+                    .onChange(of: state.config.frequencyRangeHigh) { _, newHigh in
+                        // Ensure high doesn't go below low plus minimum gap
+                        if newHigh < state.config.frequencyRangeLow + 200 {
+                            state.config.frequencyRangeLow = newHigh - 200
+                        }
+                    }
             }
             .padding(.vertical, 4)
 

@@ -58,7 +58,7 @@ private struct BlobMascot: View {
 
 // MARK: - MainControlView
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 struct MainControlView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
