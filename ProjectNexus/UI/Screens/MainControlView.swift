@@ -5,6 +5,7 @@ struct MainControlView: View {
     let metricsService: MetricsService
     let asrService: ASREffectivenessService
     let analyticsService: AnalyticsService
+    let subscriptionManager: SubscriptionManager
     let onToggleShield: () -> Void
 
     /// Captures peak jam score when shield deactivates for the post-session flash.
@@ -17,6 +18,9 @@ struct MainControlView: View {
     // MARK: - ASR permission nudge
     @AppStorage("nexus.asrPermissionNudgeShown") private var nudgeShown = false
     @State private var showASRNudge: Bool = false
+
+    // MARK: - Paywall
+    @State private var showPaywall: Bool = false
 
     // MARK: - Blinking cursor state
     @State private var cursorVisible: Bool = true
@@ -48,6 +52,9 @@ struct MainControlView: View {
             .overlay(alignment: .bottom) { asrPermissionNudge }
         }
         .scanlines()
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(subscriptionManager: subscriptionManager)
+        }
         .onChange(of: state.isShieldActive) { _, isActive in
             if isActive {
                 sessionStartTime = .now
@@ -342,8 +349,12 @@ struct MainControlView: View {
                 color: state.config.tier2Enabled ? PixelColor.phosphor : PixelColor.border,
                 enabled: state.config.tier2Enabled
             ) {
-                withAnimation(PixelAnimation.primary) {
-                    state.config.tier2Enabled.toggle()
+                if subscriptionManager.isPro {
+                    withAnimation(PixelAnimation.primary) {
+                        state.config.tier2Enabled.toggle()
+                    }
+                } else {
+                    showPaywall = true
                 }
             }
         }

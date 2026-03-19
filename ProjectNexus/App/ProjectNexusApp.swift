@@ -175,6 +175,7 @@ struct ContentView: View {
                     metricsService: metricsService,
                     asrService: asrService,
                     analyticsService: analyticsService,
+                    subscriptionManager: subscriptionManager,
                     onToggleShield: onToggleShield
                 )
             }
