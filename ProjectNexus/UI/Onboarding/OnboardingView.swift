@@ -3,7 +3,7 @@ import AVFoundation
 
 // MARK: - Onboarding container
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 struct OnboardingView: View {
     @AppStorage("nexus.onboarding.completed") private var isCompleted = false
     @State private var page = 0
@@ -85,7 +85,7 @@ struct OnboardingView: View {
 
 // MARK: - Page 1 — Welcome
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 private struct WelcomePage: View {
     @State private var appeared = false
 
@@ -158,7 +158,7 @@ private struct WelcomePage: View {
 
 // MARK: - Page 2 — How it works
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 private struct HowItWorksPage: View {
     @State private var appeared = false
 
@@ -257,7 +257,7 @@ private struct HowItWorksPage: View {
 
 // MARK: - Page 3 — Microphone permission
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 private struct PermissionPage: View {
     let onGranted: () -> Void
 
@@ -380,7 +380,7 @@ private struct PermissionPage: View {
 
 // MARK: - Page 4 — Ready
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 private struct ReadyPage: View {
     let onDone: () -> Void
     @State private var appeared = false

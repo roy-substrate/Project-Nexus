@@ -19,7 +19,7 @@ struct ProjectNexusApp: App {
     var body: some Scene {
         WindowGroup {
             if onboardingCompleted {
-                if #available(iOS 26, *) {
+                if #available(iOS 17, *) {
                     ContentView(
                         state: appState,
                         metricsService: metricsService,
@@ -39,14 +39,14 @@ struct ProjectNexusApp: App {
                         Text(appState.errorMessage ?? "")
                     }
                 } else {
-                    Text("iOS 26 or later is required.")
+                    Text("iOS 17 or later is required.")
                         .foregroundStyle(NexusColor.textSecondary)
                 }
             } else {
-                if #available(iOS 26, *) {
+                if #available(iOS 17, *) {
                     OnboardingView()
                 } else {
-                    Text("iOS 26 or later is required.")
+                    Text("iOS 17 or later is required.")
                         .foregroundStyle(NexusColor.textSecondary)
                 }
             }
@@ -65,6 +65,13 @@ struct ProjectNexusApp: App {
 
     private func setupServices() {
         guard perturbationService == nil else { return }
+        
+        // Skip audio services in Simulator (no real audio hardware)
+        #if targetEnvironment(simulator)
+        print("⚠️ Simulator detected - skipping PerturbationService initialization")
+        return
+        #endif
+        
         do {
             let service = try PerturbationService()
             metricsService.startMonitoring(perturbationService: service)
@@ -74,6 +81,7 @@ struct ProjectNexusApp: App {
             }
             perturbationService = service
         } catch {
+            print("⚠️ Failed to initialize PerturbationService: \(error)")
             appState.errorMessage = error.localizedDescription
             return
         }
@@ -171,7 +179,7 @@ struct ProjectNexusApp: App {
 
 // MARK: - ContentView
 
-@available(iOS 26, *)
+@available(iOS 17, *)
 struct ContentView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
@@ -183,35 +191,47 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $state.selectedTab) {
-            Tab("Shield", systemImage: "shield.fill", value: AppTab.shield) {
-                MainControlView(
-                    state: state,
-                    metricsService: metricsService,
-                    asrService: asrService,
-                    analyticsService: analyticsService,
-                    onToggleShield: onToggleShield
-                )
+            MainControlView(
+                state: state,
+                metricsService: metricsService,
+                asrService: asrService,
+                analyticsService: analyticsService,
+                onToggleShield: onToggleShield
+            )
+            .tabItem {
+                Label("Shield", systemImage: "shield.fill")
             }
-            Tab("Settings", systemImage: "slider.horizontal.3", value: AppTab.settings) {
-                PerturbationSettingsView(state: state)
+            .tag(AppTab.shield)
+            
+            PerturbationSettingsView(state: state)
+                .tabItem {
+                    Label("Settings", systemImage: "slider.horizontal.3")
+                }
+                .tag(AppTab.settings)
+            
+            AudioRoutingView(state: state)
+                .tabItem {
+                    Label("Routing", systemImage: "antenna.radiowaves.left.and.right")
+                }
+                .tag(AppTab.routing)
+            
+            DiagnosticsView(
+                metricsService: metricsService,
+                isActive: state.isShieldActive,
+                asrService: asrService
+            )
+            .tabItem {
+                Label("Diagnostics", systemImage: "chart.bar.xaxis")
             }
-            Tab("Routing", systemImage: "antenna.radiowaves.left.and.right", value: AppTab.routing) {
-                AudioRoutingView(state: state)
-            }
-            Tab("Diagnostics", systemImage: "chart.bar.xaxis", value: AppTab.diagnostics) {
-                DiagnosticsView(
-                    metricsService: metricsService,
-                    isActive: state.isShieldActive,
-                    asrService: asrService
-                )
-            }
-            Tab("Account", systemImage: "person.circle", value: AppTab.account) {
-                AccountView(analyticsService: analyticsService, subscriptionManager: subscriptionManager)
-            }
+            .tag(AppTab.diagnostics)
+            
+            AccountView(analyticsService: analyticsService, subscriptionManager: subscriptionManager)
+                .tabItem {
+                    Label("Account", systemImage: "person.circle")
+                }
+                .tag(AppTab.account)
         }
         .tint(PixelColor.phosphor)
-        // iOS 26 floating tab bar — minimizes on scroll down for more content area
-        .tabBarMinimizeBehavior(.onScrollDown)
         // Propagate all config mutations to the live service + persistence
         .onChange(of: state.config.intensity) { _, new in
             onConfigUpdate()
