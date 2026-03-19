@@ -127,9 +127,12 @@ enum DSPUtilities {
                     // Apply notches
                     for notchFreq in notchFrequencies {
                         let centerBin = frequencyToBin(notchFreq, sampleRate: sampleRate, fftSize: n)
-                        let widthBins = frequencyToBin(notchWidth, sampleRate: sampleRate, fftSize: n)
+                        let widthBins = max(1, frequencyToBin(notchWidth, sampleRate: sampleRate, fftSize: n))
 
-                        for i in max(0, centerBin - widthBins)...min(halfN - 1, centerBin + widthBins) {
+                        let startBin = max(0, centerBin - widthBins)
+                        let endBin = min(halfN - 1, centerBin + widthBins)
+                        guard startBin <= endBin else { continue }
+                        for i in startBin...endBin {
                             let distance = abs(Float(i - centerBin)) / Float(widthBins)
                             let attenuation = min(1.0, distance)
                             realPtr[i] *= attenuation

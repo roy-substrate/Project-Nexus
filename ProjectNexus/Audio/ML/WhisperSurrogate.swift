@@ -51,7 +51,7 @@ final class WhisperSurrogate: SurrogateModel {
     }
 
     private func computeMelSpectrogram(_ audio: [Float]) -> [Float] {
-        let frameCount = audio.count / hopLength
+        let frameCount = max(0, (audio.count - nFFT) / hopLength + 1)
         guard frameCount > 0 else { return [] }
 
         var melSpec = [Float](repeating: 0, count: frameCount * nMels)
@@ -85,7 +85,7 @@ final class WhisperSurrogate: SurrogateModel {
             for mel in 0..<nMels {
                 let centerFreq = melToHz(Float(mel) * hzToMel(8000) / Float(nMels))
                 let centerBin = Int(centerFreq * Float(nFFT) / sampleRate)
-                let bandwidth = max(1, Int(Float(nMels) * 0.5))
+                let bandwidth = max(1, halfN / nMels)
 
                 var energy: Float = 0
                 for b in max(0, centerBin - bandwidth)...min(halfN - 1, centerBin + bandwidth) {

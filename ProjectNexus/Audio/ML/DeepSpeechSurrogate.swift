@@ -62,7 +62,7 @@ final class DeepSpeechSurrogate: SurrogateModel {
             for k in 0..<halfN {
                 var real: Float = 0
                 var imag: Float = 0
-                for n in stride(from: 0, to: frameSize, by: 4) {
+                for n in 0..<frameSize {
                     let angle = -2.0 * .pi * Float(k) * Float(n) / Float(frameSize)
                     real += windowed[n] * cosf(angle)
                     imag += windowed[n] * sinf(angle)

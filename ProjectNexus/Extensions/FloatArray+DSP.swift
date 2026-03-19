@@ -39,7 +39,6 @@ extension Array where Element == Float {
     func toDecibels(reference: Float = 1.0) -> [Float] {
         var ref = reference
         var result = [Float](repeating: 0, count: count)
-        var n = Int32(count)
         vDSP_vdbcon(self, 1, &ref, &result, 1, vDSP_Length(count), 1)
         return result
     }
