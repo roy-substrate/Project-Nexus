@@ -9,7 +9,7 @@ protocol PerturbationGenerator: AnyObject {
     var isEnabled: Bool { get set }
 }
 
-final class AudioPipelineManager {
+final class AudioPipelineManager: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.nexus.audio", category: "Pipeline")
 
     private let engine = AVAudioEngine()

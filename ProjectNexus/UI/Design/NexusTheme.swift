@@ -23,7 +23,7 @@ enum NexusTheme {
 
     // MARK: - Semantic status
 
-    static let positive = PixelColor.positive
+    static let positive = PixelColor.phosphor
     static let warning  = PixelColor.warning
     static let danger   = NexusColor.danger
 
@@ -50,7 +50,7 @@ enum NexusTheme {
     static let accentCyan                 = Color(red: 0.13, green: 0.75, blue: 0.90)
     static let accentPurple               = Color(red: 0.60, green: 0.32, blue: 0.90)
     static let accentMagenta              = Color(red: 0.90, green: 0.25, blue: 0.65)
-    static let accentGreen                = PixelColor.positive
+    static let accentGreen                = PixelColor.phosphor
     static let accentOrange               = PixelColor.phosphor
     static let accentRed                  = NexusColor.danger
     static let glassFill                  = PixelColor.surface

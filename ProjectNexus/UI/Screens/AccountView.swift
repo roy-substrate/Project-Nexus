@@ -69,7 +69,7 @@ struct AccountView: View {
                 color: analyticsService.protectionStreak >= 3 ? .orange : .secondary
             )
             statRow(
-                icon: "shield.checkered.fill",
+                icon: "shield.fill",
                 label: "Total Activations",
                 value: "\(analyticsService.totalActivations)",
                 color: .blue
@@ -267,7 +267,7 @@ private struct SessionHistoryView: View {
 
             HStack(spacing: 16) {
                 Label("\(session.shieldActivations) activation\(session.shieldActivations == 1 ? "" : "s")",
-                      systemImage: "shield.checkered")
+                      systemImage: "shield.fill")
                     .font(.caption)
                     .foregroundStyle(NexusTheme.textSecondary)
 

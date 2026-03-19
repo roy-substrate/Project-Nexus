@@ -57,7 +57,7 @@ enum AppTab: String, CaseIterable, Identifiable {
 
     var iconName: String {
         switch self {
-        case .shield:      "shield.checkered"
+        case .shield:      "shield.fill"
         case .settings:    "slider.horizontal.3"
         case .routing:     "antenna.radiowaves.left.and.right"
         case .diagnostics: "chart.bar.xaxis"
