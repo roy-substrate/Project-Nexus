@@ -14,11 +14,9 @@ tags:
 
 # ── Activate shield and run for a few seconds ───────────────────
 - tapOn: "Shield"
-- tapOn:
-    text: "S"
-    index: 0
+- tapOn: "Activate shield"
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 3000
 
 # Let it run for 3 seconds to generate a meaningful session
@@ -27,9 +25,9 @@ tags:
 - waitForAnimationToEnd
 
 # Deactivate
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000
 
 # ── Navigate to Account tab ─────────────────────────────────────
@@ -41,7 +39,7 @@ tags:
 - assertVisible: "Protection Streak"
 - assertVisible: "Total Activations"
 - assertVisible: "Total Protected Time"
-- assertVisible: "Peak ASR Jam Score"
+- assertVisible: "Peak Protection Score"
 - assertVisible: "Sessions Recorded"
 
 # ── Navigate to Session History ─────────────────────────────────

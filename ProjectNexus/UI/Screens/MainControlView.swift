@@ -257,6 +257,7 @@ struct MainControlView: View {
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
             .animation(PixelAnimation.primary, value: state.isShieldActive)
+            .accessibilityLabel(state.isShieldActive ? "Deactivate shield" : "Activate shield")
 
             // ── Status labels ─────────────────────────────────────────
             VStack(spacing: 8) {
