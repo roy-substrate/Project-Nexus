@@ -19,36 +19,26 @@ struct ProjectNexusApp: App {
     var body: some Scene {
         WindowGroup {
             if onboardingCompleted {
-                if #available(iOS 26, *) {
-                    ContentView(
-                        state: appState,
-                        metricsService: metricsService,
-                        asrService: asrService,
-                        analyticsService: analyticsService,
-                        subscriptionManager: subscriptionManager,
-                        onToggleShield: toggleShield,
-                        onConfigUpdate: applyConfigUpdate
-                    )
-                    .onAppear { setupServices() }
-                    .alert("Shield Unavailable", isPresented: Binding(
-                        get: { appState.errorMessage != nil },
-                        set: { if !$0 { appState.errorMessage = nil } }
-                    )) {
-                        Button("OK", role: .cancel) { appState.errorMessage = nil }
-                    } message: {
-                        Text(appState.errorMessage ?? "")
-                    }
-                } else {
-                    Text("iOS 26 or later is required.")
-                        .foregroundStyle(NexusColor.textSecondary)
+                ContentView(
+                    state: appState,
+                    metricsService: metricsService,
+                    asrService: asrService,
+                    analyticsService: analyticsService,
+                    subscriptionManager: subscriptionManager,
+                    onToggleShield: toggleShield,
+                    onConfigUpdate: applyConfigUpdate
+                )
+                .onAppear { setupServices() }
+                .alert("Shield Unavailable", isPresented: Binding(
+                    get: { appState.errorMessage != nil },
+                    set: { if !$0 { appState.errorMessage = nil } }
+                )) {
+                    Button("OK", role: .cancel) { appState.errorMessage = nil }
+                } message: {
+                    Text(appState.errorMessage ?? "")
                 }
             } else {
-                if #available(iOS 26, *) {
-                    OnboardingView()
-                } else {
-                    Text("iOS 26 or later is required.")
-                        .foregroundStyle(NexusColor.textSecondary)
-                }
+                OnboardingView()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -168,7 +158,6 @@ struct ProjectNexusApp: App {
 
 // MARK: - ContentView
 
-@available(iOS 26, *)
 struct ContentView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService
@@ -207,8 +196,9 @@ struct ContentView: View {
             }
         }
         .tint(PixelColor.phosphor)
-        // iOS 26 floating tab bar — minimizes on scroll down for more content area
-        .tabBarMinimizeBehavior(.onScrollDown)
+        // iOS 26 floating tab bar — minimizes on scroll down for more content area.
+        // Conditionally applied so the app runs on iOS 18+.
+        .tabBarMinimizeOnScrollDownIfAvailable()
         // Propagate all config mutations to the live service + persistence
         .onChange(of: state.config.intensity) { _, new in
             onConfigUpdate()
@@ -224,5 +214,20 @@ struct ContentView: View {
         }
         .onChange(of: state.config.frequencyRangeLow)       { _, _ in onConfigUpdate() }
         .onChange(of: state.config.frequencyRangeHigh)      { _, _ in onConfigUpdate() }
+    }
+}
+
+// MARK: - iOS-version-conditional modifiers
+
+private extension View {
+    /// Applies `.tabBarMinimizeBehavior(.onScrollDown)` on iOS 26+ only.
+    /// On iOS 18–25 this is a no-op, allowing the app to run on the full iOS 18+ base.
+    @ViewBuilder
+    func tabBarMinimizeOnScrollDownIfAvailable() -> some View {
+        if #available(iOS 26, *) {
+            self.tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
     }
 }

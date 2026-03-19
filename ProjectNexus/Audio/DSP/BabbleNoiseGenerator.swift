@@ -1,6 +1,7 @@
 import Foundation
 import Accelerate
 import Synchronization
+import os
 
 final class BabbleNoiseGenerator: PerturbationGenerator {
     private let _isEnabled = Atomic<Bool>(true)
@@ -9,21 +10,37 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
         set { _isEnabled.store(newValue, ordering: .relaxed) }
     }
 
+    // Atomic backing so the CoreAudio render thread (read) and main thread (write via
+    // setIntensity) never race on the intensity value.
+    private let _intensity = Atomic<Float>(0.8)
+    private var intensity: Float {
+        get { _intensity.load(ordering: .relaxed) }
+        set { _intensity.store(newValue, ordering: .relaxed) }
+    }
+
     private let layerCount = 4
     private let segmentLength = 48000 * 3  // 3 seconds at 48kHz
     private var layers: [[Float]] = []
     private var layerPositions: [Int] = []
     private var layerGains: [Float] = []
-    private var intensity: Float = 0.8
+
+    // Protects layers/layerPositions/layerGains: mutated on main thread in
+    // generateBabbleLayers(), read on the CoreAudio render thread in fillBuffer().
+    private let layersLock = os_unfair_lock_t.allocate(capacity: 1)
 
     private var lowFreq: Float
     private var highFreq: Float
 
     init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
-        self.intensity = intensity
         self.lowFreq = lowFreq
         self.highFreq = highFreq
+        layersLock.initialize(to: os_unfair_lock())
+        self.intensity = max(0, min(1, intensity))
         generateBabbleLayers()
+    }
+
+    deinit {
+        layersLock.deallocate()
     }
 
     func setIntensity(_ value: Float) {
@@ -40,12 +57,19 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
         // Clear output buffer, then accumulate each layer with vectorized ops.
         memset(buffer, 0, frameCount * MemoryLayout<Float>.size)
 
+        let currentIntensity = intensity
+        os_unfair_lock_lock(layersLock)
+        let layersCopy = layers
+        var positionsCopy = layerPositions
+        let gainsCopy = layerGains
+        os_unfair_lock_unlock(layersLock)
+
         for l in 0..<layerCount {
-            guard l < layers.count else { continue }
-            let layer = layers[l]
+            guard l < layersCopy.count else { continue }
+            let layer = layersCopy[l]
             let layerLen = layer.count
-            var pos = layerPositions[l]
-            var gain = layerGains[l] * intensity * 0.12
+            var pos = positionsCopy[l]
+            var gain = gainsCopy[l] * currentIntensity * 0.12
 
             layer.withUnsafeBufferPointer { layerPtr in
                 guard let base = layerPtr.baseAddress else { return }
@@ -61,8 +85,12 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
                     remaining -= chunk
                 }
             }
-            layerPositions[l] = pos
+            positionsCopy[l] = pos
         }
+
+        os_unfair_lock_lock(layersLock)
+        layerPositions = positionsCopy
+        os_unfair_lock_unlock(layersLock)
     }
 
     func updateMaskingThreshold(_ threshold: [Float]) {
@@ -70,7 +98,7 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     }
 
     private func generateBabbleLayers() {
-        layers = (0..<layerCount).map { _ in
+        var newLayers: [[Float]] = (0..<layerCount).map { _ in
             var noise = generateSpeechlikeNoise(length: segmentLength)
             DSPUtilities.bandpassFilter(
                 &noise,
@@ -94,8 +122,14 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
             return noise
         }
 
-        layerPositions = (0..<layerCount).map { _ in Int.random(in: 0..<segmentLength) }
-        layerGains = (0..<layerCount).map { _ in Float.random(in: 0.6...1.0) }
+        let newPositions = (0..<layerCount).map { _ in Int.random(in: 0..<segmentLength) }
+        let newGains = (0..<layerCount).map { _ in Float.random(in: 0.6...1.0) }
+
+        os_unfair_lock_lock(layersLock)
+        layers = newLayers
+        layerPositions = newPositions
+        layerGains = newGains
+        os_unfair_lock_unlock(layersLock)
     }
 
     private func generateSpeechlikeNoise(length: Int) -> [Float] {

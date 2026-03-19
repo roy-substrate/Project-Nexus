@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 26, *)
 struct MainControlView: View {
     @Bindable var state: AppState
     let metricsService: MetricsService

@@ -12,14 +12,24 @@ final class CodecSimulator {
     private let fftSetup: FFTSetup
     private let hannWindow: [Float]
 
-    init(codecTarget: CodecTarget = .opus64k, fftSize: Int = 1024, sampleRate: Float = 48000) {
+    enum CodecSimulatorError: LocalizedError {
+        case fftSetupFailed(fftSize: Int)
+        var errorDescription: String? {
+            switch self {
+            case .fftSetupFailed(let size):
+                return "CodecSimulator: vDSP_create_fftsetup failed for fftSize=\(size). fftSize must be a power of 2."
+            }
+        }
+    }
+
+    init(codecTarget: CodecTarget = .opus64k, fftSize: Int = 1024, sampleRate: Float = 48000) throws {
         self.codecTarget = codecTarget
         self.fftSize = fftSize
         self.sampleRate = sampleRate
         self.codecEnvelope = [Float](repeating: 1, count: fftSize / 2)
         let log2n = vDSP_Length(log2(Float(fftSize)))
         guard let setup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else {
-            preconditionFailure("CodecSimulator: vDSP_create_fftsetup failed for fftSize=\(fftSize)")
+            throw CodecSimulatorError.fftSetupFailed(fftSize: fftSize)
         }
         self.fftSetup = setup
         self.hannWindow = DSPUtilities.generateHannWindow(size: fftSize)

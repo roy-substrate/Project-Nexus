@@ -3,7 +3,7 @@ import SwiftUI
 struct AccountView: View {
     let analyticsService: AnalyticsService
     let subscriptionManager: SubscriptionManager
-    @AppStorage("nexus.onboarding.completed") private var onboardingCompleted = true
+    @AppStorage("nexus.onboarding.completed") private var onboardingCompleted = false
 
     @State private var showDeleteConfirmation = false
     @State private var showDeleteDataConfirmation = false

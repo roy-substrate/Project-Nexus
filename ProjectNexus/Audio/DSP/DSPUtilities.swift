@@ -46,6 +46,7 @@ enum DSPUtilities {
         highFreq: Float,
         sampleRate: Float
     ) {
+        guard signal.count > 0 else { return }
         let n = signal.count
         let halfN = n / 2
         let log2n = vDSP_Length(log2(Float(n)))
@@ -103,6 +104,7 @@ enum DSPUtilities {
         notchWidth: Float,
         sampleRate: Float
     ) {
+        guard signal.count > 0 else { return }
         let n = signal.count
         let halfN = n / 2
         let log2n = vDSP_Length(log2(Float(n)))

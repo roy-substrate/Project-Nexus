@@ -1,5 +1,6 @@
 import Foundation
 import Synchronization
+import os
 
 final class FrequencySweepGenerator: PerturbationGenerator {
     private let _isEnabled = Atomic<Bool>(true)
@@ -8,23 +9,38 @@ final class FrequencySweepGenerator: PerturbationGenerator {
         set { _isEnabled.store(newValue, ordering: .relaxed) }
     }
 
+    // Atomic backing so the CoreAudio render thread (read) and main thread (write via
+    // setIntensity) never race on the intensity value.
+    private let _intensity = Atomic<Float>(0.8)
+    private var intensity: Float {
+        get { _intensity.load(ordering: .relaxed) }
+        set { _intensity.store(newValue, ordering: .relaxed) }
+    }
+
     private let maxConcurrentSweeps = 4
+    // Protects sweeps/lowFreq/highFreq: mutated on main thread in initializeSweeps(),
+    // read and written on the CoreAudio render thread in fillBuffer().
+    private let sweepsLock = os_unfair_lock_t.allocate(capacity: 1)
     private var sweeps: [Sweep] = []
-    private var intensity: Float = 0.8
 
     private var lowFreq: Float
     private var highFreq: Float
     private let sampleRate: Float = 48000
 
     init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
-        self.intensity = intensity
         self.lowFreq = lowFreq
         self.highFreq = highFreq
+        sweepsLock.initialize(to: os_unfair_lock())
+        self.intensity = max(0, min(1, intensity))
         initializeSweeps()
     }
 
+    deinit {
+        sweepsLock.deallocate()
+    }
+
     func setIntensity(_ value: Float) {
-        intensity = max(0, min(1, value))
+        intensity = max(0, min(1, value))  // Atomic<Float> setter — safe cross-thread
     }
 
     func setFrequencyRange(low: Float, high: Float) {
@@ -34,6 +50,8 @@ final class FrequencySweepGenerator: PerturbationGenerator {
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
+        let currentIntensity = intensity
+        os_unfair_lock_lock(sweepsLock)
         for i in 0..<frameCount {
             var sample: Float = 0
 
@@ -45,8 +63,9 @@ final class FrequencySweepGenerator: PerturbationGenerator {
                 }
             }
 
-            buffer[i] = sample * intensity * 0.1 / Float(maxConcurrentSweeps)
+            buffer[i] = sample * currentIntensity * 0.1 / Float(maxConcurrentSweeps)
         }
+        os_unfair_lock_unlock(sweepsLock)
     }
 
     func updateMaskingThreshold(_ threshold: [Float]) {
@@ -54,13 +73,16 @@ final class FrequencySweepGenerator: PerturbationGenerator {
     }
 
     private func initializeSweeps() {
-        sweeps = (0..<maxConcurrentSweeps).map { _ in
+        let newSweeps: [Sweep] = (0..<maxConcurrentSweeps).map { _ in
             var sweep = Sweep.random(lowFreq: lowFreq, highFreq: highFreq, sampleRate: sampleRate)
             // Offset each sweep randomly into its duration
             let skipSamples = Int.random(in: 0..<sweep.totalSamples)
             for _ in 0..<skipSamples { _ = sweep.nextSample() }
             return sweep
         }
+        os_unfair_lock_lock(sweepsLock)
+        sweeps = newSweeps
+        os_unfair_lock_unlock(sweepsLock)
     }
 }
 

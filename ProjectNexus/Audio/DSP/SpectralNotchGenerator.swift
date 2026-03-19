@@ -20,12 +20,18 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     private let notchWidth: Float = 80
     private var lowFreq: Float
     private var highFreq: Float
-    private var intensity: Float = 0.8
+    // Atomic backing so the CoreAudio render thread (read) and main thread (write via
+    // setIntensity) never race on the intensity value.
+    private let _intensity = Atomic<Float>(0.8)
+    private var intensity: Float {
+        get { _intensity.load(ordering: .relaxed) }
+        set { _intensity.store(newValue, ordering: .relaxed) }
+    }
 
     private let lock = os_unfair_lock_t.allocate(capacity: 1)
 
     init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
-        self.intensity = intensity
+        self.intensity = max(0, min(1, intensity))
         self.lowFreq = lowFreq
         self.highFreq = highFreq
         self.noiseTable = DSPUtilities.generateWhiteNoise(count: noiseTableSize)
@@ -38,7 +44,7 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     }
 
     func setIntensity(_ value: Float) {
-        intensity = max(0, min(1, value))
+        intensity = max(0, min(1, value))  // Atomic<Float> setter — safe cross-thread
     }
 
     func setFrequencyRange(low: Float, high: Float) {
