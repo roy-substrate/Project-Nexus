@@ -78,9 +78,8 @@ struct ProjectNexusApp: App {
             return
         }
 
-        activateShieldOnLaunch()
-
-        // Start ASR effectiveness measurement
+        // Start ASR effectiveness measurement (skip on simulator — no speech hardware)
+        #if !targetEnvironment(simulator)
         Task {
             let granted = await asrService.requestAuthorization()
             if granted {
@@ -89,15 +88,19 @@ struct ProjectNexusApp: App {
                 })
             }
         }
+        #endif
 
         // Track ASR score updates to analytics (drives peakJamScore in Account tab).
         // Also trigger a one-time App Store review request when the user first sees
         // a high jam score (>70%) — maximum social proof moment.
-        asrService.onEffectivenessUpdate = { [weak self] score in
-            self?.analyticsService.track(.asrScoreRecorded(score: score))
-            if score > 0.70 && !(self?.reviewRequested ?? true) {
-                self?.reviewRequested = true
-                self?.requestReview()
+        let capturedAnalytics = analyticsService
+        let reviewKey = "nexus.reviewRequested"
+        let capturedRequestReview = requestReview
+        asrService.onEffectivenessUpdate = { score in
+            capturedAnalytics.track(.asrScoreRecorded(score: score))
+            if score > 0.70 && !UserDefaults.standard.bool(forKey: reviewKey) {
+                UserDefaults.standard.set(true, forKey: reviewKey)
+                capturedRequestReview()
             }
         }
 
@@ -180,7 +183,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $state.selectedTab) {
-            Tab("Shield", systemImage: "shield.checkered.fill", value: AppTab.shield) {
+            Tab("Shield", systemImage: "shield.fill", value: AppTab.shield) {
                 MainControlView(
                     state: state,
                     metricsService: metricsService,

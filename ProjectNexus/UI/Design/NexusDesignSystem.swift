@@ -34,7 +34,7 @@ enum NexusColor {
     static let dangerFill       = Color(red: 0.92, green: 0.26, blue: 0.21).opacity(0.10)
     static let warning          = PixelColor.warning
     static let warningFill      = PixelColor.warning.opacity(0.10)
-    static let positive         = PixelColor.positive
+    static let positive         = PixelColor.phosphor
 
     // MARK: Tier Colors
 

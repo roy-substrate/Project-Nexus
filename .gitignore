@@ -61,3 +61,4 @@ app-store-screenshots/
 screenshots/.next/
 screenshots/node_modules/
 # Generated screenshot PNGs are committed deliberately (screenshots-output/ is tracked)
+.swiftpm

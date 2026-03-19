@@ -5,7 +5,6 @@ import PackageDescription
 var targetExcludes: [String] = [
     "App/Info.plist",
     "App/ProjectNexusApp.swift",
-    "UI",
     "Services/ASREffectivenessService.swift",
     "Services/SubscriptionManager.swift",
     "Audio/ML/WhisperSurrogate.swift",

@@ -144,7 +144,7 @@ struct MainControlView: View {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(PixelColor.positive)
+                    .foregroundStyle(PixelColor.phosphor)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Session complete")
@@ -193,7 +193,7 @@ struct MainControlView: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(PixelColor.ctaBlue)
+                .background(PixelColor.background)
                 .clipShape(Capsule())
 
                 Button {
@@ -264,7 +264,7 @@ struct MainControlView: View {
                 // Status pill
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(state.isShieldActive ? PixelColor.positive : PixelColor.textSecondary)
+                        .fill(state.isShieldActive ? PixelColor.phosphor : PixelColor.textSecondary)
                         .frame(width: 8, height: 8)
                         .opacity(cursorVisible || !state.isShieldActive ? 1 : 0.3)
 
@@ -278,7 +278,7 @@ struct MainControlView: View {
                 .padding(.vertical, 9)
                 .background(
                     state.isShieldActive
-                        ? PixelColor.positive.opacity(0.10)
+                        ? PixelColor.phosphor.opacity(0.10)
                         : PixelColor.border.opacity(0.50)
                 )
                 .clipShape(Capsule())
@@ -459,11 +459,11 @@ struct MainControlView: View {
                 if state.isShieldActive {
                     HStack(spacing: 5) {
                         Circle()
-                            .fill(PixelColor.positive)
+                            .fill(PixelColor.phosphor)
                             .frame(width: 7, height: 7)
                         Text("Live")
                             .font(PixelFont.terminal(12, weight: .semibold))
-                            .foregroundStyle(PixelColor.positive)
+                            .foregroundStyle(PixelColor.phosphor)
                     }
                     .transition(.opacity)
                 }
