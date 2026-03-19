@@ -19,7 +19,7 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     private var lowFreq: Float
     private var highFreq: Float
 
-    init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
+    init(intensity: Float = 0.8, lowFreq: Float = 300, highFreq: Float = 4_000) {
         self.intensity = intensity
         self.lowFreq = lowFreq
         self.highFreq = highFreq

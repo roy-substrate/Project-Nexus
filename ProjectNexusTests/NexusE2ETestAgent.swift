@@ -193,15 +193,15 @@ final class NexusE2ETestAgent: XCTestCase {
             scenario("Config: frequencyRangeLow clamps to [16000, 21800]") {
                 var config = PerturbationConfig()
                 config.frequencyRangeLow = 10
-                try assert(config.frequencyRangeLow >= 16_000, "Low must be ≥ 16000 Hz")
+                try assert(config.frequencyRangeLow >= 80, "Low must be ≥ 80 Hz")
                 config.frequencyRangeLow = 9999
-                try assert(config.frequencyRangeLow <= 21_800, "Low must be ≤ 21800 Hz")
+                try assert(config.frequencyRangeLow <= 8_000, "Low must be ≤ 8000 Hz")
             },
 
             scenario("Config: 200 Hz minimum gap between low and high frequency") {
                 var config = PerturbationConfig()
-                config.frequencyRangeLow = 17_400
-                config.frequencyRangeHigh = 17_500   // only 100 Hz gap → should auto-adjust
+                config.frequencyRangeLow = 2_400
+                config.frequencyRangeHigh = 2_500   // only 100 Hz gap → should auto-adjust
                 let gap = config.frequencyRangeHigh - config.frequencyRangeLow
                 try assert(gap >= 200, "Gap \(gap) Hz is below the 200 Hz minimum")
             },
