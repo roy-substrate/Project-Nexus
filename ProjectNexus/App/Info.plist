@@ -6,10 +6,10 @@
     <array>
         <string>audio</string>
     </array>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Project Nexus uses the microphone to analyze ambient audio and compute psychoacoustic masking thresholds, ensuring perturbations remain imperceptible to human listeners while effectively disrupting ASR systems.</string>
-    <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Nexus Shield measures how effectively it blocks AI transcription by running on-device speech recognition. No audio is recorded or sent anywhere.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Nexus Shield uses the microphone to apply on-device voice privacy filters that reduce unwanted speech transcription in nearby systems. Audio is processed locally on your device.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Nexus Shield uses on-device speech recognition to estimate privacy protection effectiveness. Audio is not recorded or sent to external servers.</string>
     <key>CFBundleName</key>
     <string>Nexus</string>
     <key>CFBundleDisplayName</key>

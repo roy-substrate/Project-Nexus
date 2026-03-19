@@ -82,7 +82,7 @@ struct AccountView: View {
             )
             statRow(
                 icon: "waveform.badge.minus",
-                label: "Peak ASR Jam Score",
+                label: "Peak Protection Score",
                 value: String(format: "%.0f%%", analyticsService.peakJamScore * 100),
                 color: jammingColor(analyticsService.peakJamScore)
             )
@@ -194,7 +194,7 @@ struct AccountView: View {
     }
 
     private func jammingColor(_ score: Float) -> Color {
-        // High jam score = great protection = green. Low = poor = red.
+        // High protection score = better protection = green. Low = poor = red.
         if score < 0.33 { return .red }
         if score < 0.66 { return .orange }
         return .green
@@ -288,11 +288,11 @@ private struct SessionHistoryView: View {
     }
 
     private func shareText(for session: SessionSummary) -> String {
-        let jam = Int(session.peakASRJamScore * 100)
+        let protection = Int(session.peakASRJamScore * 100)
         let duration = formattedDuration(session.totalShieldSeconds)
         // Platform-optimized: concise enough for Twitter (< 280 chars),
         // includes hook + brand + URL for all platforms.
-        return "Blocked \(jam)% of AI transcription for \(duration) with Nexus Shield — free, on-device voice protection.\n\nYour voice. Your rules.\nnexusshield.app"
+        return "Reduced AI transcription accuracy by \(protection)% for \(duration) with Nexus Shield — free, on-device voice protection.\n\nYour voice. Your rules.\nnexusshield.app"
     }
 
     private func formattedDuration(_ seconds: Double) -> String {
@@ -304,7 +304,7 @@ private struct SessionHistoryView: View {
     }
 
     private func jammingColor(_ score: Float) -> Color {
-        // High jam score = great protection = green. Low = poor = red.
+        // High protection score = better protection = green. Low = poor = red.
         if score < 0.33 { return .red }
         if score < 0.66 { return .orange }
         return .green
@@ -313,7 +313,7 @@ private struct SessionHistoryView: View {
     private func jammingLabel(_ score: Float) -> String {
         if score < 0.33 { return "Low" }
         if score < 0.66 { return "Moderate" }
-        return "High jam"
+        return "High protection"
     }
 }
 
