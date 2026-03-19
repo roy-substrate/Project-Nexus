@@ -1,43 +1,42 @@
 import SwiftUI
 
-/// Design token compatibility shim.
-/// All values now forward to PixelColor / NexusColor (which itself forwards to PixelColor).
-/// No existing code needs to change — add new code using PixelColor directly.
+/// Design token compatibility shim — warm palette.
+/// All values forward to PixelColor / NexusColor.
 enum NexusTheme {
 
     // MARK: - Background surfaces
 
     static let background                  = PixelColor.background
-    static let backgroundSecondary         = PixelColor.surface
+    static let backgroundSecondary         = NexusColor.surfaceHigh
     static let backgroundGrouped           = PixelColor.background
-    static let backgroundGroupedSecondary  = PixelColor.surface
+    static let backgroundGroupedSecondary  = NexusColor.surfaceHigh
 
     // MARK: - Brand / interactive
 
-    static let accent     = PixelColor.text
-    static let accentFill = Color.white.opacity(0.05)
+    static let accent     = PixelColor.phosphor
+    static let accentFill = PixelColor.phosphorDim
 
-    // MARK: - Tier colours (both white in pixel aesthetic)
+    // MARK: - Tier colours
 
-    static let tier1 = PixelColor.text
-    static let tier2 = PixelColor.text
+    static let tier1 = NexusColor.tier1    // warm orange
+    static let tier2 = NexusColor.tier2    // calm blue
 
     // MARK: - Semantic status
 
-    static let positive = PixelColor.phosphor
+    static let positive = PixelColor.positive
     static let warning  = PixelColor.warning
-    static let danger   = PixelColor.warning
+    static let danger   = NexusColor.danger
 
     // MARK: - Text
 
     static let textPrimary    = PixelColor.text
     static let textSecondary  = PixelColor.textSecondary
-    static let textTertiary   = Color.white.opacity(0.2)
-    static let textQuaternary = Color.white.opacity(0.12)
+    static let textTertiary   = NexusColor.textTertiary
+    static let textQuaternary = Color(red: 0.80, green: 0.78, blue: 0.76)
 
     // MARK: - Surface / separator
 
-    static let separator              = Color.white.opacity(0.15)
+    static let separator              = NexusColor.separator
     static let cardBackground         = PixelColor.surface
     static let cardStroke             = PixelColor.border
 
@@ -45,22 +44,22 @@ enum NexusTheme {
 
     static let backgroundPrimary          = background
     static let backgroundTertiary         = backgroundGroupedSecondary
-    static let accentBlue                 = PixelColor.text
-    static let accentBlueSoft             = Color.white.opacity(0.05)
-    static let accentIndigoMuted          = Color.white.opacity(0.08)
-    static let accentCyan                 = PixelColor.text
-    static let accentPurple               = PixelColor.text
-    static let accentMagenta              = PixelColor.text
-    static let accentGreen                = PixelColor.phosphor
-    static let accentOrange               = PixelColor.warning
-    static let accentRed                  = PixelColor.warning
+    static let accentBlue                 = NexusColor.tier2
+    static let accentBlueSoft             = NexusColor.tier2.opacity(0.12)
+    static let accentIndigoMuted          = Color(red: 0.44, green: 0.34, blue: 0.90).opacity(0.12)
+    static let accentCyan                 = Color(red: 0.13, green: 0.75, blue: 0.90)
+    static let accentPurple               = Color(red: 0.60, green: 0.32, blue: 0.90)
+    static let accentMagenta              = Color(red: 0.90, green: 0.25, blue: 0.65)
+    static let accentGreen                = PixelColor.positive
+    static let accentOrange               = PixelColor.phosphor
+    static let accentRed                  = NexusColor.danger
     static let glassFill                  = PixelColor.surface
     static let glassStroke                = PixelColor.border
-    static let glassHighlight             = Color.white.opacity(0.06)
-    static let glowCyan                   = Color.clear
-    static let glowPurple                 = Color.clear
+    static let glassHighlight             = Color.white.opacity(0.70)
+    static let glowCyan                   = NexusColor.tier2.opacity(0.25)
+    static let glowPurple                 = Color(red: 0.60, green: 0.32, blue: 0.90).opacity(0.25)
 
-    // MARK: - Typography (legacy aliases — prefer PixelFont)
+    // MARK: - Typography (rounded SF Pro)
 
     static let displayFont   = PixelFont.hero(34)
     static let titleFont     = PixelFont.terminal(22, weight: .bold)
@@ -80,32 +79,33 @@ enum NexusTheme {
     static let spacingXL:  CGFloat = 32
     static let spacingXXL: CGFloat = 48
 
-    // MARK: - Corner radii (all 0 in pixel aesthetic)
+    // MARK: - Corner radii (warm rounded aesthetic)
 
-    static let radiusSM: CGFloat = 0
-    static let radiusMD: CGFloat = 0
-    static let radiusLG: CGFloat = 0
-    static let radiusXL: CGFloat = 0
+    static let radiusSM: CGFloat = 10
+    static let radiusMD: CGFloat = 16
+    static let radiusLG: CGFloat = 20
+    static let radiusXL: CGFloat = 28
 
-    // MARK: - Gradients (replaced by dither patterns — kept for compat)
+    // MARK: - Gradients
 
     static let backgroundGradient = LinearGradient(
-        colors: [PixelColor.background, PixelColor.surface],
+        colors: [PixelColor.background, NexusColor.surfaceHigh],
         startPoint: .top, endPoint: .bottom
     )
 
     static let spectrumGradient = LinearGradient(
-        colors: [PixelColor.text, PixelColor.phosphor],
+        colors: [PixelColor.phosphor, PixelColor.warning],
         startPoint: .leading, endPoint: .trailing
     )
 
     static let cyanGradient = LinearGradient(
-        colors: [PixelColor.text, PixelColor.text.opacity(0.5)],
+        colors: [NexusColor.tier2, NexusColor.tier2.opacity(0.5)],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 
     static let purpleGradient = LinearGradient(
-        colors: [PixelColor.textSecondary, PixelColor.textSecondary.opacity(0.5)],
+        colors: [Color(red: 0.60, green: 0.32, blue: 0.90),
+                 Color(red: 0.60, green: 0.32, blue: 0.90).opacity(0.5)],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 }

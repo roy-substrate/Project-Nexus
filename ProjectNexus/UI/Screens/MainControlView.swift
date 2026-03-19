@@ -1,5 +1,63 @@
 import SwiftUI
 
+// MARK: - BlobMascot
+
+/// Friendly rounded blob character — drawn with SwiftUI Canvas.
+/// Closed-eyes crescent arcs convey calm focus (Headspace-style mascot).
+private struct BlobMascot: View {
+    let isActive: Bool
+    let audioScale: CGFloat
+
+    private var fillColor: Color {
+        isActive ? PixelColor.phosphor : Color(red: 0.88, green: 0.86, blue: 0.84)
+    }
+
+    var body: some View {
+        Canvas { context, size in
+            let w = size.width, h = size.height
+            let cx = w / 2, cy = h / 2
+
+            // ── Blob body ──────────────────────────────────────────────
+            // Rounded rectangle, slightly shorter on the bottom (organic feel).
+            let blobPath = Path(
+                roundedRect: CGRect(x: cx - w * 0.44, y: cy - h * 0.42,
+                                    width: w * 0.88, height: h * 0.80),
+                cornerRadius: min(w, h) * 0.38,
+                style: .continuous
+            )
+            context.fill(blobPath, with: .color(fillColor))
+
+            // ── Eyes (closed crescent arcs) ────────────────────────────
+            let eyeColor: Color = isActive ? .white.opacity(0.92) : Color(red: 0.55, green: 0.53, blue: 0.51)
+            let eyeY = cy - h * 0.04
+            let eyeSpread: CGFloat = w * 0.16
+            let eyeW: CGFloat = w * 0.14
+            let eyeH: CGFloat = h * 0.06
+
+            for sign: CGFloat in [-1, 1] {
+                // Each eye is a downward crescent arc (bottom half of ellipse, flipped)
+                var eyePath = Path()
+                let ex = cx + sign * eyeSpread
+                eyePath.move(to: CGPoint(x: ex - eyeW, y: eyeY))
+                eyePath.addCurve(
+                    to: CGPoint(x: ex + eyeW, y: eyeY),
+                    control1: CGPoint(x: ex - eyeW * 0.5, y: eyeY + eyeH * 2.2),
+                    control2: CGPoint(x: ex + eyeW * 0.5, y: eyeY + eyeH * 2.2)
+                )
+                context.stroke(
+                    eyePath,
+                    with: .color(eyeColor),
+                    style: StrokeStyle(lineWidth: h * 0.038, lineCap: .round)
+                )
+            }
+        }
+        .scaleEffect(isActive ? audioScale : 1.0)
+        .animation(PixelAnimation.audioPulse, value: audioScale)
+    }
+}
+
+// MARK: - MainControlView
+
 @available(iOS 26, *)
 struct MainControlView: View {
     @Bindable var state: AppState
@@ -19,13 +77,13 @@ struct MainControlView: View {
     @AppStorage("nexus.asrPermissionNudgeShown") private var nudgeShown = false
     @State private var showASRNudge: Bool = false
 
-    // MARK: - Blinking cursor state
+    // MARK: - Blinking cursor state (repurposed as status pulse)
     @State private var cursorVisible: Bool = true
     private let cursorTimer = Timer.publish(every: 0.6, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
-            // ── Pure black background ─────────────────────────────────
+            // ── Warm background ────────────────────────────────────────
             PixelColor.background
                 .ignoresSafeArea()
 
@@ -48,7 +106,6 @@ struct MainControlView: View {
             .overlay(alignment: .top) { sessionResultBanner }
             .overlay(alignment: .bottom) { asrPermissionNudge }
         }
-        .scanlines()
         .onChange(of: state.isShieldActive) { _, isActive in
             if isActive {
                 sessionStartTime = .now
@@ -84,19 +141,26 @@ struct MainControlView: View {
     @ViewBuilder
     private var sessionResultBanner: some View {
         if showSessionResult {
-            HStack(spacing: 10) {
-                Text("[OK]")
-                    .font(PixelFont.terminal(12, weight: .bold))
-                    .foregroundStyle(PixelColor.phosphor)
-                    .phosphorGlow()
-                Text("SESSION COMPLETE · \(Int(sessionResultScore * 100))% AI BLOCKED")
-                    .font(PixelFont.terminal(12))
-                    .foregroundStyle(PixelColor.text)
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(PixelColor.positive)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Session complete")
+                        .font(PixelFont.terminal(14, weight: .semibold))
+                        .foregroundStyle(PixelColor.text)
+                    Text("\(Int(sessionResultScore * 100))% of AI blocked")
+                        .font(PixelFont.terminal(12))
+                        .foregroundStyle(PixelColor.textSecondary)
+                }
+                Spacer()
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 11)
-            .background(PixelColor.background)
-            .pixelBorder(PixelColor.phosphor)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(PixelColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
             .padding(.top, 14)
             .padding(.horizontal, 18)
             .transition(.move(edge: .top).combined(with: .opacity))
@@ -109,39 +173,43 @@ struct MainControlView: View {
     private var asrPermissionNudge: some View {
         if showASRNudge {
             HStack(spacing: 12) {
-                Text("[MIC]")
-                    .font(PixelFont.terminal(11, weight: .bold))
+                Image(systemName: "mic.circle.fill")
+                    .font(.system(size: 22))
                     .foregroundStyle(PixelColor.warning)
 
-                Text("ENABLE SPEECH MEASUREMENT FOR JAM SCORE")
-                    .font(PixelFont.terminal(11))
+                Text("Enable speech measurement for jam score")
+                    .font(PixelFont.terminal(13))
                     .foregroundStyle(PixelColor.text)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
-                Button("[ ON ]") {
+                Button("Enable") {
                     Task { await asrService.requestAuthorization() }
                     nudgeShown = true
                     withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                 }
-                .font(PixelFont.terminal(11, weight: .bold))
-                .foregroundStyle(PixelColor.phosphor)
-                .phosphorGlow()
+                .font(PixelFont.terminal(13, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(PixelColor.ctaBlue)
+                .clipShape(Capsule())
 
-                Button("[ X ]") {
-                    // Do not set nudgeShown — dismisses for this session only so the
-                    // nudge can reappear on future sessions until the user grants access.
+                Button {
                     withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(PixelColor.textSecondary)
                 }
-                .font(PixelFont.terminal(11))
-                .foregroundStyle(PixelColor.textSecondary)
             }
             .padding(.horizontal, 18)
-            .padding(.vertical, 14)
-            .background(PixelColor.background)
-            .pixelBorder()
-            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .background(PixelColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: -2)
+            .padding(.horizontal, 16)
             .padding(.bottom, 14)
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
@@ -151,159 +219,126 @@ struct MainControlView: View {
 
     private var sessionCount: Int { analyticsService.sessionHistory.count }
 
-    // MARK: - ASR Effectiveness
-
-    private var asrEffectivenessColor: Color {
-        let s = asrService.effectivenessScore
-        if !state.isShieldActive || s < 0.05 { return PixelColor.textSecondary }
-        return PixelColor.phosphor
-    }
-
-    // MARK: - Shield Hero
+    // MARK: - Audio scale
 
     private var audioScale: CGFloat {
         guard state.isShieldActive else { return 1.0 }
         let norm = CGFloat(max(0, (metricsService.currentMetrics.rmsLevel + 60) / 60))
-        return 1.0 + norm * 0.05
+        return 1.0 + norm * 0.04
     }
+
+    // MARK: - Shield Hero
 
     private var shieldHero: some View {
         VStack(spacing: 0) {
-            // ── Button ────────────────────────────────────────────────
+
+            // ── Hero blob button ───────────────────────────────────────
             Button(action: onToggleShield) {
                 ZStack {
-                    // Shield box — 120×120 rectangle, square corners
+                    // Glow ring when active
                     if state.isShieldActive {
-                        // Active: phosphor dither fill
-                        DitherPatternView(
-                            density: 0.15,
-                            foreground: PixelColor.phosphor,
-                            background: .black
-                        )
-                        .frame(width: 120, height: 120)
-                        .pixelBorder(PixelColor.phosphor, width: 1)
-                        .scaleEffect(audioScale)
-                        .animation(PixelAnimation.audioPulse, value: audioScale)
-                    } else {
-                        // Inactive: pure black, white border
-                        Rectangle()
-                            .fill(PixelColor.background)
-                            .frame(width: 120, height: 120)
-                            .pixelBorder(PixelColor.border)
+                        Circle()
+                            .fill(PixelColor.phosphor.opacity(0.12))
+                            .frame(width: 192, height: 192)
+                            .scaleEffect(audioScale * 1.05)
+                            .animation(PixelAnimation.audioPulse, value: audioScale)
+
+                        Circle()
+                            .fill(PixelColor.phosphor.opacity(0.07))
+                            .frame(width: 220, height: 220)
                     }
 
-                    // ASCII shield label inside the box
-                    VStack(spacing: 4) {
-                        Text("[NEXUS]")
-                            .font(PixelFont.hero(16))
-                            .foregroundStyle(
-                                state.isShieldActive ? PixelColor.phosphor : PixelColor.text
-                            )
-                            .if(state.isShieldActive) { $0.phosphorGlow() }
-
-                        if state.isShieldActive {
-                            WaveformView(isActive: true,
-                                         level: metricsService.currentMetrics.rmsLevel)
-                                .frame(width: 56, height: 12)
-                                .transition(.opacity)
-                        } else {
-                            Text("/  \\")
-                                .font(PixelFont.hero(10))
-                                .foregroundStyle(PixelColor.textSecondary)
-                            Text("| S |")
-                                .font(PixelFont.hero(10))
-                                .foregroundStyle(PixelColor.textSecondary)
-                            Text(" \\_/")
-                                .font(PixelFont.hero(10))
-                                .foregroundStyle(PixelColor.textSecondary)
-                        }
-                    }
+                    // Blob mascot
+                    BlobMascot(isActive: state.isShieldActive, audioScale: audioScale)
+                        .frame(width: 160, height: 140)
                 }
+                .frame(height: 200)
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
-            .frame(height: 136)
             .animation(PixelAnimation.primary, value: state.isShieldActive)
 
             // ── Status labels ─────────────────────────────────────────
-            VStack(spacing: 6) {
-                // Primary status line
-                HStack(spacing: 0) {
-                    Text("> ")
-                        .font(PixelFont.terminal(14))
-                        .foregroundStyle(PixelColor.textSecondary)
-                    Text(state.isShieldActive ? "SHIELD ACTIVE" : "SHIELD OFFLINE")
-                        .font(PixelFont.terminal(14, weight: .bold))
-                        .foregroundStyle(
-                            state.isShieldActive ? PixelColor.phosphor : PixelColor.textSecondary
-                        )
-                        .if(state.isShieldActive) { $0.phosphorGlow() }
-                    // Blinking cursor when active
-                    if state.isShieldActive {
-                        Text(cursorVisible ? " ▌" : "  ")
-                            .font(PixelFont.terminal(14))
-                            .foregroundStyle(PixelColor.phosphor)
-                            .phosphorGlow()
-                    }
-                }
+            VStack(spacing: 8) {
 
-                // Session timer — hero metric, monospaced
+                // Status pill
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(state.isShieldActive ? PixelColor.positive : PixelColor.textSecondary)
+                        .frame(width: 8, height: 8)
+                        .opacity(cursorVisible || !state.isShieldActive ? 1 : 0.3)
+
+                    Text(state.isShieldActive ? "Shield active" : "Shield offline")
+                        .font(PixelFont.terminal(15, weight: .semibold))
+                        .foregroundStyle(
+                            state.isShieldActive ? PixelColor.text : PixelColor.textSecondary
+                        )
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(
+                    state.isShieldActive
+                        ? PixelColor.positive.opacity(0.10)
+                        : PixelColor.border.opacity(0.50)
+                )
+                .clipShape(Capsule())
+
+                // Session timer — shown when active
                 if state.isShieldActive, let startTime = sessionStartTime {
                     VStack(spacing: 2) {
-                        Text("UPTIME")
+                        Text("Session time")
                             .font(PixelFont.stripLabel())
                             .foregroundStyle(PixelColor.textSecondary)
-                            .kerning(1.5)
+                            .kerning(0.5)
                         TimelineView(.periodic(from: .now, by: 1)) { _ in
                             Text(sessionDurationString(since: startTime))
-                                .font(PixelFont.hero(44))
+                                .font(PixelFont.hero(48))
                                 .foregroundStyle(PixelColor.phosphor)
-                                .phosphorGlow()
                                 .contentTransition(.numericText())
                         }
                     }
                     .transition(.opacity.combined(with: .scale(scale: 0.92)))
                 }
 
-                if state.isShieldActive && state.activeTechniqueCount > 0 {
-                    Text("TECH:\(state.activeTechniqueCount)  ACTIVE")
-                        .font(PixelFont.terminal(11))
-                        .foregroundStyle(PixelColor.textSecondary)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                } else if !state.isShieldActive {
-                    Text("VOICE PROTECTION OFFLINE")
-                        .font(PixelFont.terminal(11))
-                        .foregroundStyle(PixelColor.textSecondary)
+                // Subtitle — technique count or offline prompt
+                Group {
+                    if state.isShieldActive && state.activeTechniqueCount > 0 {
+                        Text("\(state.activeTechniqueCount) technique\(state.activeTechniqueCount == 1 ? "" : "s") active")
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    } else if !state.isShieldActive {
+                        Text("Tap the blob to start protecting your voice")
+                    }
                 }
+                .font(PixelFont.terminal(13))
+                .foregroundStyle(PixelColor.textSecondary)
+                .multilineTextAlignment(.center)
 
+                // Session count badge
                 if sessionCount > 0 && !state.isShieldActive {
-                    Text("SESSIONS LOGGED: \(sessionCount)")
-                        .font(PixelFont.terminal(11))
+                    Text("\(sessionCount) session\(sessionCount == 1 ? "" : "s") logged")
+                        .font(PixelFont.terminal(12))
                         .foregroundStyle(PixelColor.textSecondary)
                         .transition(.opacity)
                 }
 
-                // JAM score badge — pixel rectangle, text-art bar
+                // JAM score pill
                 if state.isShieldActive && asrService.isMeasuring && asrService.effectivenessScore > 0.05 {
                     HStack(spacing: 8) {
-                        Text("JAM:")
-                            .font(PixelFont.terminal(12, weight: .bold))
+                        Image(systemName: "waveform.badge.minus")
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(PixelColor.phosphor)
-                            .phosphorGlow()
-                        PixelTextProgressBar(
-                            value: asrService.effectivenessScore,
-                            width: 8,
-                            color: PixelColor.phosphor
-                        )
+                        Text("Jam score  \(Int(asrService.effectivenessScore * 100))%")
+                            .font(PixelFont.terminal(13, weight: .semibold))
+                            .foregroundStyle(PixelColor.phosphor)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(PixelColor.background)
-                    .pixelBorder(PixelColor.phosphor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(PixelColor.phosphor.opacity(0.10))
+                    .clipShape(Capsule())
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
-            .animation(.easeOut(duration: 0.15), value: state.isShieldActive)
+            .animation(PixelAnimation.primary, value: state.isShieldActive)
             .padding(.bottom, 32)
         }
     }
@@ -325,11 +360,12 @@ struct MainControlView: View {
     // MARK: - Tier Row
 
     private var tierRow: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             tierToggle(
-                label: "STD",
-                sublabel: "TIER 1",
-                color: state.config.tier1Enabled ? PixelColor.phosphor : PixelColor.border,
+                label: "Acoustic",
+                sublabel: "Tier 1",
+                icon: "waveform",
+                color: NexusColor.tier1,
                 enabled: state.config.tier1Enabled
             ) {
                 withAnimation(PixelAnimation.primary) {
@@ -338,9 +374,10 @@ struct MainControlView: View {
             }
 
             tierToggle(
-                label: "AI",
-                sublabel: "TIER 2",
-                color: state.config.tier2Enabled ? PixelColor.phosphor : PixelColor.border,
+                label: "Adversarial",
+                sublabel: "Tier 2",
+                icon: "brain",
+                color: NexusColor.tier2,
                 enabled: state.config.tier2Enabled
             ) {
                 withAnimation(PixelAnimation.primary) {
@@ -353,31 +390,53 @@ struct MainControlView: View {
     private func tierToggle(
         label: String,
         sublabel: String,
+        icon: String,
         color: Color,
         enabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                HStack(spacing: 6) {
+            VStack(spacing: 10) {
+                // Icon
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(enabled ? color : PixelColor.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(enabled ? color.opacity(0.12) : PixelColor.border.opacity(0.50))
+                    )
+
+                VStack(spacing: 3) {
                     Text(label)
-                        .font(PixelFont.terminal(14, weight: .bold))
-                        .foregroundStyle(enabled ? PixelColor.phosphor : PixelColor.text)
-                        .if(enabled) { $0.phosphorGlow() }
-                    Text(enabled ? "●" : "○")
-                        .font(PixelFont.terminal(12))
-                        .foregroundStyle(enabled ? PixelColor.phosphor : PixelColor.textSecondary)
-                        .if(enabled) { $0.phosphorGlow() }
+                        .font(PixelFont.terminal(13, weight: .semibold))
+                        .foregroundStyle(enabled ? PixelColor.text : PixelColor.textSecondary)
+                    Text(sublabel)
+                        .font(PixelFont.stripLabel())
+                        .foregroundStyle(PixelColor.textSecondary)
                 }
-                Text(sublabel)
-                    .font(PixelFont.stripLabel())
-                    .kerning(1.5)
-                    .foregroundStyle(PixelColor.textSecondary)
+
+                // Mini toggle pill
+                Capsule()
+                    .fill(enabled ? color : PixelColor.border)
+                    .frame(width: 36, height: 18)
+                    .overlay(alignment: enabled ? .trailing : .leading) {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 14, height: 14)
+                            .padding(.horizontal, 2)
+                            .shadow(color: Color.black.opacity(0.15), radius: 2)
+                    }
+                    .animation(PixelAnimation.primary, value: enabled)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(PixelColor.background)
-            .pixelBorder(enabled ? PixelColor.phosphor : PixelColor.border)
+            .padding(.vertical, 18)
+            .background(PixelColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(
+                color: (enabled ? color : Color.black).opacity(enabled ? 0.14 : 0.05),
+                radius: 10, x: 0, y: 4
+            )
             .animation(PixelAnimation.primary, value: enabled)
         }
         .buttonStyle(.plain)
@@ -388,21 +447,23 @@ struct MainControlView: View {
     private var spectrumCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("SPECTRUM ANALYSIS")
-                    .font(PixelFont.sectionHead())
-                    .kerning(1.5)
-                    .foregroundStyle(PixelColor.text)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Spectrum Analysis")
+                        .font(PixelFont.terminal(15, weight: .semibold))
+                        .foregroundStyle(PixelColor.text)
+                    Text("Live frequency monitoring")
+                        .font(PixelFont.terminal(11))
+                        .foregroundStyle(PixelColor.textSecondary)
+                }
                 Spacer()
                 if state.isShieldActive {
-                    HStack(spacing: 4) {
-                        Text("●")
-                            .font(.system(size: 6, design: .monospaced))
-                            .foregroundStyle(PixelColor.phosphor)
-                            .phosphorGlow()
-                        Text("LIVE")
-                            .font(PixelFont.sectionHead())
-                            .foregroundStyle(PixelColor.phosphor)
-                            .phosphorGlow()
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(PixelColor.positive)
+                            .frame(width: 7, height: 7)
+                        Text("Live")
+                            .font(PixelFont.terminal(12, weight: .semibold))
+                            .foregroundStyle(PixelColor.positive)
                     }
                     .transition(.opacity)
                 }
@@ -415,8 +476,7 @@ struct MainControlView: View {
                 isActive: state.isShieldActive
             )
             .frame(height: 80)
-            // Square corners — no clipShape roundedRectangle
-            .pixelBorder()
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             LevelMeterView(
                 level: metricsService.currentMetrics.rmsLevel,
@@ -426,25 +486,26 @@ struct MainControlView: View {
             if state.isShieldActive && !metricsService.rmsHistory.allSatisfy({ $0 == -60 }) {
                 SparklineView(
                     values: metricsService.rmsHistory,
-                    color: PixelColor.phosphorDim
+                    color: PixelColor.phosphor.opacity(0.55)
                 )
-                .frame(height: 18)
+                .frame(height: 20)
                 .transition(.opacity)
             }
 
             HStack {
-                Text("100HZ").frame(maxWidth: .infinity, alignment: .leading)
-                Text("1KHZ").frame(maxWidth: .infinity, alignment: .center)
-                Text("4KHZ").frame(maxWidth: .infinity, alignment: .center)
-                Text("20KHZ").frame(maxWidth: .infinity, alignment: .trailing)
+                Text("100 Hz").frame(maxWidth: .infinity, alignment: .leading)
+                Text("1 kHz").frame(maxWidth: .infinity, alignment: .center)
+                Text("4 kHz").frame(maxWidth: .infinity, alignment: .center)
+                Text("20 kHz").frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .font(PixelFont.monoSmall(size: 9))
+            .font(PixelFont.monoSmall(size: 10))
             .foregroundStyle(PixelColor.textSecondary)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
         .background(PixelColor.surface)
-        .pixelBorder()
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     // MARK: - Intensity card
@@ -452,68 +513,98 @@ struct MainControlView: View {
     private var intensityCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("INTENSITY")
-                    .font(PixelFont.sectionHead())
-                    .kerning(1.5)
-                    .foregroundStyle(PixelColor.text)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Intensity")
+                        .font(PixelFont.terminal(15, weight: .semibold))
+                        .foregroundStyle(PixelColor.text)
+                    Text("Perturbation strength")
+                        .font(PixelFont.terminal(11))
+                        .foregroundStyle(PixelColor.textSecondary)
+                }
                 Spacer()
                 Text("\(Int(state.config.intensity * 100))%")
-                    .font(PixelFont.terminal(15, weight: .bold))
+                    .font(PixelFont.hero(22))
                     .foregroundStyle(
                         state.isShieldActive ? PixelColor.phosphor : PixelColor.text
                     )
-                    .if(state.isShieldActive) { $0.phosphorGlow() }
                     .contentTransition(.numericText())
             }
 
-            // Text-art intensity bar
-            PixelTextProgressBar(
-                value: state.config.intensity,
-                width: 12,
-                color: state.isShieldActive ? PixelColor.phosphor : PixelColor.text
-            )
+            // Smooth progress bar
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(PixelColor.border.opacity(0.60))
+                        .frame(height: 10)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [PixelColor.warning, PixelColor.phosphor],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .frame(
+                            width: geo.size.width * CGFloat(state.config.intensity),
+                            height: 10
+                        )
+                        .animation(PixelAnimation.arcFill, value: state.config.intensity)
+                }
+            }
+            .frame(height: 10)
 
             Slider(value: $state.config.intensity, in: 0...1, step: 0.01)
                 .tint(state.isShieldActive ? PixelColor.phosphor : PixelColor.border)
 
-            Text("HIGHER VALUES INCREASE JAM EFFECTIVENESS — MAY BECOME FAINTLY AUDIBLE.")
-                .font(PixelFont.monoSmall(size: 10))
+            Text("Higher values increase jam effectiveness — may become faintly audible.")
+                .font(PixelFont.monoSmall(size: 11))
                 .foregroundStyle(PixelColor.textSecondary)
-                .lineSpacing(4)
+                .lineSpacing(3)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 18)
         .background(PixelColor.surface)
-        .pixelBorder()
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     // MARK: - Status strip
 
     private var statusStrip: some View {
-        HStack(spacing: 0) {
-            // Single-line terminal readout
-            Text(statusLine)
-                .font(PixelFont.stripLabel())
-                .foregroundStyle(PixelColor.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
+        HStack(spacing: 16) {
+            statusChip(label: statusLatency, icon: "timer")
+            statusChip(label: statusLevel, icon: "waveform")
+            statusChip(label: statusRoute, icon: "speaker.wave.2")
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
-        .background(PixelColor.background)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(PixelColor.surface)
         .overlay(alignment: .top) {
             Rectangle()
                 .fill(PixelColor.border)
-                .frame(height: 1)
+                .frame(height: 0.5)
         }
     }
 
-    private var statusLine: String {
-        let lat = String(format: "LAT:%.0fms", metricsService.currentMetrics.latencyMs)
-        let lvl = String(format: "LVL:%.0fdB", metricsService.currentMetrics.rmsLevel)
-        let route = state.audioMode == .speakerPlayback ? "ROUTE:SPK" : "ROUTE:VoIP"
-        let tech = "TECH:\(state.activeTechniqueCount)"
-        return "\(lat)  \(lvl)  \(route)  \(tech)"
+    private func statusChip(label: String, icon: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(PixelColor.textSecondary)
+            Text(label)
+                .font(PixelFont.stripLabel())
+                .foregroundStyle(PixelColor.textSecondary)
+        }
+    }
+
+    private var statusLatency: String {
+        String(format: "%.0f ms", metricsService.currentMetrics.latencyMs)
+    }
+    private var statusLevel: String {
+        String(format: "%.0f dB", metricsService.currentMetrics.rmsLevel)
+    }
+    private var statusRoute: String {
+        state.audioMode == .speakerPlayback ? "Speaker" : "VoIP"
     }
 }
 
