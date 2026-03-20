@@ -1,4 +1,5 @@
 import Foundation
+import Accelerate
 import Synchronization
 
 final class FrequencySweepGenerator: PerturbationGenerator {
@@ -15,6 +16,9 @@ final class FrequencySweepGenerator: PerturbationGenerator {
     private var lowFreq: Float
     private var highFreq: Float
     private let sampleRate: Float = 48000
+
+    // Atomic scalar gain derived from PsychoacousticMasker thresholds (CTO Option B).
+    private let _maskingGain = Atomic<Float>(1.0)
 
     init(intensity: Float = 0.8, lowFreq: Float = 300, highFreq: Float = 4_000) {
         self.intensity = intensity
@@ -45,12 +49,16 @@ final class FrequencySweepGenerator: PerturbationGenerator {
                 }
             }
 
-            buffer[i] = sample * intensity * 0.1 / Float(maxConcurrentSweeps)
+            buffer[i] = sample * intensity * 0.1 * _maskingGain.load(ordering: .relaxed) / Float(maxConcurrentSweeps)
         }
     }
 
     func updateMaskingThreshold(_ threshold: [Float]) {
-        // Could use threshold to modulate sweep amplitudes
+        guard !threshold.isEmpty else { return }
+        var mean: Float = 0
+        vDSP_meanv(threshold, 1, &mean, vDSP_Length(threshold.count))
+        let gain = max(0.05, min(1.0, (mean + 60.0) / 60.0))
+        _maskingGain.store(gain, ordering: .relaxed)
     }
 
     private func initializeSweeps() {

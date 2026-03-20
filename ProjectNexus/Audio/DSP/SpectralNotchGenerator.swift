@@ -14,7 +14,6 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     private let noiseTableSize = 48000  // 1 second at 48kHz
     private var noiseTable: [Float]
     private var readPosition: Int = 0
-    private var currentMaskingThreshold: [Float] = []
 
     private let formantFrequencies: [Float] = [500, 1500, 2500]
     private let notchWidth: Float = 80
@@ -22,19 +21,17 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     private var highFreq: Float
     private var intensity: Float = 0.8
 
-    private let lock = os_unfair_lock_t.allocate(capacity: 1)
+    // Atomic scalar gain derived from PsychoacousticMasker thresholds.
+    // Written on the main thread, read on the CoreAudio render thread — Atomic<Float>
+    // avoids os_unfair_lock overhead on the hot path (CTO Option B).
+    private let _maskingGain = Atomic<Float>(1.0)
 
     init(intensity: Float = 0.8, lowFreq: Float = 300, highFreq: Float = 4_000) {
         self.intensity = intensity
         self.lowFreq = lowFreq
         self.highFreq = highFreq
         self.noiseTable = DSPUtilities.generateWhiteNoise(count: noiseTableSize)
-        lock.initialize(to: os_unfair_lock())
         prepareNoiseTable()
-    }
-
-    deinit {
-        lock.deallocate()
     }
 
     func setIntensity(_ value: Float) {
@@ -50,7 +47,7 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {
         // Copy from circular noise table without a scalar loop.
         // Handles wrap-around with at most two vDSP_vsmul calls.
-        let scale = intensity * 0.15
+        let scale = intensity * 0.15 * _maskingGain.load(ordering: .relaxed)
         var remaining = frameCount
         var outOffset = 0
         while remaining > 0 {
@@ -69,9 +66,11 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     }
 
     func updateMaskingThreshold(_ threshold: [Float]) {
-        os_unfair_lock_lock(lock)
-        currentMaskingThreshold = threshold
-        os_unfair_lock_unlock(lock)
+        guard !threshold.isEmpty else { return }
+        var mean: Float = 0
+        vDSP_meanv(threshold, 1, &mean, vDSP_Length(threshold.count))
+        let gain = max(0.05, min(1.0, (mean + 60.0) / 60.0))
+        _maskingGain.store(gain, ordering: .relaxed)
     }
 
     private func prepareNoiseTable() {
