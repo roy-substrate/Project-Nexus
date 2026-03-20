@@ -239,20 +239,20 @@ struct MainControlView: View {
                     if state.isShieldActive {
                         Circle()
                             .fill(PixelColor.phosphor.opacity(0.12))
-                            .frame(width: 192, height: 192)
+                            .frame(width: 160, height: 160)
                             .scaleEffect(audioScale * 1.05)
                             .animation(PixelAnimation.audioPulse, value: audioScale)
 
                         Circle()
                             .fill(PixelColor.phosphor.opacity(0.07))
-                            .frame(width: 220, height: 220)
+                            .frame(width: 184, height: 184)
                     }
 
                     // Blob mascot
                     BlobMascot(isActive: state.isShieldActive, audioScale: audioScale)
-                        .frame(width: 160, height: 140)
+                        .frame(width: 136, height: 120)
                 }
-                .frame(height: 200)
+                .frame(height: 160)
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .heavy), trigger: state.isShieldActive)
@@ -293,7 +293,7 @@ struct MainControlView: View {
                             .kerning(0.5)
                         TimelineView(.periodic(from: .now, by: 1)) { _ in
                             Text(sessionDurationString(since: startTime))
-                                .font(PixelFont.hero(48))
+                                .font(PixelFont.hero(36))
                                 .foregroundStyle(PixelColor.phosphor)
                                 .contentTransition(.numericText())
                         }
@@ -340,7 +340,7 @@ struct MainControlView: View {
                 }
             }
             .animation(PixelAnimation.primary, value: state.isShieldActive)
-            .padding(.bottom, 32)
+            .padding(.bottom, 16)
         }
     }
 
@@ -572,6 +572,7 @@ struct MainControlView: View {
 
     private var statusStrip: some View {
         HStack(spacing: 16) {
+            Spacer()
             statusChip(label: statusLatency, icon: "timer")
             statusChip(label: statusLevel, icon: "waveform")
             statusChip(label: statusRoute, icon: "speaker.wave.2")
