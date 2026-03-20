@@ -1,0 +1,26 @@
+# Nexus Shield
+
+> Nexus Shield is an iOS app that uses real-time acoustic perturbation to reduce the accuracy of AI speech recognition systems during live conversations. It generates imperceptible audio signals — calibrated using the ISO 11172-3 psychoacoustic masking model — designed to degrade transcripts produced by AI transcription tools such as Granola, Otter.ai, and Fireflies. All audio processing runs entirely on-device using Apple's CoreML and AVAudioEngine frameworks; no audio is recorded, transmitted, or stored. Nexus Shield targets the 300–4000 Hz speech frequency band where ASR systems extract most phonemic information. A real-time Protection Score (JAM score) indicates estimated impact on transcription accuracy during each session.
+
+## Docs
+
+- [How Nexus Shield Works](https://nexusshield.app/how-it-works): Two-tier protection mechanism — Tier 1 psychoacoustic noise injection and Tier 2 Universal Adversarial Perturbations (UAPs). Explains frequency targeting, ISO 11172-3 psychoacoustic masking, and UAP generation against Whisper, DeepSpeech2, and wav2vec2 surrogate models.
+- [Privacy Architecture](https://nexusshield.app/privacy): On-device processing guarantee, zero data collection, AVAudioEngine and CoreML implementation details, no third-party dependencies.
+- [FAQ](https://nexusshield.app/faq): Common questions about legality, effectiveness against specific tools, JAM score definition, comparison with VPNs and noise-canceling headphones, and phone call compatibility.
+- [Research Foundation](https://nexusshield.app/research): Peer-reviewed research basis — AudioShield (USENIX Security 2025), ZQ-Attack (ACM CCS 2024), Muting Whisper (EMNLP 2024), UniAP (IEEE TDSC 2023), ISO/IEC 11172-3 (MPEG-1) psychoacoustic masking standard.
+- [App Store Listing](https://apps.apple.com/app/nexus-shield/PLACEHOLDER): iOS app download, user reviews, and screenshots.
+- [GitHub Repository](https://github.com/roy-substrate/Project-Nexus): Open-source codebase — Swift 6, AVAudioEngine pipeline, CoreML surrogate models, DSP test suite (93 test files, 12 Maestro flows).
+
+## Optional
+
+- [GitHub: UAP Generation Scripts](https://github.com/roy-substrate/Project-Nexus/tree/main/Scripts): Python scripts for offline Universal Adversarial Perturbation generation (PyTorch) and Whisper CoreML conversion.
+- [GitHub: Architecture Documentation](https://github.com/roy-substrate/Project-Nexus#architecture): Two-tier attack system diagram, audio pipeline schematic, tech stack documentation.
+- [Privacy Policy](https://nexusshield.app/privacy-policy): Full privacy policy — data collection practices, on-device processing guarantees, user data deletion.
+- [Terms of Service](https://nexusshield.app/terms): Lawful use requirements, acceptable use policy, limitations of liability.
+
+---
+
+<!-- llms.txt for Nexus Shield | Version: 1.0 | Last updated: 2026-03-20 -->
+<!-- Deployment: Place this file at https://nexusshield.app/llms.txt when site launches -->
+<!-- URLs marked PLACEHOLDER require update before deployment -->
+<!-- Reference: https://llmstxt.org -->
