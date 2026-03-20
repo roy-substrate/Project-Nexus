@@ -27,7 +27,7 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea()
 
-            if page < 3 {
+            if page < 2 {
                 VStack {
                     Spacer()
                     bottomControls
@@ -305,6 +305,14 @@ private struct PermissionPage: View {
                         .foregroundStyle(PixelColor.textSecondary)
                         .lineSpacing(5)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if permissionState != .denied {
+                        Text("THE MIC IS HOW THE SHIELD HEARS.\nNO ACCESS = NO PROTECTION.")
+                            .font(PixelFont.terminal(13))
+                            .foregroundStyle(PixelColor.textSecondary)
+                            .lineSpacing(5)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 10)

@@ -441,6 +441,9 @@ struct MainControlView: View {
             .animation(PixelAnimation.primary, value: enabled)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(label) \(sublabel)")
+        .accessibilityValue(enabled ? "On" : "Off")
+        .accessibilityHint("Double-tap to toggle")
     }
 
     // MARK: - Spectrum card
