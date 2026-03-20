@@ -152,7 +152,7 @@ struct AccountView: View {
                 Label("Build", systemImage: "hammer")
                     .foregroundStyle(NexusTheme.textSecondary)
                 Spacer()
-                Text("iOS 26 · Swift 6")
+                Text("iOS 17+ · Swift 6")
                     .font(.system(.caption, design: .rounded))
                     .foregroundStyle(NexusTheme.textTertiary)
             }
