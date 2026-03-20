@@ -142,6 +142,12 @@ final class AudioPipelineManager: @unchecked Sendable {
         perturbationMixer.setGain(gain)
     }
 
+    func updateGeneratorThresholds(_ threshold: [Float]) {
+        for generator in generators {
+            generator.updateMaskingThreshold(threshold)
+        }
+    }
+
     private func setupMicCallbacks() {
         micCapture.onSpectrumUpdate = { [weak self] spectrum, rms, peak in
             guard let self else { return }
@@ -157,10 +163,8 @@ final class AudioPipelineManager: @unchecked Sendable {
                 self.onMetricsUpdate?(metrics)
             }
 
-            // Feed masking threshold to generators
-            for generator in self.generators {
-                generator.updateMaskingThreshold(spectrum)
-            }
+            // Forward spectrum for external processing (e.g. PsychoacousticMasker)
+            self.onSpectrumUpdate?(spectrum)
         }
 
         // Forward raw PCM buffers to any ASR measurement consumer.

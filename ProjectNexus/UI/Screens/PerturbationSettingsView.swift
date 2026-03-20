@@ -75,8 +75,8 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier1)
                 }
                 Slider(value: $state.config.frequencyRangeLow,
-                       in: 16_000...21_800,
-                       step: 100)
+                       in: 80...8_000,
+                       step: 10)
                     .tint(NexusTheme.tier1)
                     .onChange(of: state.config.frequencyRangeLow) { _, newLow in
                         // Ensure low doesn't exceed high minus minimum gap
@@ -98,8 +98,8 @@ struct PerturbationSettingsView: View {
                         .foregroundStyle(NexusTheme.tier2)
                 }
                 Slider(value: $state.config.frequencyRangeHigh,
-                       in: 16_200...22_000,
-                       step: 100)
+                       in: 280...8_000,
+                       step: 10)
                     .tint(NexusTheme.tier2)
                     .onChange(of: state.config.frequencyRangeHigh) { _, newHigh in
                         // Ensure high doesn't go below low plus minimum gap
@@ -117,16 +117,16 @@ struct PerturbationSettingsView: View {
         } header: {
             Text("Frequency Range")
         } footer: {
-            Text("Defines the ultrasonic band where perturbations are generated. The default range is above most human hearing.")
+            Text("Defines the speech-band frequency range where perturbations are generated. The default range (300–4000 Hz) targets ASR feature extraction.")
         }
     }
 
     private var frequencyBandBar: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let totalRange: Float = 22_000 - 16_000
-            let lowNorm  = CGFloat((state.config.frequencyRangeLow  - 16_000) / totalRange)
-            let highNorm = CGFloat((state.config.frequencyRangeHigh - 16_000) / totalRange)
+            let totalRange: Float = 8_000 - 80
+            let lowNorm  = CGFloat((state.config.frequencyRangeLow  - 80) / totalRange)
+            let highNorm = CGFloat((state.config.frequencyRangeHigh - 80) / totalRange)
 
             ZStack(alignment: .leading) {
                 Capsule()

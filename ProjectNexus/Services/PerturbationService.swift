@@ -89,6 +89,14 @@ final class PerturbationService {
 
         pipeline.setOutputGain(config.intensity)
 
+        // Connect mic spectrum → PsychoacousticMasker → generator thresholds
+        pipeline.onSpectrumUpdate = { [weak self] spectrum in
+            guard let self else { return }
+            self.masker.computeThreshold(from: spectrum)
+            let threshold = self.masker.getCurrentThreshold()
+            self.pipeline.updateGeneratorThresholds(threshold)
+        }
+
         try speakerRouter.activate()
         try pipeline.start()
 
@@ -110,6 +118,7 @@ final class PerturbationService {
         spectralNotch?.setIntensity(config.intensity)
         babbleNoise?.setIntensity(config.intensity)
         frequencySweep?.setIntensity(config.intensity)
+        uapGenerator?.setIntensity(config.intensity)
         spectralNotch?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
         babbleNoise?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
         frequencySweep?.setFrequencyRange(low: config.frequencyRangeLow, high: config.frequencyRangeHigh)
@@ -136,6 +145,10 @@ private final class UAPGenerator: PerturbationGenerator {
     init(uapManager: UAPManager, intensity: Float) {
         self.uapManager = uapManager
         self.intensity = intensity
+    }
+
+    func setIntensity(_ value: Float) {
+        intensity = max(0, min(1, value))
     }
 
     func fillBuffer(_ buffer: UnsafeMutablePointer<Float>, frameCount: Int, sampleRate: Double) {

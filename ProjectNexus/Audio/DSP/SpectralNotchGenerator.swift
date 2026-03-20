@@ -16,7 +16,7 @@ final class SpectralNotchGenerator: PerturbationGenerator {
     private var readPosition: Int = 0
     private var currentMaskingThreshold: [Float] = []
 
-    private let formantFrequencies: [Float] = [17_500, 18_500, 19_500]
+    private let formantFrequencies: [Float] = [500, 1500, 2500]
     private let notchWidth: Float = 80
     private var lowFreq: Float
     private var highFreq: Float
@@ -24,7 +24,7 @@ final class SpectralNotchGenerator: PerturbationGenerator {
 
     private let lock = os_unfair_lock_t.allocate(capacity: 1)
 
-    init(intensity: Float = 0.8, lowFreq: Float = 17_000, highFreq: Float = 20_000) {
+    init(intensity: Float = 0.8, lowFreq: Float = 300, highFreq: Float = 4_000) {
         self.intensity = intensity
         self.lowFreq = lowFreq
         self.highFreq = highFreq
