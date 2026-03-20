@@ -94,6 +94,7 @@ Keep a running list:
 | Agent | Your Role |
 |-------|-----------|
 | `/nexus-review` | Approve/reject all proposed fixes |
+| `/nexus-design` | Approve/reject layout, alignment, and accessibility fixes |
 | `/nexus-optimize` | Approve perf changes; escalate render-thread changes to CTO |
 | `/nexus-mobile` | Approve iOS feature additions; escalate new entitlements to CTO |
 | `/nexus-qa` | Receive QA reports; prioritise which bugs engineering addresses first |
