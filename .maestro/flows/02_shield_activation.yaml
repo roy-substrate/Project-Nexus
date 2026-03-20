@@ -1,7 +1,7 @@
 # Flow 02: Shield Activation & Deactivation
 # CORE HYPOTHESIS TEST: Tapping the shield should activate voice protection.
 # When active, all perturbation generators should be running (techniques > 0),
-# the status should read ACTIVE, and the uptime timer should be counting.
+# the status should read "Shield active", and the session timer should be counting.
 
 appId: com.nexus.shield
 name: "Shield — Activate & Deactivate"
@@ -14,42 +14,34 @@ tags:
 
 # ── Pre-condition: On main Shield tab ────────────────────────────
 - tapOn: "Shield"
-- assertVisible: "SHIELD OFFLINE"
-- assertVisible: "VOICE PROTECTION OFFLINE"
+- assertVisible: "Shield offline"
 
 # ── Activate Shield ──────────────────────────────────────────────
-# The shield button shows an ASCII art when inactive:
-#   /  \
-#   | S |
-#    \_/
-# Tap the shield area
-- tapOn:
-    text: "S"
-    index: 0
+# The blob mascot button is the tap target (accessibilityLabel-based)
+- tapOn: "Activate shield"
 
 # ── Verify: Shield is now ACTIVE ─────────────────────────────────
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 3000
 
 # Active state indicators
-- assertVisible: "SHIELD ACTIVE"
+- assertVisible: "Shield active"
 
-# Uptime timer should appear and start counting
+# Session timer should appear and start counting
 - extendedWaitUntil:
-    visible: "UPTIME"
+    visible: "Session time"
     timeout: 2000
 
 # Active techniques should be reported
 - assertVisible:
-    text: "TECH.*ACTIVE"
-    regex: true
+    text: "technique"
     optional: true
 
 # Spectrum analysis should show LIVE indicator
-- assertVisible: "SPECTRUM ANALYSIS"
+- assertVisible: "Spectrum Analysis"
 - assertVisible:
-    text: "LIVE"
+    text: "Live"
     optional: true
 
 # ── Let shield run for 5 seconds to collect metrics ──────────────
@@ -59,7 +51,7 @@ tags:
     amount: 100
 
 # Verify intensity card is visible and shows a value
-- assertVisible: "INTENSITY"
+- assertVisible: "Intensity"
 
 # Scroll back up
 - scroll:
@@ -67,16 +59,14 @@ tags:
     amount: 100
 
 # ── Deactivate Shield ────────────────────────────────────────────
-# Tap the shield button again (now shows [NEXUS] text when active)
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 
 # ── Verify: Shield is now OFFLINE ────────────────────────────────
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000
-- assertVisible: "VOICE PROTECTION OFFLINE"
 
 # ── Verify: Session result banner may appear (if ASR was measuring) ─
 - assertVisible:
-    text: "SESSION COMPLETE"
+    text: "Session complete"
     optional: true

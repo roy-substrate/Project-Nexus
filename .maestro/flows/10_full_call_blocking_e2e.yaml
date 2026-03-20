@@ -75,24 +75,22 @@ tags:
 # ═══════════════════════════════════════════════════════════════════
 
 - tapOn: "Shield"
-- assertVisible: "SHIELD OFFLINE"
+- assertVisible: "Shield offline"
 
 # Activate!
-- tapOn:
-    text: "S"
-    index: 0
+- tapOn: "Activate shield"
 
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 5000
 
 # Verify active state
-- assertVisible: "SHIELD ACTIVE"
-- assertVisible: "UPTIME"
+- assertVisible: "Shield active"
+- assertVisible: "Session time"
 
 # Accept ASR measurement if nudge appears
 - tapOn:
-    text: "ON"
+    text: "Enable"
     optional: true
 - tapOn:
     text: "Allow"
@@ -144,28 +142,28 @@ tags:
 # ═══════════════════════════════════════════════════════════════════
 
 - tapOn: "Shield"
-- assertVisible: "SHIELD ACTIVE"
+- assertVisible: "Shield active"
 
 # JAM badge should be visible on main screen (the viral hook)
 - assertVisible:
-    text: "JAM"
+    text: "Jam score"
     optional: true
 
 # Spectrum analysis should be live
-- assertVisible: "SPECTRUM ANALYSIS"
+- assertVisible: "Spectrum Analysis"
 
 # ═══════════════════════════════════════════════════════════════════
 # STEP 7: Deactivate & Verify Session Recorded
 # ═══════════════════════════════════════════════════════════════════
 
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000
 
 # Session result banner
 - assertVisible:
-    text: "SESSION COMPLETE"
+    text: "Session complete"
     optional: true
 
 # Go to Account to verify session was logged

@@ -25,17 +25,15 @@ tags:
 - tapOn: "Shield"
 
 # ── Activate shield ──────────────────────────────────────────────
-- tapOn:
-    text: "S"
-    index: 0
+- tapOn: "Activate shield"
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 3000
 
 # ── Accept ASR measurement nudge if it appears ───────────────────
 # The app shows a permission nudge to enable speech measurement
 - tapOn:
-    text: "ON"
+    text: "Enable"
     optional: true
 # Handle iOS speech recognition permission dialog
 - tapOn:
@@ -45,11 +43,11 @@ tags:
 # ── Wait for JAM score to appear ─────────────────────────────────
 # The JAM badge appears when ASR is measuring and score > 5%
 - extendedWaitUntil:
-    visible: "JAM"
+    visible: "Jam score"
     timeout: 15000
 
 # ── Verify JAM score is displayed ────────────────────────────────
-- assertVisible: "JAM"
+- assertVisible: "Jam score"
 
 # ── Navigate to Diagnostics for detailed measurement ─────────────
 - tapOn: "Diagnostics"
@@ -90,16 +88,16 @@ tags:
 - tapOn: "Shield"
 
 # ── Deactivate shield ───────────────────────────────────────────
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000
 
 # ── Session result should appear with blocking percentage ────────
-# Banner: "SESSION COMPLETE · [N]% AI BLOCKED"
+# Banner: "Session complete · [N]% of AI blocked"
 - assertVisible:
-    text: "SESSION COMPLETE"
+    text: "Session complete"
     optional: true
 - assertVisible:
-    text: "AI BLOCKED"
+    text: "of AI blocked"
     optional: true

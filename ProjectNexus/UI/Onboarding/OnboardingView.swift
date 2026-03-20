@@ -53,12 +53,7 @@ struct OnboardingView: View {
             }
 
             // CTA buttons — rectangular, pixel-bordered
-            if page == 2 {
-                Button("[ SKIP FOR NOW ]") { advance() }
-                    .font(PixelFont.terminal(13))
-                    .foregroundStyle(PixelColor.textSecondary)
-                    .padding(.bottom, 4)
-            } else if page == 0 {
+            if page == 0 {
                 Button(action: advance) {
                     Text("[ GET STARTED ]")
                 }

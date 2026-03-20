@@ -14,11 +14,9 @@ tags:
 
 # ── Activate shield first ───────────────────────────────────────
 - tapOn: "Shield"
-- tapOn:
-    text: "S"
-    index: 0
+- tapOn: "Activate shield"
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 3000
 
 # ── Navigate to Diagnostics ─────────────────────────────────────
@@ -71,7 +69,7 @@ tags:
 
 # ── Navigate back and deactivate ────────────────────────────────
 - tapOn: "Shield"
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000

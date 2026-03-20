@@ -15,55 +15,53 @@ tags:
 
 # ── Navigate to Shield tab ───────────────────────────────────────
 - tapOn: "Shield"
-- assertVisible: "SHIELD OFFLINE"
+- assertVisible: "Shield offline"
 
 # ── Verify both tier buttons are visible ─────────────────────────
-- assertVisible: "STD"
-- assertVisible: "TIER 1"
-- assertVisible: "AI"
-- assertVisible: "TIER 2"
+- assertVisible: "Acoustic"
+- assertVisible: "Tier 1"
+- assertVisible: "Adversarial"
+- assertVisible: "Tier 2"
 
 # ── Toggle Tier 1 OFF ───────────────────────────────────────────
-- tapOn: "STD"
-# The filled circle ● should change to empty ○ (tier disabled)
+- tapOn: "Acoustic"
+# The mini toggle pill should animate to disabled state
 - waitForAnimationToEnd
 
 # ── Toggle Tier 2 OFF ───────────────────────────────────────────
-- tapOn: "AI"
+- tapOn: "Adversarial"
 - waitForAnimationToEnd
 
 # ── Toggle Tier 1 back ON ───────────────────────────────────────
-- tapOn: "STD"
+- tapOn: "Acoustic"
 - waitForAnimationToEnd
 
 # ── Toggle Tier 2 back ON ───────────────────────────────────────
-- tapOn: "AI"
+- tapOn: "Adversarial"
 - waitForAnimationToEnd
 
 # ── Activate shield with both tiers ON ──────────────────────────
-- tapOn:
-    text: "S"
-    index: 0
+- tapOn: "Activate shield"
 - extendedWaitUntil:
-    visible: "SHIELD ACTIVE"
+    visible: "Shield active"
     timeout: 3000
 
 # With both tiers on, techniques count should be > 0
 - assertVisible:
-    text: "TECH"
+    text: "technique"
     optional: true
 
 # ── Disable Tier 2 while shield is active ───────────────────────
-- tapOn: "AI"
+- tapOn: "Adversarial"
 - waitForAnimationToEnd
 # Shield should remain active but technique count may decrease
 
 # ── Re-enable Tier 2 ────────────────────────────────────────────
-- tapOn: "AI"
+- tapOn: "Adversarial"
 - waitForAnimationToEnd
 
 # ── Deactivate shield ───────────────────────────────────────────
-- tapOn: "NEXUS"
+- tapOn: "Deactivate shield"
 - extendedWaitUntil:
-    visible: "SHIELD OFFLINE"
+    visible: "Shield offline"
     timeout: 3000
