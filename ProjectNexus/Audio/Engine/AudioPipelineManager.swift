@@ -159,8 +159,8 @@ final class AudioPipelineManager: @unchecked Sendable {
             metrics.latencyMs = self.sessionConfigurator.ioBufferDuration * 1000 * 2
             metrics.bufferUnderruns = self.underrunCount.load(ordering: .relaxed)
 
-            DispatchQueue.main.async {
-                self.onMetricsUpdate?(metrics)
+            Task { @MainActor [weak self] in
+                self?.onMetricsUpdate?(metrics)
             }
 
             // Forward spectrum for external processing (e.g. PsychoacousticMasker)
