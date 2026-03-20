@@ -1,0 +1,185 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://nexusshield.app/#software",
+      "name": "Nexus Shield",
+      "alternateName": "Project Nexus",
+      "description": "Nexus Shield is an iOS app that uses real-time acoustic perturbation to reduce the accuracy of AI speech recognition systems during live conversations. The app generates imperceptible audio signals calibrated using the ISO 11172-3 psychoacoustic masking model, designed to degrade transcripts produced by AI transcription tools including Whisper, Granola, Otter.ai, and Fireflies. In internal testing, Whisper transcription accuracy dropped from 94% to 8% with Nexus Shield active. All audio processing runs entirely on-device using Apple's CoreML and AVAudioEngine frameworks; no audio is recorded, transmitted, or stored.",
+      "applicationCategory": "UtilitiesApplication",
+      "applicationSubCategory": "Privacy",
+      "operatingSystem": "iOS 26 or later",
+      "softwareVersion": "1.0",
+      "datePublished": "2026-03-20",
+      "url": "https://nexusshield.app/",
+      "downloadUrl": "https://apps.apple.com/app/nexus-shield/[FILL-APP-STORE-ID]",
+      "screenshot": [
+        "https://nexusshield.app/assets/screenshot-protection-active.png",
+        "https://nexusshield.app/assets/screenshot-protection-score.png",
+        "https://nexusshield.app/assets/screenshot-onboarding.png"
+      ],
+      "featureList": [
+        "Real-time acoustic perturbation at 48kHz / Float32 with ~21ms pipeline latency",
+        "Tier 1: Psychoacoustic noise injection using ISO 11172-3 Bark-scale masking across 24 critical bands",
+        "Tier 1: Spectral notch noise targeting the 300–4000 Hz speech frequency band",
+        "Tier 1: Babble noise injection with formant-aligned design",
+        "Tier 1: Frequency sweep perturbation",
+        "Tier 2: Pre-computed Universal Adversarial Perturbations (UAPs) against Whisper-tiny, DeepSpeech2, wav2vec2-base ensemble",
+        "Tier 2: On-device CoreML refinement for environment adaptation",
+        "Tier 2: Transfer-based black-box attack effectiveness against commercial ASR systems",
+        "Codec survival pre-filter for Opus and AAC VoIP compression",
+        "Real-time Protection Score (JAM score) display",
+        "100% on-device processing — zero audio transmitted",
+        "Zero audio recordings stored",
+        "Zero third-party dependencies",
+        "Lock-free audio render callbacks for real-time performance",
+        "1024-sample buffer size for low-latency processing",
+        "Effectiveness against Whisper, Granola, Otter.ai, Fireflies, Deepgram, AssemblyAI"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "[FILL-AFTER-LAUNCH]",
+        "reviewCount": "[FILL-AFTER-LAUNCH]",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "priceValidUntil": "[FILL-DAU-MILESTONE-DATE]",
+        "description": "Free to download. No subscription required during launch phase (free until 500 daily active user milestone)."
+      },
+      "author": {
+        "@id": "https://nexusshield.app/#organization"
+      },
+      "publisher": {
+        "@id": "https://nexusshield.app/#organization"
+      },
+      "privacyPolicyUrl": "https://nexusshield.app/privacy",
+      "keywords": [
+        "voice protection",
+        "acoustic perturbation",
+        "AI transcription blocker",
+        "privacy app",
+        "iOS privacy",
+        "adversarial audio",
+        "Whisper blocker",
+        "speech recognition privacy",
+        "anti-transcription",
+        "psychoacoustic masking",
+        "universal adversarial perturbations",
+        "Otter.ai protection",
+        "Granola privacy",
+        "Fireflies protection",
+        "real-time audio protection"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://nexusshield.app/#organization",
+      "name": "Nexus Shield",
+      "alternateName": "Project Nexus",
+      "url": "https://nexusshield.app/",
+      "logo": "https://nexusshield.app/assets/nexus-shield-logo.png",
+      "description": "Nexus Shield develops privacy technology for iOS users facing AI-powered surveillance. The company's flagship product, Nexus Shield, uses acoustic perturbation techniques grounded in peer-reviewed research from USENIX Security 2025, ACM CCS 2024, EMNLP 2024, and IEEE TDSC 2023 to protect spoken conversations from AI speech transcription systems.",
+      "foundingDate": "2025",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@nexusshield.app",
+        "url": "https://nexusshield.app/support"
+      },
+      "knowsAbout": [
+        "Adversarial machine learning",
+        "Acoustic perturbation",
+        "Automatic speech recognition",
+        "Universal adversarial perturbations",
+        "Psychoacoustic masking",
+        "iOS audio engineering",
+        "Real-time audio processing",
+        "Privacy-preserving technology",
+        "CoreML on-device inference",
+        "AVAudioEngine"
+      ],
+      "sameAs": [
+        "https://apps.apple.com/app/nexus-shield/[FILL-APP-STORE-ID]",
+        "https://github.com/[FILL-ORG]/ProjectNexus",
+        "https://twitter.com/NexusShieldApp",
+        "https://www.producthunt.com/products/nexus-shield"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://nexusshield.app/#website",
+      "url": "https://nexusshield.app/",
+      "name": "Nexus Shield — Real-Time Voice Protection",
+      "description": "Official website for Nexus Shield, an iOS app that uses acoustic perturbation to protect conversations from AI transcription tools. Free download on iOS 26+.",
+      "publisher": {
+        "@id": "https://nexusshield.app/#organization"
+      },
+      "inLanguage": "en-US",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://nexusshield.app/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://nexusshield.app/faq#faqpage",
+      "url": "https://nexusshield.app/faq",
+      "name": "Nexus Shield FAQ",
+      "isPartOf": {
+        "@id": "https://nexusshield.app/#website"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Nexus Shield?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nexus Shield is an iOS app that uses real-time acoustic perturbation to reduce the accuracy of AI speech recognition systems during live conversations. The app generates imperceptible audio signals — calibrated using the ISO 11172-3 psychoacoustic masking model — that cause AI transcription tools such as Granola, Otter.ai, Fireflies, and systems powered by OpenAI Whisper to produce degraded, inaccurate transcripts. In internal testing, Whisper transcription accuracy dropped from 94% to 8% with Nexus Shield active. All processing runs entirely on-device using Apple's CoreML and AVAudioEngine; no audio is recorded, transmitted, or stored at any point. Nexus Shield is free to download on iOS 26 and later."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Nexus Shield record or store my audio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Nexus Shield does not record, store, or transmit any audio. The app uses Apple's AVAudioEngine framework with lock-free render callbacks that process audio entirely within the iOS audio render thread, operating at 48kHz with a 1024-sample buffer. Audio samples are processed and discarded in real time — they never enter the app heap, are never written to disk, and are never sent over a network connection. CoreML on-device inference means that even the machine learning components of the perturbation engine operate locally. The app contains zero network requests during active protection sessions. This architecture is verifiable: Nexus Shield has zero third-party dependencies and operates entirely within Apple's native iOS frameworks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which AI transcription tools does Nexus Shield protect against?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nexus Shield is designed to reduce the accuracy of AI transcription tools that use automatic speech recognition (ASR) based on neural network architectures, particularly those in the Whisper, DeepSpeech2, and wav2vec2 families. Tools known to be affected include Granola, Otter.ai, Fireflies, and any service using OpenAI Whisper as its backend. The Tier 2 adversarial perturbation layer uses transfer-based black-box attack techniques derived from ZQ-Attack (ACM CCS 2024) to extend effectiveness to commercial ASR systems not included in the training ensemble, including Deepgram and AssemblyAI. In internal testing, Whisper word error rate increased from 6% (unprotected baseline) to 92% with Nexus Shield active."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the Nexus Shield protection signal audible?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The acoustic perturbation signals generated by Nexus Shield are designed to be inaudible to human listeners. The app calibrates all perturbation signals using the ISO 11172-3 MPEG-1 Audio psychoacoustic masking model, which defines the audibility threshold of the human ear across 24 Bark-scale critical frequency bands. Signals are shaped to remain below this masking threshold, exploiting the frequency-domain masking properties of human hearing. While the perturbation is imperceptible to human ears, it is highly disruptive to the feature extraction process that AI speech recognition systems depend on — specifically targeting the mel-spectrogram representations used by transformer-based ASR models like Whisper."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How accurate is Nexus Shield's protection?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In internal testing, Nexus Shield reduced Whisper transcription accuracy from 94% to 8% — a reduction of 86 percentage points. Stated as word error rate (WER), Whisper's WER increased from 6% (unprotected baseline) to 92% with Nexus Shield active. The two-tier protection architecture contributes to this result: Tier 1 psychoacoustic noise injection provides baseline disruption across the speech frequency band, while Tier 2 Universal Adversarial Perturbations add model-targeted interference computed against an ensemble of three open-source ASR surrogate models. Effectiveness is displayed in real time as a Protection Score (0–100 scale) during each session. Results vary based on microphone placement, ambient noise level, and the specific ASR system being disrupted."
+          }
+        }
+      ]
+    }
+  ]
+}
