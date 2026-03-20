@@ -113,7 +113,8 @@ struct MainControlView: View {
                     withAnimation(PixelAnimation.appear) {
                         showASRNudge = true
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(8))
                         withAnimation(PixelAnimation.dismiss) { showASRNudge = false }
                     }
                 }
@@ -125,7 +126,8 @@ struct MainControlView: View {
                     withAnimation(PixelAnimation.appear) {
                         showSessionResult = true
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(3))
                         withAnimation(PixelAnimation.dismiss) { showSessionResult = false }
                     }
                 }

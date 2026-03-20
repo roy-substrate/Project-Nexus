@@ -45,7 +45,7 @@ final class AudioSessionConfigurator: @unchecked Sendable {
         var options: AVAudioSession.CategoryOptions = [
             .defaultToSpeaker, .mixWithOthers, .allowBluetooth
         ]
-        if #available(iOS 26.0, *) {
+        if #available(iOS 18.0, *) {
             options.insert(.bluetoothHighQualityRecording)
         }
         try session.setCategory(.playAndRecord, mode: .default, options: options)
