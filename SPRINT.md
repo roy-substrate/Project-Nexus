@@ -65,6 +65,39 @@
 
 ---
 
+## CEO Decisions — Autonomous (2026-03-20)
+
+### Monetization Model (DECIDED)
+- **Consumer:** Free forever — no paywall, no subscription. All features unlocked. Acquisition via App Store virality + jam score sharing.
+- **B2B / M&A Legal:** $99–149/seat/month SaaS for AmLaw 200 law firms and M&A teams. Entry via M&A partner direct outreach (see office-hours design doc). First contract target: Q2 2026.
+- Rationale: Consumer free builds install base + social proof; B2B $99–149/seat captures high-willingness-to-pay segment with existing pain (deal confidentiality on calls).
+
+### App Store Copy (APPROVED — GATE CLEARED ✅ 2026-03-20)
+- GEO/OPTIMIZED-APP-STORE-DESCRIPTION.md is approved for submission.
+- ~~Gate: masking actualization required before submitting.~~ CLEARED: commit c640b7f shipped psychoacoustic masking feedback loop across all Tier 1 generators. Claim is now functionally true.
+- **Status: READY TO SUBMIT to App Store Connect.**
+
+### Demo Video (GREEN-LIT)
+- Brief approved: jam score rising live on a Zoom/Teams call, real device, no voiceover.
+- Owner: /nexus-marketing
+- Deliverable: 30s vertical video (Reels/TikTok format) + 60s horizontal (YouTube).
+- Target: complete before Sprint 5 ends (2026-04-11).
+
+### Sprint 5 Scope (APPROVED)
+- **P0:** One-tap shield activation — reduce friction from 3 taps to 1 (Lock Screen widget + home screen shortcut). Must ship Sprint 5 Day 1.
+- **P1:** Weekly streak local notification — re-engagement loop. Max 2 notifications/week.
+- **P1:** Quick presets (Stealth / Balanced / Max) — configures intensity + frequency range in one tap.
+- **P2:** B2B landing page (nexusshield.app/enterprise) — gated behind M&A legal vertical messaging.
+- **Out of scope Sprint 5:** Siri integration (defer to Sprint 6), iCloud sync (defer until B2B signed).
+
+### Office-Hours Design Doc Reference
+- Path: `~/.gstack/projects/project-nexus/root-claude-nexus-agency-setup-0QjbK-design-20260320-112318.md`
+- Status: APPROVED. Consumer Frictionless (Approach A) + M&A Legal Wedge (Approach B) strategy.
+- Assignment (CEO carries): Email one M&A partner at an AmLaw 200 firm before writing B2B landing page code.
+- **B2B landing page gate:** Unblocked once CEO sends that email. No code dependency.
+
+---
+
 ## Metrics This Sprint
 - Permission grant rate on onboarding page 3
 - Day-7 retention

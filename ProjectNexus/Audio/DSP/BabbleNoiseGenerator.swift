@@ -19,6 +19,9 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     private var lowFreq: Float
     private var highFreq: Float
 
+    // Atomic scalar gain derived from PsychoacousticMasker thresholds (CTO Option B).
+    private let _maskingGain = Atomic<Float>(1.0)
+
     init(intensity: Float = 0.8, lowFreq: Float = 300, highFreq: Float = 4_000) {
         self.intensity = intensity
         self.lowFreq = lowFreq
@@ -45,7 +48,7 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
             let layer = layers[l]
             let layerLen = layer.count
             var pos = layerPositions[l]
-            var gain = layerGains[l] * intensity * 0.12
+            var gain = layerGains[l] * intensity * 0.12 * _maskingGain.load(ordering: .relaxed)
 
             layer.withUnsafeBufferPointer { layerPtr in
                 guard let base = layerPtr.baseAddress else { return }
@@ -66,7 +69,11 @@ final class BabbleNoiseGenerator: PerturbationGenerator {
     }
 
     func updateMaskingThreshold(_ threshold: [Float]) {
-        // Babble noise uses fixed spectrum, masking threshold could modulate gain
+        guard !threshold.isEmpty else { return }
+        var mean: Float = 0
+        vDSP_meanv(threshold, 1, &mean, vDSP_Length(threshold.count))
+        let gain = max(0.05, min(1.0, (mean + 60.0) / 60.0))
+        _maskingGain.store(gain, ordering: .relaxed)
     }
 
     private func generateBabbleLayers() {

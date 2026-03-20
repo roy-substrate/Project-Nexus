@@ -63,7 +63,7 @@ struct DiagnosticsView: View {
                     Text("20 kHz").frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(Color(.quaternaryLabel))
+                .foregroundStyle(PixelColor.textSecondary)
             }
         }
     }
@@ -117,22 +117,22 @@ struct DiagnosticsView: View {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.system(size: 26, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(PixelColor.text)
                     .contentTransition(.numericText())
                 Text(unit)
                     .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(PixelColor.textSecondary)
             }
 
             Text(title)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PixelColor.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .fill(PixelColor.surface)
                 .overlay {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .strokeBorder(accent.opacity(0.15), lineWidth: 1)
@@ -180,7 +180,7 @@ struct DiagnosticsView: View {
 
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
-                            Capsule().fill(Color(.systemFill)).frame(height: 5)
+                            Capsule().fill(PixelColor.border.opacity(0.4)).frame(height: 5)
                             Capsule()
                                 .fill(jamColor(score))
                                 .frame(width: geo.size.width * CGFloat(score), height: 5)
@@ -191,7 +191,7 @@ struct DiagnosticsView: View {
 
                     Text("Word recognition rate degraded by the perturbation engine vs. baseline.")
                         .font(.system(size: 12))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(PixelColor.textSecondary)
                         .lineSpacing(3)
                 }
             }
@@ -234,11 +234,11 @@ struct DiagnosticsView: View {
         HStack {
             Text(label)
                 .font(.system(size: 14))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PixelColor.textSecondary)
             Spacer()
             Text(value)
                 .font(.system(size: 14, design: .monospaced))
-                .foregroundStyle(color)
+                .foregroundStyle(color == .primary ? PixelColor.text : color)
         }
         .padding(.vertical, 11)
     }
@@ -263,10 +263,10 @@ struct DiagnosticsView: View {
             .padding(16)
             .background {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.secondarySystemGroupedBackground))
+                    .fill(PixelColor.surface)
                     .overlay {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(Color(.separator).opacity(0.45), lineWidth: 0.5)
+                            .strokeBorder(PixelColor.border.opacity(0.45), lineWidth: 0.5)
                     }
                     .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 1)
             }
@@ -275,7 +275,7 @@ struct DiagnosticsView: View {
     private func legendDot(color: Color, label: String) -> some View {
         HStack(spacing: 4) {
             Circle().fill(color).frame(width: 6, height: 6)
-            Text(label).font(.system(size: 10)).foregroundStyle(.tertiary)
+            Text(label).font(.system(size: 10)).foregroundStyle(PixelColor.textSecondary)
         }
     }
 }

@@ -9,6 +9,19 @@ protocol PerturbationGenerator: AnyObject {
     var isEnabled: Bool { get set }
 }
 
+// MARK: - Thread Safety Contract
+// AudioPipelineManager is marked @unchecked Sendable because Swift cannot verify its
+// internal thread-safety statically. The contract is:
+//   • `engine`, `format`, `micCapture`, `perturbationMixer` — written once in init(),
+//     read-only thereafter. Safe to access from any thread after construction.
+//   • `generators`, `mixBuffer`, `isRunning` — accessed exclusively on the main thread
+//     (start/stop lifecycle). Never mutated from the CoreAudio render thread.
+//   • `underrunCount` — Atomic<Int>, incremented on the CoreAudio render thread,
+//     read on the main thread.
+//   • `onMetricsUpdate`, `onSpectrumUpdate`, `onMicBuffer` — set before the engine
+//     starts; read-only on the render thread thereafter.
+// Any future mutation must honour these access constraints or add explicit
+// synchronisation (Atomic / os_unfair_lock / DispatchQueue).
 final class AudioPipelineManager: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.nexus.audio", category: "Pipeline")
 
