@@ -1,26 +1,43 @@
 # Nexus Shield
 
-> Nexus Shield is an iOS app that uses real-time acoustic perturbation to reduce the accuracy of AI speech recognition systems during live conversations. It generates imperceptible audio signals — calibrated using the ISO 11172-3 psychoacoustic masking model — designed to degrade transcripts produced by AI transcription tools such as Granola, Otter.ai, and Fireflies. All audio processing runs entirely on-device using Apple's CoreML and AVAudioEngine frameworks; no audio is recorded, transmitted, or stored. Nexus Shield targets the 300–4000 Hz speech frequency band where ASR systems extract most phonemic information. A real-time Protection Score (JAM score) indicates estimated impact on transcription accuracy during each session.
+> Nexus Shield is an iOS app that uses real-time acoustic perturbation to reduce the accuracy of AI speech recognition systems during live conversations. The app generates imperceptible audio signals — calibrated using the ISO 11172-3 psychoacoustic masking model across 24 Bark-scale critical bands — designed to degrade transcripts produced by AI transcription tools including Granola, Otter.ai, Fireflies, and Whisper. In internal testing, Whisper word error rate increased from 6% (unprotected) to 92% (Nexus Shield active), representing a reduction in Whisper transcription accuracy from 94% to 8%. All audio processing runs entirely on-device using Apple's CoreML and AVAudioEngine frameworks operating at 48kHz / Float32 with ~21ms pipeline latency. No audio is recorded, transmitted, or stored at any point. Nexus Shield is free to download on iOS 26 and later.
 
-## Docs
+## Core Pages
 
-- [How Nexus Shield Works](https://nexusshield.app/how-it-works): Two-tier protection mechanism — Tier 1 psychoacoustic noise injection and Tier 2 Universal Adversarial Perturbations (UAPs). Explains frequency targeting, ISO 11172-3 psychoacoustic masking, and UAP generation against Whisper, DeepSpeech2, and wav2vec2 surrogate models.
-- [Privacy Architecture](https://nexusshield.app/privacy): On-device processing guarantee, zero data collection, AVAudioEngine and CoreML implementation details, no third-party dependencies.
-- [FAQ](https://nexusshield.app/faq): Common questions about legality, effectiveness against specific tools, JAM score definition, comparison with VPNs and noise-canceling headphones, and phone call compatibility.
-- [Research Foundation](https://nexusshield.app/research): Peer-reviewed research basis — AudioShield (USENIX Security 2025), ZQ-Attack (ACM CCS 2024), Muting Whisper (EMNLP 2024), UniAP (IEEE TDSC 2023), ISO/IEC 11172-3 (MPEG-1) psychoacoustic masking standard.
-- [App Store Listing](https://apps.apple.com/app/nexus-shield/PLACEHOLDER): iOS app download, user reviews, and screenshots.
-- [GitHub Repository](https://github.com/roy-substrate/Project-Nexus): Open-source codebase — Swift 6, AVAudioEngine pipeline, CoreML surrogate models, DSP test suite (93 test files, 12 Maestro flows).
+- [Home](https://nexusshield.app/): Product overview, hero copy ("YOUR VOICE. YOUR RULES."), download link, and primary value proposition — real-time acoustic voice protection with zero audio transmission.
+- [How It Works](https://nexusshield.app/how-it-works): Detailed explanation of the two-tier acoustic perturbation engine. Tier 1 covers psychoacoustic noise injection (ISO 11172-3 Bark-scale masking, spectral notch noise, babble noise, frequency sweeps). Tier 2 covers Universal Adversarial Perturbations (UAPs) pre-computed against Whisper-tiny, DeepSpeech2, and wav2vec2-base with on-device CoreML refinement.
+- [FAQ](https://nexusshield.app/faq): Answers to the eight most common questions about Nexus Shield, including privacy guarantees, inaudibility, target AI systems, accuracy statistics, phone call compatibility, and the ML adversarial protection tier.
+- [Research Foundation](https://nexusshield.app/research): Overview of the four peer-reviewed research papers underlying Nexus Shield's design: AudioShield (USENIX Security 2025), ZQ-Attack (ACM CCS 2024), Muting Whisper (EMNLP 2024), and UniAP (IEEE TDSC 2023).
+- [Privacy Policy](https://nexusshield.app/privacy): Full privacy policy. Key points: zero audio data collected, zero data transmitted, zero recordings stored, microphone access is used exclusively for real-time perturbation generation, no analytics data leaves the device.
+- [Download](https://nexusshield.app/download): Direct link to the Nexus Shield App Store listing. The app is free to download for iOS 26 and later. No subscription required during the launch phase (free until 500 DAU milestone).
+
+## Technical Documentation
+
+- [Audio Pipeline](https://nexusshield.app/docs/audio-pipeline): Technical specification of the AVAudioEngine-based real-time audio pipeline. Covers 48kHz / Float32 / mono configuration, 1024-sample buffer size, ~21ms processing latency, lock-free render callbacks, and the codec survival pre-filter that ensures perturbation signals persist through Opus and AAC compression in VoIP calls.
+- [Psychoacoustic Masking Model](https://nexusshield.app/docs/psychoacoustic-masking): Technical explanation of the Tier 1 protection mechanism. Describes how the ISO 11172-3 MPEG-1 Audio standard's masking threshold model is applied across 24 Bark-scale critical bands to generate perturbation signals that remain below the human audibility threshold while disrupting the 300–4000 Hz speech frequency band that ASR systems depend on for phoneme extraction.
+- [Universal Adversarial Perturbations](https://nexusshield.app/docs/uap): Technical documentation for the Tier 2 ML protection layer. Explains how UAPs are pre-computed using a multi-model surrogate ensemble (Whisper-tiny, DeepSpeech2, wav2vec2-base), how transfer-based black-box attacks extend effectiveness to commercial ASR systems not in the training ensemble, and how on-device CoreML refinement adapts perturbations to the active acoustic environment.
+- [Protection Score](https://nexusshield.app/docs/protection-score): Definition and explanation of the real-time Protection Score (JAM score) displayed during active sessions. Covers the 0–100 scale, what constitutes an effective protection level, how the score is calculated from spectral perturbation strength and estimated ASR phoneme disruption, and what factors cause score variation across environments.
+
+## Research Foundation
+
+- [AudioShield — USENIX Security 2025](https://nexusshield.app/research/audioshield): Summary of the AudioShield paper and its contribution to Nexus Shield's design. AudioShield demonstrated that real-time acoustic perturbation signals could be generated with sub-30ms latency while achieving significant word error rate degradation against multiple ASR systems. This paper established the feasibility of the approach Nexus Shield implements.
+- [ZQ-Attack — ACM CCS 2024](https://nexusshield.app/research/zq-attack): Summary of the ZQ-Attack paper (ACM Conference on Computer and Communications Security, 2024) and its contribution to Nexus Shield's Tier 2 UAP generation methodology. ZQ-Attack introduced a query-efficient black-box adversarial attack framework for ASR systems that informs how Nexus Shield's transfer attacks generalize to commercial ASR targets.
+- [Muting Whisper — EMNLP 2024](https://nexusshield.app/research/muting-whisper): Summary of the "Muting Whisper" paper (Empirical Methods in Natural Language Processing, 2024) specifically targeting OpenAI's Whisper model family. This research underpins Nexus Shield's effectiveness against Whisper-based transcription services including those embedded in Granola, Otter.ai, and similar tools.
+- [UniAP — IEEE TDSC 2023](https://nexusshield.app/research/uniap): Summary of the Universal Adversarial Perturbations paper published in IEEE Transactions on Dependable and Secure Computing (2023). UniAP demonstrated cross-model transferability of adversarial perturbations against ASR systems, providing the theoretical foundation for Nexus Shield's single perturbation signal that targets multiple ASR architectures simultaneously.
+
+## Privacy & Trust
+
+- [Privacy Architecture](https://nexusshield.app/privacy/architecture): Deep-dive explanation for technical audiences of why Nexus Shield cannot transmit audio data. Covers the AVAudioEngine render callback execution model (audio never enters the heap during perturbation generation), CoreML on-device inference, absence of network entitlements in the app bundle, and the iOS sandbox constraints that make audio transmission architecturally impossible during normal operation.
+- [Security Information](https://nexusshield.app/security): Information for security researchers and enterprise users. Covers the app's zero-dependency architecture, iOS 26 security model compliance, Swift 6 concurrency safety, and the responsible disclosure process for reporting issues.
+
+## Support
+
+- [Support](https://nexusshield.app/support): Help documentation, frequently asked questions, and troubleshooting guides for Nexus Shield. Covers setup on iOS 26, microphone permission configuration, understanding the Protection Score display, and known limitations.
+- [Contact](mailto:support@nexusshield.app): Direct contact for support inquiries, press requests, and enterprise licensing questions.
 
 ## Optional
 
-- [GitHub: UAP Generation Scripts](https://github.com/roy-substrate/Project-Nexus/tree/main/Scripts): Python scripts for offline Universal Adversarial Perturbation generation (PyTorch) and Whisper CoreML conversion.
-- [GitHub: Architecture Documentation](https://github.com/roy-substrate/Project-Nexus#architecture): Two-tier attack system diagram, audio pipeline schematic, tech stack documentation.
-- [Privacy Policy](https://nexusshield.app/privacy-policy): Full privacy policy — data collection practices, on-device processing guarantees, user data deletion.
-- [Terms of Service](https://nexusshield.app/terms): Lawful use requirements, acceptable use policy, limitations of liability.
-
----
-
-<!-- llms.txt for Nexus Shield | Version: 1.0 | Last updated: 2026-03-20 -->
-<!-- Deployment: Place this file at https://nexusshield.app/llms.txt when site launches -->
-<!-- URLs marked PLACEHOLDER require update before deployment -->
-<!-- Reference: https://llmstxt.org -->
+- [App Store Listing](https://apps.apple.com/app/nexus-shield/[FILL-APP-ID]): Official Nexus Shield listing on the Apple App Store. Contains the full App Store description, screenshots, user reviews, and version history.
+- [GitHub Repository](https://github.com/[FILL-ORG]/ProjectNexus): Source code repository for Project Nexus (Nexus Shield development name). Contains Swift 6 / SwiftUI implementation, DSP test suites, and technical documentation for contributors.
+- [Blog](https://nexusshield.app/blog): Technical articles and product updates. Planned posts include "The Science Behind Acoustic Perturbation," "How Nexus Shield Survives VoIP Compression," and "Understanding Your Protection Score."
+- [Press Kit](https://nexusshield.app/press): Media assets, product screenshots, founder bio, and approved product description for journalists and content creators. Includes the key statistic: Whisper transcription accuracy reduced from 94% to 8% with Nexus Shield active.
