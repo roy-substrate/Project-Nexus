@@ -49,6 +49,7 @@ let package = Package(
     products: [
         .library(
             name: "ProjectNexus",
+            type: .static,
             targets: ["ProjectNexus"]
         ),
     ],
